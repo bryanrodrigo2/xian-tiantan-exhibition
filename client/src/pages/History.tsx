@@ -238,39 +238,41 @@ export default function History() {
           <div className="col-span-4 flex flex-col h-[600px]">
             <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-secondary pl-4">典籍记载</h2>
             {/* 使用 ScrollArea 实现固定高度内的滚动，超出部分自动隐藏 */}
-            <ScrollArea className="flex-1 rounded-lg border border-white/5 bg-black/20 p-4">
-              <div className="space-y-4 pr-4">
-                {bookRecords.map((record, index) => (
-                  <motion.div
-                    key={record.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                  >
-                    <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
-                      <CardContent className="p-5">
-                        <h3 className="text-primary font-serif text-lg mb-3">{record.book}</h3>
-                        <div className="relative pl-4 border-l-2 border-white/20 mb-3">
-                          <p className="font-kai text-xl text-white/90 italic leading-relaxed">
-                            "{record.quote}"
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-white/60">
-                            <span className="text-secondary font-bold mr-2">译文:</span>
-                            {record.translation}
-                          </p>
-                          <p className="text-sm text-white/60 placeholder-text">
-                            <span className="text-blue-400 font-bold mr-2">释义:</span>
-                            [需核对] {record.significance}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="flex-1 min-h-0 rounded-lg border border-white/5 bg-black/20 overflow-hidden">
+              <ScrollArea className="h-full p-4">
+                <div className="space-y-4 pr-4 pb-4">
+                  {bookRecords.map((record, index) => (
+                    <motion.div
+                      key={record.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + index * 0.1 }}
+                    >
+                      <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
+                        <CardContent className="p-5">
+                          <h3 className="text-primary font-serif text-lg mb-3">{record.book}</h3>
+                          <div className="relative pl-4 border-l-2 border-white/20 mb-3">
+                            <p className="font-kai text-xl text-white/90 italic leading-relaxed">
+                              "{record.quote}"
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-sm text-white/60">
+                              <span className="text-secondary font-bold mr-2">译文:</span>
+                              {record.translation}
+                            </p>
+                            <p className="text-sm text-white/60 placeholder-text">
+                              <span className="text-blue-400 font-bold mr-2">释义:</span>
+                              [需核对] {record.significance}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
           </div>
         </div>
       </div>
