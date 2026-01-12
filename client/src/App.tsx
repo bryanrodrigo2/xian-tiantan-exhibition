@@ -10,6 +10,8 @@ import History from "./pages/History";
 import Survey from "./pages/Survey";
 import Blueprint from "./pages/Blueprint";
 import Interaction from "./pages/Interaction";
+import SplashScreen from "./components/SplashScreen";
+import { useState } from "react";
 
 
 function AppRouter() {
@@ -33,6 +35,8 @@ function AppRouter() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <ErrorBoundary>
       <ThemeProvider
@@ -41,10 +45,14 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          {/* 使用 Hash 路由模式，支持纯静态文件部署 */}
-          <WouterRouter hook={useHashLocation}>
-            <AppRouter />
-          </WouterRouter>
+          {showSplash ? (
+            <SplashScreen onComplete={() => setShowSplash(false)} />
+          ) : (
+            /* 使用 Hash 路由模式，支持纯静态文件部署 */
+            <WouterRouter hook={useHashLocation}>
+              <AppRouter />
+            </WouterRouter>
+          )}
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

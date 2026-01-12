@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { sound } from "@/lib/sound";
 import { useState } from "react";
+import { AboutDialog } from "./AboutDialog";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -51,18 +52,21 @@ export default function Layout({ children, className, showBack = true }: LayoutP
           )}
         </div>
 
-        {/* 右上角静音开关 */}
-        <button 
-          onClick={toggleMute}
-          className="p-3 rounded-full bg-black/50 border border-primary/30 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 group"
-          title={isMuted ? "开启音效" : "关闭音效"}
-        >
-          {isMuted ? (
-            <VolumeX className="w-6 h-6" />
-          ) : (
-            <Volume2 className="w-6 h-6" />
-          )}
-        </button>
+        {/* 右上角功能区 */}
+        <div className="flex items-center gap-3">
+          <AboutDialog />
+          <button 
+            onClick={toggleMute}
+            className="p-3 rounded-full bg-black/50 border border-primary/30 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 group"
+            title={isMuted ? "开启音效" : "关闭音效"}
+          >
+            {isMuted ? (
+              <VolumeX className="w-6 h-6" />
+            ) : (
+              <Volume2 className="w-6 h-6" />
+            )}
+          </button>
+        </div>
       </header>
 
       {/* 主内容区域 */}

@@ -1,10 +1,9 @@
 import Layout from "@/components/Layout";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ZoomIn, Maximize2 } from "lucide-react";
+import { ZoomIn } from "lucide-react";
+import { Lightbox } from "@/components/ui/lightbox";
 
 // 模拟CAD图纸数据
 const cadDrawings = Array.from({ length: 10 }).map((_, i) => ({
@@ -36,6 +35,14 @@ const currentModels = [
 ];
 
 export default function Survey() {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImage, setCurrentImage] = useState({ src: "", alt: "" });
+
+  const openLightbox = (src: string, alt: string) => {
+    setCurrentImage({ src, alt });
+    setLightboxOpen(true);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-12">
@@ -65,38 +72,24 @@ export default function Survey() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="group relative aspect-video bg-black/40 border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-primary/50 transition-all duration-300">
-                        {/* 图片占位符 - 红色文字提示替换 */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                          <img src={item.src} alt={item.title} className="w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity" />
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ZoomIn className="w-10 h-10 text-primary" />
-                          </div>
-                        </div>
-                        
-                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                          <h3 className="text-white font-bold truncate">{item.title}</h3>
-                          <p className="text-xs text-white/60">{item.type}</p>
-                          <p className="text-xs text-red-500 mt-1 font-mono">[待替换为真实CAD图]</p>
-                        </div>
+                  <div 
+                    className="group relative aspect-video bg-black/40 border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-primary/50 transition-all duration-300"
+                    onClick={() => openLightbox(item.src, item.title)}
+                  >
+                    {/* 图片占位符 - 红色文字提示替换 */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                      <img src={item.src} alt={item.title} className="w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ZoomIn className="w-10 h-10 text-primary" />
                       </div>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[90vw] h-[80vh] bg-black/90 border-white/10 p-0 overflow-hidden flex flex-col">
-                      <VisuallyHidden>
-                        <DialogTitle>{item.title}</DialogTitle>
-                      </VisuallyHidden>
-                      <div className="relative flex-1 w-full h-full bg-black flex items-center justify-center overflow-auto p-4">
-                        <img src={item.src} alt={item.title} className="max-w-none h-full object-contain" />
-                        <p className="absolute top-4 left-4 text-red-500 font-bold bg-black/50 px-2 py-1 rounded">[此处需替换为高清CAD大图]</p>
-                      </div>
-                      <div className="p-4 bg-white/5 border-t border-white/10">
-                        <h2 className="text-xl font-bold text-primary">{item.title}</h2>
-                        <p className="text-white/70">{item.description}</p>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                    </div>
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                      <h3 className="text-white font-bold truncate">{item.title}</h3>
+                      <p className="text-xs text-white/60">{item.type}</p>
+                      <p className="text-xs text-red-500 mt-1 font-mono">[待替换为真实CAD图]</p>
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -113,8 +106,15 @@ export default function Survey() {
                 </div>
               </div>
               {currentModels.map((item) => (
-                <div key={item.id} className="aspect-video bg-black/40 border border-white/10 rounded-lg overflow-hidden relative group">
+                <div 
+                  key={item.id} 
+                  className="aspect-video bg-black/40 border border-white/10 rounded-lg overflow-hidden relative group cursor-pointer"
+                  onClick={() => openLightbox(item.src, item.title)}
+                >
                   <img src={item.src} alt={item.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ZoomIn className="w-10 h-10 text-primary" />
+                  </div>
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                     <h3 className="text-white font-bold">{item.title}</h3>
                     <p className="text-xs text-red-500">[待替换为实景照片]</p>
@@ -124,6 +124,13 @@ export default function Survey() {
             </div>
           </TabsContent>
         </Tabs>
+
+        <Lightbox 
+          isOpen={lightboxOpen}
+          imageSrc={currentImage.src}
+          altText={currentImage.alt}
+          onClose={() => setLightboxOpen(false)}
+        />
       </div>
     </Layout>
   );
