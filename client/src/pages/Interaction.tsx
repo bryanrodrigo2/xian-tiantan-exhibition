@@ -2,7 +2,7 @@ import Layout from "@/components/Layout";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard } from "lucide-react";
+import { Play, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard, MessageSquareQuote } from "lucide-react";
 
 // 祭天大典六步流程数据
 const ritualSteps = [
@@ -13,6 +13,7 @@ const ritualSteps = [
     icon: <LayoutDashboard className="w-6 h-6" />,
     description: "在内壝内拖拽布置昊天上帝神座（北侧南向），并检查祭品（牺牲）。",
     detail: "通过 UI 弹窗解释'内壝'与'外壝'的等级区别及神位摆放的方位学意义。",
+    npcScript: "吉时已到，请陛下查验祭品，确认神位安放无误。",
     image: "https://placehold.co/600x400/1a1a1a/FFF?text=Preparation"
   },
   {
@@ -22,6 +23,7 @@ const ritualSteps = [
     icon: <Crown className="w-6 h-6" />,
     description: "皇帝仪仗从明德门方向沿御道进入，文武百官按品级在壝墙外列队。",
     detail: "镜头拉高展示 CAD 规划中清理出的'视觉通廊'，强调遗址与长安城中轴线的关系。",
+    npcScript: "圣驾至——百官跪迎！启奏陛下，文武百官已按品级于壝墙外列队恭候。",
     image: "https://placehold.co/600x400/1a1a1a/FFF?text=Arrival"
   },
   {
@@ -31,6 +33,7 @@ const ritualSteps = [
     icon: <ScrollText className="w-6 h-6" />,
     description: "用户控制角色从正南方的午陛登上坛顶，完成跪拜并献上玉币。",
     detail: "镜头特写脚下的白灰抹面材质，触发步履声与雅乐音效。",
+    npcScript: "请陛下登坛，行初献之礼，奠玉帛以告苍天。",
     image: "https://placehold.co/600x400/1a1a1a/FFF?text=Offering"
   },
   {
@@ -40,6 +43,7 @@ const ritualSteps = [
     icon: <Utensils className="w-6 h-6" />,
     description: "敬献煮熟的肉食，展示唐代祭天不同于后世的'尚气'传统。",
     detail: "解释这一环节保留了上古'分享食物'的遗风，体现人神共食的理念。",
+    npcScript: "进熟——献牲肉于昊天上帝座前，愿神悦纳。",
     image: "https://placehold.co/600x400/1a1a1a/FFF?text=Food"
   },
   {
@@ -49,6 +53,7 @@ const ritualSteps = [
     icon: <Flame className="w-6 h-6" />,
     description: "用户移动至东南侧的燎炉，触发点火交互。",
     detail: "利用 UE5 Niagara 粒子系统生成逼真的火焰与烟雾，象征将祭品香气送达天庭。",
+    npcScript: "礼成——燎柴！愿烟火直达天庭，赐福大唐万世基业。",
     image: "https://placehold.co/600x400/1a1a1a/FFF?text=Burning"
   },
   {
@@ -58,6 +63,7 @@ const ritualSteps = [
     icon: <Footprints className="w-6 h-6" />,
     description: "仪式结束，系统生成'祭天成就报告'。",
     detail: "对比唐代与现代的遗址现状，完成一次跨越千年的历史对话。",
+    npcScript: "大礼告成，起驾回宫——",
     image: "https://placehold.co/600x400/1a1a1a/FFF?text=Return"
   }
 ];
@@ -258,78 +264,83 @@ export default function Interaction() {
                 style={{ left: `${sliderValue}%` }}
                 onMouseDown={handleMouseDown}
               >
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg text-black">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m9 18 6-6-6-6"/>
-                    <path d="m15 18-6-6 6-6" transform="rotate(180 12 12)"/>
-                  </svg>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
+                  <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 8L22 12L18 16" />
+                      <path d="M6 8L2 12L6 16" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div className="mt-6 space-y-4">
-              <p className="text-white/80 leading-relaxed text-sm">
-                拖动滑块对比唐代天坛复原模型与今日遗址现状。可以看到，虽然地面建筑已不复存在，但圜丘的夯土台基依然清晰可见，见证了千年的沧桑变迁。
+            
+            <div className="mt-4 bg-white/5 p-4 rounded-lg border border-white/10">
+              <h3 className="text-primary font-bold mb-2">建筑形制对比</h3>
+              <p className="text-sm text-white/70 leading-relaxed">
+                拖动滑块对比现状遗址与唐代复原模型。可见唐代圜丘为四层圆坛，而现状仅存土芯。复原模型依据《大唐开元礼》及考古数据重建了白灰抹面与朱红栏杆。
               </p>
-              <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded">
-                <p className="text-blue-400 font-mono text-xs mb-1">技术实现说明:</p>
-                <p className="text-white/60 text-xs">
-                  左侧复原模型基于严谨的考古数据与古籍记载重建；右侧现状模型由无人机倾斜摄影生成的高精度点云数据渲染而来。
-                </p>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* 新增：六步祭天大典流程详解 */}
-        <div className="mt-16 mb-12">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-serif text-primary mb-2">六步祭天大典</h2>
-            <p className="text-white/60">THE SIX STEPS OF HEAVEN WORSHIP RITUAL</p>
-            <div className="w-24 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
-          </div>
-
+        {/* 祭天大典流程详解 - 增加 AI 礼官解说 */}
+        <div className="mt-12">
+          <h2 className="text-3xl font-serif text-white mb-8 text-center border-b border-white/10 pb-4">
+            六步祭天大典流程详解
+          </h2>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ritualSteps.map((step) => (
+            {ritualSteps.map((step, index) => (
               <motion.div
                 key={step.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: step.id * 0.1 }}
-                className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 transition-colors duration-300"
+                transition={{ delay: index * 0.1 }}
+                className="group bg-black/40 border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 hover:-translate-y-1"
               >
                 {/* 图片区域 */}
-                <div className="relative h-48 overflow-hidden">
+                <div className="aspect-video relative overflow-hidden">
                   <img 
                     src={step.image} 
                     alt={step.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                   />
-                  <div className="absolute top-4 left-4 w-8 h-8 bg-primary text-black font-bold rounded-full flex items-center justify-center shadow-lg">
-                    {step.id}
+                  <div className="absolute top-4 left-4 bg-black/60 backdrop-blur px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+                    <span className="text-primary">{step.icon}</span>
+                    <span className="text-white text-xs font-bold">STEP 0{step.id}</span>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60"></div>
                 </div>
 
                 {/* 内容区域 */}
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3 text-primary">
-                    {step.icon}
-                    <h3 className="text-xl font-bold">{step.title}</h3>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1 flex items-center justify-between">
+                      {step.title}
+                      <span className="text-xs font-normal text-white/40 font-sans">{step.enTitle}</span>
+                    </h3>
+                    <div className="w-12 h-1 bg-primary/50 rounded-full mt-2 group-hover:w-full transition-all duration-500"></div>
                   </div>
-                  <p className="text-xs text-white/40 uppercase tracking-wider mb-4 font-mono">{step.enTitle}</p>
-                  
-                  <div className="space-y-3">
-                    <p className="text-white/80 text-sm leading-relaxed">
-                      {step.description}
+
+                  {/* AI 礼官解说词 - 新增 */}
+                  <div className="bg-primary/10 border-l-2 border-primary p-3 rounded-r relative">
+                    <MessageSquareQuote className="absolute top-2 right-2 w-4 h-4 text-primary/40" />
+                    <p className="text-primary text-sm font-serif italic">
+                      "{step.npcScript}"
                     </p>
-                    <div className="pt-3 border-t border-white/10">
-                      <p className="text-white/50 text-xs italic">
-                        <span className="text-secondary mr-1">✦</span>
-                        {step.detail}
-                      </p>
-                    </div>
+                    <p className="text-[10px] text-primary/60 mt-1 text-right">— AI 礼官</p>
+                  </div>
+                  
+                  <p className="text-white/70 text-sm leading-relaxed">
+                    {step.description}
+                  </p>
+                  
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-xs text-white/40 font-mono">
+                      <span className="text-primary/60 mr-2">[技术实现]</span>
+                      {step.detail}
+                    </p>
                   </div>
                 </div>
               </motion.div>

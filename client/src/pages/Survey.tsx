@@ -2,7 +2,7 @@ import Layout from "@/components/Layout";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ZoomIn } from "lucide-react";
+import { ZoomIn, Quote, Lightbulb, Users } from "lucide-react";
 import { Lightbox } from "@/components/ui/lightbox";
 
 // 模拟CAD图纸数据
@@ -53,6 +53,46 @@ export default function Survey() {
         >
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">现状与测绘</h1>
           <p className="text-white/60 tracking-widest">SURVEY & MAPPING</p>
+        </motion.div>
+
+        {/* 设计理念板块 - 新增 */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-16 grid grid-cols-1 md:grid-cols-2 gap-8"
+        >
+          <div className="bg-white/5 border border-white/10 rounded-xl p-8 relative overflow-hidden group hover:border-primary/30 transition-colors">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Quote className="w-24 h-24 text-primary" />
+            </div>
+            <h3 className="text-2xl font-serif text-primary mb-4 flex items-center gap-2">
+              <Lightbulb className="w-6 h-6" />
+              场所精神的数字重构
+            </h3>
+            <p className="text-white/80 leading-relaxed mb-4">
+              天坛不仅仅是一堆黄土，它是隋唐时期国家最高礼仪的发生地，承载着“天人合一”的哲学思想。本方案通过数字化手段，试图在不破坏遗址本体的前提下，重建遗址与城市的“精神连接”。
+            </p>
+            <div className="text-sm text-white/50 italic border-l-2 border-primary/50 pl-4">
+              —— 摘自《毕业设计开题报告》 P9
+            </div>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-xl p-8 relative overflow-hidden group hover:border-primary/30 transition-colors">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Users className="w-24 h-24 text-primary" />
+            </div>
+            <h3 className="text-2xl font-serif text-primary mb-4 flex items-center gap-2">
+              <Users className="w-6 h-6" />
+              从“君权神授”到“全民共享”
+            </h3>
+            <p className="text-white/80 leading-relaxed mb-4">
+              借鉴卢浮宫玻璃金字塔“严肃与开放并存”的手法，让天坛从帝王的政治工具转变为市民的客厅。通过 Web3D 沉浸式平台，任何人都可以近距离接触曾经只有贵族阶级专享的权力工具。
+            </p>
+            <div className="text-sm text-white/50 italic border-l-2 border-primary/50 pl-4">
+              —— 摘自《毕业设计开题报告》 P9
+            </div>
+          </div>
         </motion.div>
 
         <Tabs defaultValue="cad" className="w-full">
