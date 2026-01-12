@@ -3,6 +3,7 @@
 class SoundController {
   private context: AudioContext | null = null;
   private masterGain: GainNode | null = null;
+  private isMuted: boolean = false;
 
   constructor() {
     // 懒加载 AudioContext，因为浏览器要求必须在用户交互后才能启动音频上下文
@@ -26,10 +27,24 @@ class SoundController {
     }
   }
 
+  // 切换静音状态
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    if (this.masterGain) {
+      this.masterGain.gain.value = this.isMuted ? 0 : 0.3;
+    }
+    return this.isMuted;
+  }
+
+  // 获取当前静音状态
+  getMuted() {
+    return this.isMuted;
+  }
+
   // 播放钟声 (悬停音效) - 模拟青铜编钟
   // 特点：泛音丰富，衰减长，音色清脆带金属感
   async playBell() {
-    if (!this.context || !this.masterGain) return;
+    if (!this.context || !this.masterGain || this.isMuted) return;
     await this.ensureContext();
 
     const t = this.context.currentTime;
@@ -75,7 +90,7 @@ class SoundController {
   // 播放鼓声 (点击音效) - 模拟战鼓
   // 特点：低频为主，起音极快，衰减快，有冲击力
   async playDrum() {
-    if (!this.context || !this.masterGain) return;
+    if (!this.context || !this.masterGain || this.isMuted) return;
     await this.ensureContext();
 
     const t = this.context.currentTime;

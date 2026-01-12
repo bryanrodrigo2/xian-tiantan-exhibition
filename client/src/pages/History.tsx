@@ -85,6 +85,27 @@ const bookRecords = [
     quote: "冬至祀昊天上帝于圜丘，以大明、夜明、五星、内官、中官、外官、众星从祀。",
     translation: "冬至这一天在圜丘祭祀昊天上帝，并以太阳、月亮、五星以及各星官作为陪祀。",
     significance: "规范了祭祀的对象和等级，反映了唐代人对宇宙星空的认知和敬畏。"
+  },
+  {
+    id: 4,
+    book: "《新唐书·礼乐志》",
+    quote: "天子亲祀，有司摄事，皆于圜丘。",
+    translation: "无论是皇帝亲自祭祀，还是由有关部门代理祭祀，都在圜丘举行。",
+    significance: "强调了圜丘作为国家最高祭祀场所的唯一性和重要性。"
+  },
+  {
+    id: 5,
+    book: "《通典·礼》",
+    quote: "扫地而祭，于其质也；器用陶匏，以象天地之性也。",
+    translation: "扫除地面进行祭祀，是为了崇尚质朴；使用陶器和葫芦瓢，是为了象征天地的本性。",
+    significance: "阐述了祭天仪式中崇尚自然、返璞归真的哲学思想。"
+  },
+  {
+    id: 6,
+    book: "《长安志》",
+    quote: "圜丘在郭城南，去明德门二里，高二丈，周三百步。",
+    translation: "圜丘位于外郭城南面，距离明德门二里，高二丈，周长三百步。",
+    significance: "提供了关于天坛位置和规模的另一份重要地理志资料，可与正史互证。"
   }
 ];
 
@@ -172,8 +193,9 @@ export default function History() {
           {/* 右侧：书籍记载 (4列) */}
           <div className="lg:col-span-4 flex flex-col h-[600px]">
             <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-secondary pl-4">典籍记载</h2>
-            <ScrollArea className="flex-1">
-              <div className="space-y-4 pr-2">
+            {/* 使用 ScrollArea 实现固定高度内的滚动，超出部分自动隐藏 */}
+            <ScrollArea className="flex-1 rounded-lg border border-white/5 bg-black/20 p-4">
+              <div className="space-y-4 pr-4">
                 {bookRecords.map((record, index) => (
                   <motion.div
                     key={record.id}

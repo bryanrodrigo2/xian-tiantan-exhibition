@@ -1,6 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
+import { sound } from "@/lib/sound";
+import { useState } from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +13,12 @@ interface LayoutProps {
 export default function Layout({ children, className, showBack = true }: LayoutProps) {
   const [location] = useLocation();
   const isHome = location === "/";
+  const [isMuted, setIsMuted] = useState(sound.getMuted());
+
+  const toggleMute = () => {
+    const muted = sound.toggleMute();
+    setIsMuted(muted);
+  };
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -38,10 +46,23 @@ export default function Layout({ children, className, showBack = true }: LayoutP
           ) : (
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
-              <span className="text-primary font-serif text-xl font-bold tracking-widest">西安隋唐天坛</span>
+              {/* 移除了文字 "西安隋唐天坛" */}
             </div>
           )}
         </div>
+
+        {/* 右上角静音开关 */}
+        <button 
+          onClick={toggleMute}
+          className="p-3 rounded-full bg-black/50 border border-primary/30 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 group"
+          title={isMuted ? "开启音效" : "关闭音效"}
+        >
+          {isMuted ? (
+            <VolumeX className="w-6 h-6" />
+          ) : (
+            <Volume2 className="w-6 h-6" />
+          )}
+        </button>
       </header>
 
       {/* 主内容区域 */}
