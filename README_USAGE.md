@@ -79,7 +79,6 @@ const surveyData = [
 ## 3. 本地开发指南 (使用 Cursor)
 
 ### 3.1 环境准备
-
 确保您的电脑已安装以下软件：
 *   **Node.js** (推荐 v18 或更高版本)：[下载地址](https://nodejs.org/)
 *   **Cursor** (或 VS Code)：[下载地址](https://cursor.sh/)
@@ -110,17 +109,21 @@ npm run dev
 
 ## 4. 部署上线指南
 
-本项目是纯静态的前端项目（Static Web App），非常适合部署到 Vercel、Netlify 或 GitHub Pages。以下以 **Vercel** 为例（最简单、免费）：
+本项目已配置为纯静态导出模式，支持多种部署方式。
 
-### 4.1 准备工作
+### 方式一：直接使用静态文件 (最简单)
+
+1.  解压下载的 `xian-tiantan-static-site.zip` 文件。
+2.  进入 `dist/public` 文件夹。
+3.  直接双击 `index.html` 即可在浏览器中打开查看（注意：部分浏览器可能会限制本地文件访问，建议使用简单的 HTTP 服务器）。
+4.  您可以将 `dist/public` 文件夹中的所有内容上传到任何静态网站托管服务（如 FTP 服务器、阿里云 OSS、腾讯云 COS 等）。
+
+### 方式二：使用 Vercel 部署 (推荐)
 
 1.  注册一个 [GitHub](https://github.com/) 账号。
 2.  注册一个 [Vercel](https://vercel.com/) 账号（可以直接用 GitHub 登录）。
-
-### 4.2 上传代码到 GitHub
-
-1.  在 GitHub 上新建一个仓库（Repository），例如命名为 `xian-tiantan`。
-2.  在 Cursor 终端中执行以下命令，将本地代码推送到 GitHub：
+3.  在 GitHub 上新建一个仓库（Repository），例如命名为 `xian-tiantan`。
+4.  在 Cursor 终端中执行以下命令，将本地代码推送到 GitHub：
 
 ```bash
 git init
@@ -131,22 +134,13 @@ git remote add origin https://github.com/您的用户名/xian-tiantan.git
 git push -u origin main
 ```
 
-### 4.3 在 Vercel 上部署
-
-1.  登录 Vercel 控制台，点击 **"Add New..."** -> **"Project"**。
-2.  在 "Import Git Repository" 列表中找到刚才创建的 `xian-tiantan` 仓库，点击 **"Import"**。
-3.  **配置项目**：
+5.  登录 Vercel 控制台，点击 **"Add New..."** -> **"Project"**。
+6.  导入刚才创建的 `xian-tiantan` 仓库。
+7.  **配置项目**：
     *   **Framework Preset**: Vercel 通常会自动识别为 `Vite`。
-    *   **Root Directory**: 选择 `client` 目录（**重要！因为代码在 client 文件夹下**）。如果 Vercel 没有自动识别，请点击 Edit 手动选择 `client` 文件夹。
-4.  点击 **"Deploy"** 按钮。
-5.  等待约 1 分钟，部署完成后，Vercel 会分配一个免费域名（如 `xian-tiantan.vercel.app`），您可以直接访问。
-
-### 4.4 绑定自定义域名
-
-1.  在 Vercel 项目页面，点击 **"Settings"** -> **"Domains"**。
-2.  输入您的域名 `bryanfinal.xyz`，点击 **"Add"**。
-3.  Vercel 会提示您去域名服务商（如阿里云、腾讯云、GoDaddy）配置 DNS 解析记录（通常是添加一条 A 记录或 CNAME 记录）。
-4.  配置完成后，等待 DNS 生效即可通过您的域名访问。
+    *   **Root Directory**: 选择 `client` 目录（**重要！因为代码在 client 文件夹下**）。
+8.  点击 **"Deploy"** 按钮。
+9.  部署完成后，在 **Settings** -> **Domains** 中绑定您的域名 `bryanfinal.xyz`。
 
 ---
 
