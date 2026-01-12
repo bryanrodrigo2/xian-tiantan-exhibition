@@ -2,6 +2,7 @@ import Layout from "@/components/Layout";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { sound } from "@/lib/sound";
+import { useEffect } from "react";
 
 // 导航菜单配置
 // 包含标题、英文、路由路径、屏幕位置及动画延迟时间
@@ -37,6 +38,11 @@ const navItems = [
 ];
 
 export default function Home() {
+  // 动态设置页面标题，确保符合 SEO 要求的长度（30-60字符）
+  useEffect(() => {
+    document.title = "西安隋唐天坛全息影像设计与交互实现 | 数字化文化遗产保护与沉浸式虚拟体验展示平台";
+  }, []);
+
   return (
     // 主页布局：隐藏返回按钮，全屏居中显示
     <Layout showBack={false} className="flex items-center justify-center h-screen overflow-hidden">
@@ -71,14 +77,15 @@ export default function Home() {
           >
             西安隋唐天坛
           </motion.h1>
-          <motion.p 
+          {/* SEO优化：将副标题从 p 标签改为 h2 标签，提升页面结构语义化 */}
+          <motion.h2 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
             className="text-xl md:text-2xl text-white/60 font-light tracking-[0.5em]"
           >
             全息影像设计与交互实现
-          </motion.p>
+          </motion.h2>
         </div>
 
         {/* 交互层：四个角落的导航按钮 */}
