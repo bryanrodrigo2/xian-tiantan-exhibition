@@ -76,9 +76,9 @@ export default function Home() {
           </motion.p>
         </div>
 
-        {/* 四个导航按钮 */}
-        <div className="absolute inset-0 z-30 pointer-events-none">
-          <div className="w-full h-full relative container mx-auto">
+        {/* 四个导航按钮 - 使用Grid布局避免重叠 */}
+        <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+          <div className="w-full h-full container mx-auto grid grid-cols-2 grid-rows-2 gap-4 md:gap-12 p-4 md:p-12">
             {navItems.map((item, index) => {
               // 计算位置样式
               const isTop = item.position.includes("top");
@@ -90,13 +90,10 @@ export default function Home() {
                   initial={{ opacity: 0, x: isLeft ? -50 : 50, y: isTop ? -50 : 50 }}
                   animate={{ opacity: 1, x: 0, y: 0 }}
                   transition={{ duration: 0.8, delay: item.delay }}
-                  className={`absolute pointer-events-auto
-                    ${isTop ? "top-[20%] md:top-[25%]" : "bottom-[20%] md:bottom-[25%]"}
-                    ${isLeft ? "left-4 md:left-[10%]" : "right-4 md:right-[10%]"}
-                  `}
+                  className={`pointer-events-auto flex ${isTop ? 'items-end' : 'items-start'} ${isLeft ? 'justify-end md:justify-start' : 'justify-start md:justify-end'}`}
                 >
                   <Link href={item.href}>
-                    <div className="group relative w-48 h-32 md:w-64 md:h-40 cursor-pointer">
+                    <div className="group relative w-40 h-28 md:w-64 md:h-40 cursor-pointer m-2 md:m-8">
                       {/* 按钮背景 */}
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm border border-white/10 rounded-lg transform transition-all duration-500 group-hover:scale-110 group-hover:bg-black/60 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(255,215,0,0.15)]" />
                       
@@ -108,10 +105,10 @@ export default function Home() {
                       
                       {/* 内容 */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                        <h3 className="text-2xl font-serif font-bold text-white group-hover:text-primary transition-colors duration-300 mb-1">
+                        <h3 className="text-xl md:text-2xl font-serif font-bold text-white group-hover:text-primary transition-colors duration-300 mb-1">
                           {item.title}
                         </h3>
-                        <span className="text-xs uppercase tracking-widest text-white/40 group-hover:text-primary/60 transition-colors duration-300">
+                        <span className="text-[10px] md:text-xs uppercase tracking-widest text-white/40 group-hover:text-primary/60 transition-colors duration-300">
                           {item.en}
                         </span>
                         

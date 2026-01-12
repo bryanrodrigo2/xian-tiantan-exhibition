@@ -30,23 +30,14 @@ export default function Layout({ children, className, showBack = true }: LayoutP
           {/* Logo与返回键功能结合 */}
           {showBack && !isHome ? (
             <Link href="/">
-              <div className="group flex items-center gap-3 cursor-pointer transition-all duration-300 hover:opacity-80">
-                <div className="relative w-12 h-12 rounded-full bg-black/50 border border-primary/30 flex items-center justify-center overflow-hidden group-hover:border-primary transition-colors">
-                  <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-primary font-serif text-lg leading-none group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                    <ArrowLeft className="w-4 h-4" /> 返回首页
-                  </span>
-                </div>
+              <div className="group flex items-center gap-3 cursor-pointer transition-all duration-300 hover:opacity-80 hover:scale-105">
+                {/* 仅保留放大的Logo，移除背景圆圈和文字 */}
+                <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
               </div>
             </Link>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-black/50 border border-primary/30 flex items-center justify-center overflow-hidden">
-                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
-              </div>
+              <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
               <span className="text-primary font-serif text-xl font-bold tracking-widest">西安隋唐天坛</span>
             </div>
           )}
