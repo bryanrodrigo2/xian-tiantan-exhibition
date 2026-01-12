@@ -1,7 +1,8 @@
 import Layout from "@/components/Layout";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ZoomIn, Maximize2 } from "lucide-react";
 
@@ -83,6 +84,9 @@ export default function Survey() {
                       </div>
                     </DialogTrigger>
                     <DialogContent className="max-w-[90vw] h-[80vh] bg-black/90 border-white/10 p-0 overflow-hidden flex flex-col">
+                      <VisuallyHidden>
+                        <DialogTitle>{item.title}</DialogTitle>
+                      </VisuallyHidden>
                       <div className="relative flex-1 w-full h-full bg-black flex items-center justify-center overflow-auto p-4">
                         <img src={item.src} alt={item.title} className="max-w-none h-full object-contain" />
                         <p className="absolute top-4 left-4 text-red-500 font-bold bg-black/50 px-2 py-1 rounded">[此处需替换为高清CAD大图]</p>
