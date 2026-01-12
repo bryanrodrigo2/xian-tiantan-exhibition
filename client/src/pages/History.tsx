@@ -216,16 +216,18 @@ export default function History() {
                       <p className="text-primary/80">{selectedEvent.emperor}</p>
                     </div>
                   </div>
-                  <CardContent className="p-6 flex-1 overflow-y-auto">
-                    <p className="text-lg text-white/90 mb-6 leading-relaxed font-serif">
-                      {selectedEvent.description}
-                    </p>
-                    <Separator className="bg-white/10 my-4" />
-                    <h4 className="text-sm uppercase text-white/40 mb-2 tracking-widest">详细记载</h4>
-                    <p className="text-white/70 leading-relaxed text-justify placeholder-text">
-                      {/* 这里是红色占位符，提示用户后续可以替换更详细的历史资料 */}
-                      [此处需替换为更详细的历史考证资料：{selectedEvent.details}]
-                    </p>
+                  <CardContent className="p-0 flex-1 overflow-hidden">
+                    <ScrollArea className="h-full p-6">
+                      <p className="text-lg text-white/90 mb-6 leading-relaxed font-serif">
+                        {selectedEvent.description}
+                      </p>
+                      <Separator className="bg-white/10 my-4" />
+                      <h4 className="text-sm uppercase text-white/40 mb-2 tracking-widest">详细记载</h4>
+                      <p className="text-white/70 leading-relaxed text-justify placeholder-text">
+                        {/* 这里是红色占位符，提示用户后续可以替换更详细的历史资料 */}
+                        [此处需替换为更详细的历史考证资料：{selectedEvent.details}]
+                      </p>
+                    </ScrollArea>
                   </CardContent>
                 </Card>
               </motion.div>
