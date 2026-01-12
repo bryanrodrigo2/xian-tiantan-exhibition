@@ -4,6 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 // 历代皇帝祭祀时间轴数据
 const timelineData = [
@@ -124,9 +131,44 @@ export default function History() {
           <p className="text-white/60 tracking-widest">HISTORY & ORIGINS</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+        {/* 移动端视图：滑动卡片 */}
+        <div className="lg:hidden mb-8">
+          <Carousel className="w-full max-w-xs mx-auto">
+            <CarouselContent>
+              {timelineData.map((item) => (
+                <CarouselItem key={item.id}>
+                  <div className="p-1">
+                    <Card className="bg-black/40 border-white/10 backdrop-blur-md">
+                      <CardContent className="flex flex-col aspect-[3/4] p-6">
+                        <div className="text-center mb-6">
+                          <span className="text-4xl font-serif font-bold text-primary block mb-2">{item.year}</span>
+                          <h3 className="text-2xl font-serif text-white">{item.dynasty} · {item.emperor}</h3>
+                          <p className="text-white/60 mt-2">{item.event}</p>
+                        </div>
+                        <Separator className="bg-white/10 mb-6" />
+                        <ScrollArea className="flex-1">
+                          <p className="text-white/90 leading-relaxed font-serif mb-4">
+                            {item.description}
+                          </p>
+                          <p className="text-sm text-white/60 text-justify">
+                            {item.details}
+                          </p>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-[-10px] bg-black/50 border-primary/30 text-primary" />
+            <CarouselNext className="right-[-10px] bg-black/50 border-primary/30 text-primary" />
+          </Carousel>
+        </div>
+
+        {/* 桌面端视图：三栏布局 */}
+        <div className="hidden lg:grid grid-cols-12 gap-8 flex-1">
           {/* 左侧：时间轴 (4列) */}
-          <div className="lg:col-span-4 flex flex-col h-[600px]">
+          <div className="col-span-4 flex flex-col h-[600px]">
             <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-primary pl-4">历代祭祀时间轴</h2>
             <ScrollArea className="flex-1 pr-4">
               <div className="relative border-l border-white/10 ml-4 space-y-8 py-4">
@@ -154,7 +196,7 @@ export default function History() {
           </div>
 
           {/* 中间：详细信息展示 (4列) */}
-          <div className="lg:col-span-4 flex flex-col h-[600px]">
+          <div className="col-span-4 flex flex-col h-[600px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedEvent.id}
@@ -191,7 +233,7 @@ export default function History() {
           </div>
 
           {/* 右侧：书籍记载 (4列) */}
-          <div className="lg:col-span-4 flex flex-col h-[600px]">
+          <div className="col-span-4 flex flex-col h-[600px]">
             <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-secondary pl-4">典籍记载</h2>
             {/* 使用 ScrollArea 实现固定高度内的滚动，超出部分自动隐藏 */}
             <ScrollArea className="flex-1 rounded-lg border border-white/5 bg-black/20 p-4">
