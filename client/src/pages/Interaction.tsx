@@ -2,7 +2,65 @@ import Layout from "@/components/Layout";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Maximize, MousePointer2, Keyboard } from "lucide-react";
+import { Play, Pause, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard } from "lucide-react";
+
+// 祭天大典六步流程数据
+const ritualSteps = [
+  {
+    id: 1,
+    title: "陈设与省牲",
+    enTitle: "Preparation",
+    icon: <LayoutDashboard className="w-6 h-6" />,
+    description: "在内壝内拖拽布置昊天上帝神座（北侧南向），并检查祭品（牺牲）。",
+    detail: "通过 UI 弹窗解释'内壝'与'外壝'的等级区别及神位摆放的方位学意义。",
+    image: "https://placehold.co/600x400/1a1a1a/FFF?text=Preparation"
+  },
+  {
+    id: 2,
+    title: "銮驾出宫",
+    enTitle: "Arrival",
+    icon: <Crown className="w-6 h-6" />,
+    description: "皇帝仪仗从明德门方向沿御道进入，文武百官按品级在壝墙外列队。",
+    detail: "镜头拉高展示 CAD 规划中清理出的'视觉通廊'，强调遗址与长安城中轴线的关系。",
+    image: "https://placehold.co/600x400/1a1a1a/FFF?text=Arrival"
+  },
+  {
+    id: 3,
+    title: "奠玉帛",
+    enTitle: "Offering Jade & Silk",
+    icon: <ScrollText className="w-6 h-6" />,
+    description: "用户控制角色从正南方的午陛登上坛顶，完成跪拜并献上玉币。",
+    detail: "镜头特写脚下的白灰抹面材质，触发步履声与雅乐音效。",
+    image: "https://placehold.co/600x400/1a1a1a/FFF?text=Offering"
+  },
+  {
+    id: 4,
+    title: "进熟",
+    enTitle: "Offering Food",
+    icon: <Utensils className="w-6 h-6" />,
+    description: "敬献煮熟的肉食，展示唐代祭天不同于后世的'尚气'传统。",
+    detail: "解释这一环节保留了上古'分享食物'的遗风，体现人神共食的理念。",
+    image: "https://placehold.co/600x400/1a1a1a/FFF?text=Food"
+  },
+  {
+    id: 5,
+    title: "燎柴",
+    enTitle: "Burning",
+    icon: <Flame className="w-6 h-6" />,
+    description: "用户移动至东南侧的燎炉，触发点火交互。",
+    detail: "利用 UE5 Niagara 粒子系统生成逼真的火焰与烟雾，象征将祭品香气送达天庭。",
+    image: "https://placehold.co/600x400/1a1a1a/FFF?text=Burning"
+  },
+  {
+    id: 6,
+    title: "銮驾回宫",
+    enTitle: "Return",
+    icon: <Footprints className="w-6 h-6" />,
+    description: "仪式结束，系统生成'祭天成就报告'。",
+    detail: "对比唐代与现代的遗址现状，完成一次跨越千年的历史对话。",
+    image: "https://placehold.co/600x400/1a1a1a/FFF?text=Return"
+  }
+];
 
 export default function Interaction() {
   // 状态管理
@@ -49,18 +107,18 @@ export default function Interaction() {
 
   return (
     <Layout>
-      <div className="container mx-auto py-8 h-full flex flex-col">
+      <div className="container mx-auto py-8 flex flex-col gap-12">
         {/* 页面标题 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="text-center"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">交互复原</h1>
           <p className="text-white/60 tracking-widest">INTERACTIVE RESTORATION</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* 左侧：UE交互区域 (8列) */}
           <div className="lg:col-span-8 flex flex-col gap-4">
             <div className="bg-black/60 border border-primary/30 rounded-xl overflow-hidden relative aspect-video shadow-[0_0_30px_rgba(0,0,0,0.5)]">
@@ -220,6 +278,62 @@ export default function Interaction() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* 新增：六步祭天大典流程详解 */}
+        <div className="mt-16 mb-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif text-primary mb-2">六步祭天大典</h2>
+            <p className="text-white/60">THE SIX STEPS OF HEAVEN WORSHIP RITUAL</p>
+            <div className="w-24 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {ritualSteps.map((step) => (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: step.id * 0.1 }}
+                className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 transition-colors duration-300"
+              >
+                {/* 图片区域 */}
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={step.image} 
+                    alt={step.title} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute top-4 left-4 w-8 h-8 bg-primary text-black font-bold rounded-full flex items-center justify-center shadow-lg">
+                    {step.id}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60"></div>
+                </div>
+
+                {/* 内容区域 */}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3 text-primary">
+                    {step.icon}
+                    <h3 className="text-xl font-bold">{step.title}</h3>
+                  </div>
+                  <p className="text-xs text-white/40 uppercase tracking-wider mb-4 font-mono">{step.enTitle}</p>
+                  
+                  <div className="space-y-3">
+                    <p className="text-white/80 text-sm leading-relaxed">
+                      {step.description}
+                    </p>
+                    <div className="pt-3 border-t border-white/10">
+                      <p className="text-white/50 text-xs italic">
+                        <span className="text-secondary mr-1">✦</span>
+                        {step.detail}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
