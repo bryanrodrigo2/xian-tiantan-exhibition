@@ -5,29 +5,34 @@ import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, Maximize, MousePointer2, Keyboard } from "lucide-react";
 
 export default function Interaction() {
-  const [sliderValue, setSliderValue] = useState(50);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isResizing, setIsResizing] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
+  // 状态管理
+  const [sliderValue, setSliderValue] = useState(50); // 对比滑动条的位置 (0-100)
+  const containerRef = useRef<HTMLDivElement>(null); // 对比容器的引用
+  const [isResizing, setIsResizing] = useState(false); // 是否正在拖动滑动条
+  const [showGuide, setShowGuide] = useState(false); // 是否显示新手引导动画
 
   // 启动交互时显示引导
   const handleStartInteraction = () => {
     setShowGuide(true);
-    // 5秒后自动隐藏引导
+    // 5秒后自动隐藏引导，以免干扰用户操作
     setTimeout(() => setShowGuide(false), 5000);
   };
 
-  // 处理滑动条拖动
+  // 处理滑动条拖动逻辑
   const handleMouseDown = () => setIsResizing(true);
   const handleMouseUp = () => setIsResizing(false);
+  
+  // 计算鼠标位置对应的百分比
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
+    // 限制滑动范围在容器宽度内
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const percentage = (x / rect.width) * 100;
     setSliderValue(percentage);
   };
 
+  // 注册全局鼠标事件监听，确保拖动体验流畅
   useEffect(() => {
     if (isResizing) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -45,6 +50,7 @@ export default function Interaction() {
   return (
     <Layout>
       <div className="container mx-auto py-8 h-full flex flex-col">
+        {/* 页面标题 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -58,7 +64,8 @@ export default function Interaction() {
           {/* 左侧：UE交互区域 (8列) */}
           <div className="lg:col-span-8 flex flex-col gap-4">
             <div className="bg-black/60 border border-primary/30 rounded-xl overflow-hidden relative aspect-video shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-              {/* UE5 Pixel Streaming 嵌入区域 */}
+              {/* UE5 Pixel Streaming 嵌入区域占位符 */}
+              {/* 实际项目中应在此处嵌入 Pixel Streaming 的 Video 标签 */}
               <div className="absolute inset-0 flex items-center justify-center bg-black">
                 <div className="text-center p-8">
                   <p className="text-blue-400 font-mono text-lg mb-4 code-text">
@@ -77,7 +84,7 @@ export default function Interaction() {
                 </div>
               </div>
               
-              {/* 新手引导动画层 */}
+              {/* 新手引导动画层：半透明覆盖层，展示操作指引 */}
               {showGuide && (
                 <motion.div 
                   initial={{ opacity: 0 }}
@@ -86,7 +93,7 @@ export default function Interaction() {
                   className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center pointer-events-none"
                 >
                   <div className="flex gap-12">
-                    {/* 键盘引导 */}
+                    {/* 键盘引导动画：WASD按键模拟 */}
                     <div className="flex flex-col items-center gap-4">
                       <div className="relative w-32 h-24">
                         <motion.div 
@@ -108,7 +115,7 @@ export default function Interaction() {
                       </div>
                     </div>
 
-                    {/* 鼠标引导 */}
+                    {/* 鼠标引导动画：左右晃动模拟视角旋转 */}
                     <div className="flex flex-col items-center gap-4">
                       <div className="relative w-32 h-24 flex items-center justify-center">
                         <motion.div
@@ -128,7 +135,7 @@ export default function Interaction() {
                 </motion.div>
               )}
 
-              {/* 交互控制栏 */}
+              {/* 底部交互控制栏 */}
               <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur p-4 flex items-center justify-between border-t border-white/10">
                 <div className="flex items-center gap-2">
                   <span className="text-primary font-bold mr-2">当前环节:</span>
@@ -159,6 +166,7 @@ export default function Interaction() {
           <div className="lg:col-span-4 flex flex-col h-full">
             <h2 className="text-2xl font-serif text-white mb-4 border-l-4 border-secondary pl-4">古今对比</h2>
             
+            {/* 对比容器：包含两张重叠的图片 */}
             <div 
               ref={containerRef}
               className="relative w-full aspect-[3/4] rounded-xl overflow-hidden cursor-ew-resize select-none border border-white/20 shadow-2xl"
@@ -173,7 +181,7 @@ export default function Interaction() {
                 <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded text-white/80 text-sm font-bold">现状遗址</div>
               </div>
 
-              {/* 顶层：复原模型 (左侧) - 通过clip-path裁剪 */}
+              {/* 顶层：复原模型 (左侧) - 通过 clip-path 动态裁剪实现遮罩效果 */}
               <div 
                 className="absolute inset-0 bg-amber-900"
                 style={{ clipPath: `inset(0 ${100 - sliderValue}% 0 0)` }}
@@ -186,7 +194,7 @@ export default function Interaction() {
                 <div className="absolute top-4 left-4 bg-primary/80 px-3 py-1 rounded text-black text-sm font-bold">唐代复原</div>
               </div>
 
-              {/* 滑动条控制杆 */}
+              {/* 滑动条控制杆：跟随 sliderValue 移动 */}
               <div 
                 className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-10 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
                 style={{ left: `${sliderValue}%` }}

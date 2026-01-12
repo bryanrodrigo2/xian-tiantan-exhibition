@@ -4,15 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 // 历代皇帝祭祀时间轴数据
+// 包含年份、朝代、皇帝、事件名称、简述及详细历史背景
 const timelineData = [
   {
     id: 1,
@@ -71,6 +65,7 @@ const timelineData = [
 ];
 
 // 书籍记载数据
+// 包含书名、原文引用、白话翻译及历史意义
 const bookRecords = [
   {
     id: 1,
@@ -117,11 +112,13 @@ const bookRecords = [
 ];
 
 export default function History() {
+  // 状态管理：当前选中的时间轴事件，默认为第一项
   const [selectedEvent, setSelectedEvent] = useState(timelineData[0]);
 
   return (
     <Layout>
       <div className="container mx-auto py-12 h-full flex flex-col">
+        {/* 页面标题区域 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -131,44 +128,13 @@ export default function History() {
           <p className="text-white/60 tracking-widest">HISTORY & ORIGINS</p>
         </motion.div>
 
-        {/* 移动端视图：滑动卡片 */}
-        <div className="lg:hidden mb-8">
-          <Carousel className="w-full max-w-xs mx-auto">
-            <CarouselContent>
-              {timelineData.map((item) => (
-                <CarouselItem key={item.id}>
-                  <div className="p-1">
-                    <Card className="bg-black/40 border-white/10 backdrop-blur-md">
-                      <CardContent className="flex flex-col aspect-[3/4] p-6">
-                        <div className="text-center mb-6">
-                          <span className="text-4xl font-serif font-bold text-primary block mb-2">{item.year}</span>
-                          <h3 className="text-2xl font-serif text-white">{item.dynasty} · {item.emperor}</h3>
-                          <p className="text-white/60 mt-2">{item.event}</p>
-                        </div>
-                        <Separator className="bg-white/10 mb-6" />
-                        <ScrollArea className="flex-1">
-                          <p className="text-white/90 leading-relaxed font-serif mb-4">
-                            {item.description}
-                          </p>
-                          <p className="text-sm text-white/60 text-justify">
-                            {item.details}
-                          </p>
-                        </ScrollArea>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-[-10px] bg-black/50 border-primary/30 text-primary" />
-            <CarouselNext className="right-[-10px] bg-black/50 border-primary/30 text-primary" />
-          </Carousel>
-        </div>
-
-        {/* 桌面端视图：三栏布局 */}
-        <div className="hidden lg:grid grid-cols-12 gap-8 flex-1">
-          {/* 左侧：时间轴 (4列) */}
-          <div className="col-span-4 flex flex-col h-[600px]">
+        {/* 统一布局：三栏结构（时间轴 | 详情 | 典籍） */}
+        {/* 移除了之前的移动端 Carousel 组件，现在所有设备都使用 Grid 布局 */}
+        {/* 在小屏幕上会自动堆叠为单列，大屏幕上为三列 */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+          
+          {/* 左侧：时间轴列表 */}
+          <div className="lg:col-span-4 flex flex-col h-[400px] lg:h-[600px]">
             <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-primary pl-4">历代祭祀时间轴</h2>
             <ScrollArea className="flex-1 pr-4">
               <div className="relative border-l border-white/10 ml-4 space-y-8 py-4">
@@ -181,9 +147,10 @@ export default function History() {
                     className="relative pl-8 cursor-pointer group"
                     onClick={() => setSelectedEvent(item)}
                   >
-                    {/* 时间节点 */}
+                    {/* 时间节点圆点：选中时放大并发光 */}
                     <div className={`absolute left-[-5px] top-1 w-3 h-3 rounded-full transition-all duration-300 ${selectedEvent.id === item.id ? 'bg-primary scale-125 shadow-[0_0_10px_var(--primary)]' : 'bg-white/30 group-hover:bg-primary/70'}`} />
                     
+                    {/* 时间节点内容：选中时高亮并右移 */}
                     <div className={`transition-all duration-300 ${selectedEvent.id === item.id ? 'opacity-100 translate-x-2' : 'opacity-60 group-hover:opacity-90'}`}>
                       <span className="text-primary font-mono text-sm">{item.year}</span>
                       <h3 className="text-xl font-serif text-white">{item.dynasty} · {item.emperor}</h3>
@@ -195,8 +162,8 @@ export default function History() {
             </ScrollArea>
           </div>
 
-          {/* 中间：详细信息展示 (4列) */}
-          <div className="col-span-4 flex flex-col h-[600px]">
+          {/* 中间：详细信息展示卡片 */}
+          <div className="lg:col-span-4 flex flex-col h-[500px] lg:h-[600px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedEvent.id}
@@ -207,7 +174,8 @@ export default function History() {
                 className="h-full"
               >
                 <Card className="h-full bg-black/40 border-white/10 backdrop-blur-md overflow-hidden flex flex-col">
-                  <div className="h-48 bg-gradient-to-b from-primary/20 to-transparent p-6 flex items-end relative">
+                  {/* 卡片头部：年份和事件标题 */}
+                  <div className="h-48 bg-gradient-to-b from-primary/20 to-transparent p-6 flex items-end relative shrink-0">
                     <div className="absolute top-4 right-4 text-6xl font-serif text-white/5 font-bold select-none">
                       {selectedEvent.year}
                     </div>
@@ -216,17 +184,21 @@ export default function History() {
                       <p className="text-primary/80">{selectedEvent.emperor}</p>
                     </div>
                   </div>
-                  <CardContent className="p-0 flex-1 overflow-hidden">
-                    <ScrollArea className="h-full p-6">
-                      <p className="text-lg text-white/90 mb-6 leading-relaxed font-serif">
-                        {selectedEvent.description}
-                      </p>
-                      <Separator className="bg-white/10 my-4" />
-                      <h4 className="text-sm uppercase text-white/40 mb-2 tracking-widest">详细记载</h4>
-                      <p className="text-white/70 leading-relaxed text-justify placeholder-text">
-                        {/* 这里是红色占位符，提示用户后续可以替换更详细的历史资料 */}
-                        [此处需替换为更详细的历史考证资料：{selectedEvent.details}]
-                      </p>
+                  
+                  {/* 卡片内容区：使用 ScrollArea 确保长文本可滚动 */}
+                  <CardContent className="p-0 flex-1 overflow-hidden min-h-0">
+                    <ScrollArea className="h-full w-full">
+                      <div className="p-6">
+                        <p className="text-lg text-white/90 mb-6 leading-relaxed font-serif">
+                          {selectedEvent.description}
+                        </p>
+                        <Separator className="bg-white/10 my-4" />
+                        <h4 className="text-sm uppercase text-white/40 mb-2 tracking-widest">详细记载</h4>
+                        <p className="text-white/70 leading-relaxed text-justify placeholder-text">
+                          {/* 红色占位符：提示用户替换素材 */}
+                          [此处需替换为更详细的历史考证资料：{selectedEvent.details}]
+                        </p>
+                      </div>
                     </ScrollArea>
                   </CardContent>
                 </Card>
@@ -234,13 +206,13 @@ export default function History() {
             </AnimatePresence>
           </div>
 
-          {/* 右侧：书籍记载 (4列) */}
-          <div className="col-span-4 flex flex-col h-[600px]">
+          {/* 右侧：典籍记载列表 */}
+          <div className="lg:col-span-4 flex flex-col h-[500px] lg:h-[600px]">
             <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-secondary pl-4">典籍记载</h2>
-            {/* 使用 ScrollArea 实现固定高度内的滚动，超出部分自动隐藏 */}
+            {/* 典籍列表容器：固定高度 + 内部滚动 */}
             <div className="flex-1 min-h-0 rounded-lg border border-white/5 bg-black/20 overflow-hidden">
-              <ScrollArea className="h-full p-4">
-                <div className="space-y-4 pr-4 pb-4">
+              <ScrollArea className="h-full w-full">
+                <div className="p-4 space-y-4">
                   {bookRecords.map((record, index) => (
                     <motion.div
                       key={record.id}
@@ -251,6 +223,7 @@ export default function History() {
                       <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
                         <CardContent className="p-5">
                           <h3 className="text-primary font-serif text-lg mb-3">{record.book}</h3>
+                          {/* 引用原文：使用楷体和左侧边框强调 */}
                           <div className="relative pl-4 border-l-2 border-white/20 mb-3">
                             <p className="font-kai text-xl text-white/90 italic leading-relaxed">
                               "{record.quote}"

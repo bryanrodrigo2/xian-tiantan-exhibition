@@ -3,6 +3,8 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { sound } from "@/lib/sound";
 
+// 导航菜单配置
+// 包含标题、英文、路由路径、屏幕位置及动画延迟时间
 const navItems = [
   {
     title: "历史溯源",
@@ -36,10 +38,12 @@ const navItems = [
 
 export default function Home() {
   return (
+    // 主页布局：隐藏返回按钮，全屏居中显示
     <Layout showBack={false} className="flex items-center justify-center h-screen overflow-hidden">
       <div className="relative w-full max-w-7xl h-full flex items-center justify-center">
         
-        {/* 中央天坛轮廓背景 - 隐隐的轮廓 */}
+        {/* 背景层：中央天坛轮廓动画 */}
+        {/* 使用 motion.div 实现入场时的缩放和淡入效果 */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -47,17 +51,17 @@ export default function Home() {
           className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none"
         >
           <div className="relative w-[600px] h-[600px] md:w-[800px] md:h-[800px] opacity-30">
-            {/* 使用Logo作为中央轮廓，或者使用CSS绘制天坛层级结构 */}
+            {/* 核心轮廓：使用 Logo 图片作为背景，叠加模糊和脉冲动画 */}
             <div className="absolute inset-0 bg-[url('/logo.png')] bg-contain bg-center bg-no-repeat opacity-20 blur-sm animate-pulse-slow" />
             
-            {/* 装饰性光环 */}
+            {/* 装饰性光环：多层旋转圆环增加科技感与神圣感 */}
             <div className="absolute inset-0 border border-primary/10 rounded-full scale-75 animate-[spin_60s_linear_infinite]" />
             <div className="absolute inset-0 border border-primary/5 rounded-full scale-90 animate-[spin_40s_linear_infinite_reverse]" />
             <div className="absolute inset-0 border border-primary/20 rounded-full scale-50" />
           </div>
         </motion.div>
 
-        {/* 中央标题 */}
+        {/* 前景层：中央标题 */}
         <div className="relative z-20 text-center mb-12">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -77,11 +81,12 @@ export default function Home() {
           </motion.p>
         </div>
 
-        {/* 四个导航按钮 - 使用Grid布局避免重叠 */}
+        {/* 交互层：四个角落的导航按钮 */}
+        {/* 使用 Grid 布局确保按钮在不同屏幕尺寸下稳固分布，避免重叠 */}
         <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
           <div className="w-full h-full container mx-auto grid grid-cols-2 grid-rows-2 gap-4 md:gap-12 p-4 md:p-12">
             {navItems.map((item, index) => {
-              // 计算位置样式
+              // 根据配置计算按钮在 Grid 中的对齐方式
               const isTop = item.position.includes("top");
               const isLeft = item.position.includes("left");
               
@@ -96,19 +101,20 @@ export default function Home() {
                   <Link href={item.href}>
                     <div 
                       className="group relative w-40 h-28 md:w-64 md:h-40 cursor-pointer m-2 md:m-8"
+                      // 绑定音效事件：悬停播放钟声，点击播放鼓声
                       onMouseEnter={() => sound.playBell()}
                       onClick={() => sound.playDrum()}
                     >
-                      {/* 按钮背景 */}
+                      {/* 按钮背景：磨砂玻璃效果，悬停时发光 */}
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm border border-white/10 rounded-lg transform transition-all duration-500 group-hover:scale-110 group-hover:bg-black/60 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(255,215,0,0.15)]" />
                       
-                      {/* 装饰角标 */}
+                      {/* 装饰角标：四个角落的L形边框，悬停时变色 */}
                       <div className={`absolute w-4 h-4 border-t-2 border-l-2 border-primary/30 transition-all duration-300 group-hover:border-primary top-0 left-0`} />
                       <div className={`absolute w-4 h-4 border-t-2 border-r-2 border-primary/30 transition-all duration-300 group-hover:border-primary top-0 right-0`} />
                       <div className={`absolute w-4 h-4 border-b-2 border-l-2 border-primary/30 transition-all duration-300 group-hover:border-primary bottom-0 left-0`} />
                       <div className={`absolute w-4 h-4 border-b-2 border-r-2 border-primary/30 transition-all duration-300 group-hover:border-primary bottom-0 right-0`} />
                       
-                      {/* 内容 */}
+                      {/* 按钮文字内容 */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                         <h3 className="text-xl md:text-2xl font-serif font-bold text-white group-hover:text-primary transition-colors duration-300 mb-1">
                           {item.title}
@@ -117,7 +123,7 @@ export default function Home() {
                           {item.en}
                         </span>
                         
-                        {/* 悬停时的光效线条 */}
+                        {/* 悬停时的底部光效线条 */}
                         <div className="absolute bottom-8 w-0 h-[1px] bg-primary transition-all duration-500 group-hover:w-1/2 opacity-0 group-hover:opacity-100" />
                       </div>
                     </div>
