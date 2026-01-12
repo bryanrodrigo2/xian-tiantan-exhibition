@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { sound } from "@/lib/sound";
 
 const navItems = [
   {
@@ -93,7 +94,11 @@ export default function Home() {
                   className={`pointer-events-auto flex ${isTop ? 'items-end' : 'items-start'} ${isLeft ? 'justify-end md:justify-start' : 'justify-start md:justify-end'}`}
                 >
                   <Link href={item.href}>
-                    <div className="group relative w-40 h-28 md:w-64 md:h-40 cursor-pointer m-2 md:m-8">
+                    <div 
+                      className="group relative w-40 h-28 md:w-64 md:h-40 cursor-pointer m-2 md:m-8"
+                      onMouseEnter={() => sound.playBell()}
+                      onClick={() => sound.playDrum()}
+                    >
                       {/* 按钮背景 */}
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm border border-white/10 rounded-lg transform transition-all duration-500 group-hover:scale-110 group-hover:bg-black/60 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(255,215,0,0.15)]" />
                       
