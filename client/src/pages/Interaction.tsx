@@ -2,12 +2,20 @@ import Layout from "@/components/Layout";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Maximize } from "lucide-react";
+import { Play, Pause, RotateCcw, Maximize, MousePointer2, Keyboard } from "lucide-react";
 
 export default function Interaction() {
   const [sliderValue, setSliderValue] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+
+  // 启动交互时显示引导
+  const handleStartInteraction = () => {
+    setShowGuide(true);
+    // 5秒后自动隐藏引导
+    setTimeout(() => setShowGuide(false), 5000);
+  };
 
   // 处理滑动条拖动
   const handleMouseDown = () => setIsResizing(true);
@@ -59,12 +67,67 @@ export default function Interaction() {
                     // pixelStreaming.connect();
                   </p>
                   <p className="text-white/50 mb-6">点击下方按钮启动交互体验</p>
-                  <Button size="lg" className="bg-primary text-black hover:bg-primary/80 font-bold px-8 py-6 text-lg glow-effect">
+                  <Button 
+                    size="lg" 
+                    className="bg-primary text-black hover:bg-primary/80 font-bold px-8 py-6 text-lg glow-effect"
+                    onClick={handleStartInteraction}
+                  >
                     <Play className="mr-2 w-6 h-6" /> 启动祭祀大典交互
                   </Button>
                 </div>
               </div>
               
+              {/* 新手引导动画层 */}
+              {showGuide && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center pointer-events-none"
+                >
+                  <div className="flex gap-12">
+                    {/* 键盘引导 */}
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="relative w-32 h-24">
+                        <motion.div 
+                          animate={{ y: [0, -5, 0] }}
+                          transition={{ repeat: Infinity, duration: 1.5 }}
+                          className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-10 border-2 border-primary rounded flex items-center justify-center text-primary font-bold bg-white/10"
+                        >W</motion.div>
+                        <div className="absolute bottom-0 left-0 w-10 h-10 border-2 border-white/50 rounded flex items-center justify-center text-white/50 font-bold">A</div>
+                        <motion.div 
+                          animate={{ y: [0, 5, 0] }}
+                          transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-10 border-2 border-white/50 rounded flex items-center justify-center text-white/50 font-bold"
+                        >S</motion.div>
+                        <div className="absolute bottom-0 right-0 w-10 h-10 border-2 border-white/50 rounded flex items-center justify-center text-white/50 font-bold">D</div>
+                      </div>
+                      <div className="flex items-center gap-2 text-white/80">
+                        <Keyboard className="w-5 h-5" />
+                        <span>移动位置</span>
+                      </div>
+                    </div>
+
+                    {/* 鼠标引导 */}
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="relative w-32 h-24 flex items-center justify-center">
+                        <motion.div
+                          animate={{ x: [-15, 15, -15] }}
+                          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                        >
+                          <MousePointer2 className="w-12 h-12 text-primary fill-primary/20" />
+                        </motion.div>
+                        <div className="absolute inset-0 border-2 border-dashed border-white/20 rounded-full scale-75" />
+                      </div>
+                      <div className="flex items-center gap-2 text-white/80">
+                        <MousePointer2 className="w-5 h-5" />
+                        <span>旋转视角</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* 交互控制栏 */}
               <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur p-4 flex items-center justify-between border-t border-white/10">
                 <div className="flex items-center gap-2">
