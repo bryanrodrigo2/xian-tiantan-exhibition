@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ZoomIn, ZoomOut } from "lucide-react";
+import { ZoomIn, ZoomOut } from "lucide-react";
 import { useState } from "react";
 
 interface LightboxProps {
@@ -32,16 +32,20 @@ export function Lightbox({ isOpen, imageSrc, altText, onClose }: LightboxProps) 
           className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm"
           onClick={onClose}
         >
-          {/* Close Button */}
+          {/* Logo Button for Closing - Positioned exactly where the main layout logo is */}
           <button
-            onClick={onClose}
-            className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 bg-white/10 rounded-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-6 left-6 z-[110] group flex items-center gap-3 cursor-pointer transition-all duration-300 hover:opacity-80 hover:scale-105"
+            title="返回上一级"
           >
-            <X className="w-8 h-8" />
+            <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
           </button>
 
           {/* Controls */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 bg-black/50 px-6 py-3 rounded-full border border-white/10 backdrop-blur-md">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 bg-black/50 px-6 py-3 rounded-full border border-white/10 backdrop-blur-md z-[110]">
             <button
               onClick={handleZoomOut}
               className="text-white/70 hover:text-white transition-colors"
@@ -79,8 +83,8 @@ export function Lightbox({ isOpen, imageSrc, altText, onClose }: LightboxProps) 
             />
           </motion.div>
           
-          {/* Caption */}
-          <div className="absolute top-6 left-6 text-white/80 font-serif text-xl tracking-wide pointer-events-none">
+          {/* Caption - Moved to bottom right to avoid conflict with Logo */}
+          <div className="absolute bottom-24 right-6 text-white/80 font-serif text-xl tracking-wide pointer-events-none text-right">
             {altText}
           </div>
         </motion.div>
