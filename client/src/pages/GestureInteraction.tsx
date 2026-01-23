@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState } from '@/hooks/useHandGesture';
 
-// 模型 URL - 使用 CDN 或本地路径
-const MODEL_URL = '/models/tiantan123.glb';
+// 模型 URL - 使用 CDN 托管
+const MODEL_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663310337985/EyYPnlQZoxWYwrSD.glb';
 
 export default function GestureInteraction() {
   const [trackingEnabled, setTrackingEnabled] = useState(false);
