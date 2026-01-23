@@ -105,5 +105,3 @@ temp/
 *.sqlite
 *.sqlite3
 
-# Large model files
-client/public/models/*.glb

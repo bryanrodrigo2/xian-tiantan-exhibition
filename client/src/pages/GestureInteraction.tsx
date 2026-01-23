@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState } from '@/hooks/useHandGesture';
 
-// 模型 URL - 使用 CDN 托管
-const MODEL_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663310337985/EyYPnlQZoxWYwrSD.glb';
+// 模型 URL - 使用 jsDelivr CDN（代理 GitHub 文件，支持 CORS）
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/bryanrodrigo2/xian-tiantan-exhibition@main/client/public/models/tiantan123.glb';
 
 export default function GestureInteraction() {
   const [trackingEnabled, setTrackingEnabled] = useState(false);
