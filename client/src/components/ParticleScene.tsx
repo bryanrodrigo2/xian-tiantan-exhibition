@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -7,9 +7,14 @@ interface ParticleSceneProps {
   modelUrl: string;
   gestureState: 'open' | 'closed' | 'neutral';
   className?: string;
+  onLoadComplete?: () => void;
+  onLoadError?: (error: string) => void;
 }
 
-export default function ParticleScene({ modelUrl, gestureState, className }: ParticleSceneProps) {
+export default function ParticleScene({ modelUrl, gestureState, className, onLoadComplete, onLoadError }: ParticleSceneProps) {
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -206,12 +211,20 @@ export default function ParticleScene({ modelUrl, gestureState, className }: Par
         pointsRef.current = points;
 
         console.log(`Loaded ${sampledPositions.length / 3} particles with original colors`);
+        setIsLoaded(true);
+        setLoadingProgress(100);
+        onLoadComplete?.();
       },
       (progress) => {
-        console.log(`Loading: ${(progress.loaded / progress.total * 100).toFixed(1)}%`);
+        const percent = progress.total > 0 ? (progress.loaded / progress.total * 100) : 0;
+        console.log(`Loading: ${percent.toFixed(1)}%`);
+        setLoadingProgress(Math.round(percent));
       },
       (error) => {
         console.error('Error loading model:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Failed to load model';
+        setLoadError(errorMsg);
+        onLoadError?.(errorMsg);
       }
     );
 
@@ -312,8 +325,23 @@ export default function ParticleScene({ modelUrl, gestureState, className }: Par
   return (
     <div 
       ref={containerRef} 
-      className={`w-full h-full ${className || ''}`}
+      className={`w-full h-full relative ${className || ''}`}
       style={{ minHeight: '400px' }}
-    />
+    >
+      {/* 加载指示器 */}
+      {!isLoaded && !loadError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-10">
+          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
+          <p className="text-white/80 text-sm">正在加载模型... {loadingProgress}%</p>
+        </div>
+      )}
+      {/* 错误提示 */}
+      {loadError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-10">
+          <p className="text-red-400 text-sm mb-2">模型加载失败</p>
+          <p className="text-white/60 text-xs">{loadError}</p>
+        </div>
+      )}
+    </div>
   );
 }
