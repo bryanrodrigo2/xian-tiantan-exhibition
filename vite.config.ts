@@ -10,8 +10,8 @@ const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(
 
 export default defineConfig({
   plugins,
-  // 设置 base 为相对路径，确保构建后的文件可以在任何目录下运行
-  base: "./",
+  // 设置 base 为根路径，确保静态资源正确加载
+  base: "/",
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
