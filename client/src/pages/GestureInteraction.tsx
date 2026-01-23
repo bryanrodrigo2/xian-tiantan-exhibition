@@ -1,0 +1,253 @@
+import { useState, useCallback } from 'react';
+import { Link } from 'wouter';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Hand, Loader2, Camera, CameraOff, ArrowLeft, HelpCircle, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import ParticleScene from '@/components/ParticleScene';
+import { useHandGesture, GestureState } from '@/hooks/useHandGesture';
+
+// 模型 URL - 使用 CDN 或本地路径
+const MODEL_URL = '/models/tiantan123.glb';
+
+export default function GestureInteraction() {
+  const [trackingEnabled, setTrackingEnabled] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  
+  const handleGestureChange = useCallback((gesture: GestureState) => {
+    console.log('Gesture changed:', gesture);
+  }, []);
+
+  const { gestureState, isLoading, error, cameraActive } = useHandGesture({
+    enabled: trackingEnabled,
+    onGestureChange: handleGestureChange,
+  });
+
+  const toggleTracking = () => {
+    setTrackingEnabled(!trackingEnabled);
+  };
+
+  // 获取手势状态的显示文本和颜色
+  const getGestureInfo = () => {
+    switch (gestureState) {
+      case 'open':
+        return { text: '张开手掌 - 粒子消散', color: 'text-red-400', bgColor: 'bg-red-500/20' };
+      case 'closed':
+        return { text: '握拳 - 粒子聚合', color: 'text-green-400', bgColor: 'bg-green-500/20' };
+      default:
+        return { text: '等待手势...', color: 'text-white/60', bgColor: 'bg-white/10' };
+    }
+  };
+
+  const gestureInfo = getGestureInfo();
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
+      {/* 背景装饰 */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/10 via-transparent to-transparent pointer-events-none" />
+      
+      {/* 顶部导航栏 */}
+      <header className="absolute top-0 left-0 right-0 z-50 p-4 md:p-6">
+        <div className="flex items-center justify-between">
+          {/* Logo 和返回按钮 */}
+          <Link href="/interaction">
+            <motion.div 
+              className="flex items-center gap-3 cursor-pointer group"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-primary flex items-center justify-center bg-black/50 backdrop-blur group-hover:bg-primary/20 transition-colors">
+                <span className="text-primary font-serif text-lg md:text-xl">天</span>
+              </div>
+              <div className="hidden md:flex items-center gap-2 text-white/60 group-hover:text-primary transition-colors">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm">返回交互复原</span>
+              </div>
+            </motion.div>
+          </Link>
+
+          {/* 标题 */}
+          <div className="absolute left-1/2 -translate-x-1/2 text-center">
+            <h1 className="text-xl md:text-2xl font-bold text-primary">手势交互</h1>
+            <p className="text-xs text-white/40 tracking-widest hidden md:block">GESTURE INTERACTION</p>
+          </div>
+
+          {/* 帮助按钮 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white/60 hover:text-primary"
+            onClick={() => setShowGuide(true)}
+          >
+            <HelpCircle className="w-5 h-5" />
+          </Button>
+        </div>
+      </header>
+
+      {/* 主要内容区域 */}
+      <main className="h-screen flex flex-col">
+        {/* Three.js 粒子场景 */}
+        <div className="flex-1 relative">
+          <ParticleScene 
+            modelUrl={MODEL_URL}
+            gestureState={gestureState}
+            className="absolute inset-0"
+          />
+
+          {/* 手势状态指示器 */}
+          <motion.div 
+            className={`absolute bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full ${gestureInfo.bgColor} backdrop-blur-md border border-white/10`}
+            animate={{ scale: gestureState !== 'neutral' ? [1, 1.05, 1] : 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center gap-3">
+              <Hand className={`w-5 h-5 ${gestureInfo.color}`} />
+              <span className={`font-medium ${gestureInfo.color}`}>{gestureInfo.text}</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* 底部控制栏 */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-black/80 backdrop-blur-md rounded-2xl border border-white/10 p-4 md:p-6">
+              <div className="flex items-center justify-between gap-4">
+                {/* 摄像头状态 */}
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${cameraActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                  <span className="text-sm text-white/60">
+                    {isLoading ? '正在初始化...' : cameraActive ? '摄像头已启用' : '摄像头未启用'}
+                  </span>
+                </div>
+
+                {/* 控制按钮 */}
+                <Button
+                  onClick={toggleTracking}
+                  disabled={isLoading}
+                  className={`px-6 py-2 rounded-full font-medium transition-all ${
+                    trackingEnabled 
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30' 
+                      : 'bg-primary text-black hover:bg-primary/80'
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      加载中...
+                    </>
+                  ) : trackingEnabled ? (
+                    <>
+                      <CameraOff className="w-4 h-4 mr-2" />
+                      停止追踪
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-4 h-4 mr-2" />
+                      启动手势追踪
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* 错误提示 */}
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* 操作指南弹窗 */}
+      <AnimatePresence>
+        {showGuide && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowGuide(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-primary">操作指南</h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white/60 hover:text-white"
+                  onClick={() => setShowGuide(false)}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+
+              <div className="space-y-6">
+                {/* 手势说明 */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                    <div className="text-4xl mb-3">✋</div>
+                    <h3 className="font-bold text-white mb-1">张开手掌</h3>
+                    <p className="text-sm text-white/60">粒子向外消散</p>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                    <div className="text-4xl mb-3">✊</div>
+                    <h3 className="font-bold text-white mb-1">握紧拳头</h3>
+                    <p className="text-sm text-white/60">粒子聚合成模型</p>
+                  </div>
+                </div>
+
+                {/* 使用步骤 */}
+                <div className="space-y-3">
+                  <h3 className="font-bold text-white">使用步骤</h3>
+                  <ol className="space-y-2 text-sm text-white/70">
+                    <li className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs flex-shrink-0">1</span>
+                      <span>点击「启动手势追踪」按钮</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs flex-shrink-0">2</span>
+                      <span>允许浏览器访问摄像头</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs flex-shrink-0">3</span>
+                      <span>将手放在摄像头前，尝试张开或握拳</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs flex-shrink-0">4</span>
+                      <span>观察粒子随手势变化的效果</span>
+                    </li>
+                  </ol>
+                </div>
+
+                {/* 提示 */}
+                <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
+                  <p className="text-sm text-primary">
+                    💡 提示：确保光线充足，手部清晰可见，以获得最佳追踪效果。
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                className="w-full mt-6 bg-primary text-black hover:bg-primary/80"
+                onClick={() => setShowGuide(false)}
+              >
+                开始体验
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

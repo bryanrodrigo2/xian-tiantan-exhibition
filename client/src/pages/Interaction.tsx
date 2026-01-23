@@ -1,8 +1,9 @@
 import Layout from "@/components/Layout";
+import { Link } from "wouter";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard, MessageSquareQuote } from "lucide-react";
+import { Play, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard, MessageSquareQuote, Hand } from "lucide-react";
 
 // 祭天大典六步流程数据
 const ritualSteps = [
@@ -224,6 +225,33 @@ export default function Interaction() {
                 <div className="flex items-center gap-2"><span className="border border-white/20 px-2 py-1 rounded">D</span> 右移</div>
               </div>
             </div>
+
+            {/* 手势交互入口 */}
+            <Link href="/gesture">
+              <motion.div 
+                className="bg-gradient-to-r from-primary/20 to-amber-600/20 border border-primary/30 rounded-lg p-6 cursor-pointer group hover:border-primary/60 transition-all duration-300"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                    <Hand className="w-7 h-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-primary mb-1 flex items-center gap-2">
+                      手势交互
+                      <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">NEW</span>
+                    </h3>
+                    <p className="text-white/60 text-sm">通过摄像头识别手势，控制天坛粒子效果的消散与聚合</p>
+                  </div>
+                  <div className="text-primary/60 group-hover:text-primary group-hover:translate-x-1 transition-all">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
           </div>
 
           {/* 右侧：古今对比 (4列) */}
