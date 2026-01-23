@@ -1,17 +1,24 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Hand, Loader2, Camera, CameraOff, ArrowLeft, HelpCircle, X } from 'lucide-react';
+import { Hand, Loader2, Camera, CameraOff, ArrowLeft, HelpCircle, X, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState } from '@/hooks/useHandGesture';
 
-// 模型 URL - 使用本地文件路径（随项目一起部署）
-const MODEL_URL = '/models/tiantan123.glb';
+// 模型 URL 列表 - 优先使用本地路径，备用 jsDelivr CDN
+const MODEL_URLS = [
+  '/models/tiantan123.glb',
+  'https://cdn.jsdelivr.net/gh/bryanrodrigo2/xian-tiantan-exhibition@main/client/public/models/tiantan123.glb',
+];
 
 export default function GestureInteraction() {
   const [trackingEnabled, setTrackingEnabled] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [modelUrlIndex, setModelUrlIndex] = useState(0);
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   
   const handleGestureChange = useCallback((gesture: GestureState) => {
     console.log('Gesture changed:', gesture);
@@ -26,6 +33,35 @@ export default function GestureInteraction() {
     setTrackingEnabled(!trackingEnabled);
   };
 
+  // 处理模型加载完成
+  const handleModelLoadComplete = useCallback(() => {
+    console.log('Model loaded successfully from:', MODEL_URLS[modelUrlIndex]);
+    setModelLoaded(true);
+    setModelError(null);
+  }, [modelUrlIndex]);
+
+  // 处理模型加载错误 - 尝试备用源
+  const handleModelLoadError = useCallback((errorMsg: string) => {
+    console.error('Model load error:', errorMsg, 'Current URL index:', modelUrlIndex);
+    
+    // 如果还有备用源，尝试下一个
+    if (modelUrlIndex < MODEL_URLS.length - 1) {
+      console.log('Trying fallback URL...');
+      setModelUrlIndex(prev => prev + 1);
+    } else {
+      // 所有源都失败了
+      setModelError(`模型加载失败: ${errorMsg}`);
+    }
+  }, [modelUrlIndex]);
+
+  // 手动重试
+  const handleRetry = useCallback(() => {
+    setModelUrlIndex(0);
+    setModelError(null);
+    setModelLoaded(false);
+    setRetryCount(prev => prev + 1);
+  }, []);
+
   // 获取手势状态的显示文本和颜色
   const getGestureInfo = () => {
     switch (gestureState) {
@@ -39,6 +75,7 @@ export default function GestureInteraction() {
   };
 
   const gestureInfo = getGestureInfo();
+  const currentModelUrl = MODEL_URLS[modelUrlIndex];
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
@@ -88,22 +125,46 @@ export default function GestureInteraction() {
         {/* Three.js 粒子场景 */}
         <div className="flex-1 relative">
           <ParticleScene 
-            modelUrl={MODEL_URL}
+            key={`${currentModelUrl}-${retryCount}`}
+            modelUrl={currentModelUrl}
             gestureState={gestureState}
             className="absolute inset-0"
+            onLoadComplete={handleModelLoadComplete}
+            onLoadError={handleModelLoadError}
           />
 
-          {/* 手势状态指示器 */}
-          <motion.div 
-            className={`absolute bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full ${gestureInfo.bgColor} backdrop-blur-md border border-white/10`}
-            animate={{ scale: gestureState !== 'neutral' ? [1, 1.05, 1] : 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="flex items-center gap-3">
-              <Hand className={`w-5 h-5 ${gestureInfo.color}`} />
-              <span className={`font-medium ${gestureInfo.color}`}>{gestureInfo.text}</span>
+          {/* 模型加载错误提示 */}
+          {modelError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20">
+              <div className="text-center p-6 max-w-md">
+                <div className="text-red-400 text-lg mb-4">{modelError}</div>
+                <p className="text-white/60 text-sm mb-6">
+                  模型文件加载失败，可能是网络问题。请检查网络连接后重试。
+                </p>
+                <Button
+                  onClick={handleRetry}
+                  className="bg-primary text-black hover:bg-primary/80"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  重新加载
+                </Button>
+              </div>
             </div>
-          </motion.div>
+          )}
+
+          {/* 手势状态指示器 */}
+          {modelLoaded && (
+            <motion.div 
+              className={`absolute bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full ${gestureInfo.bgColor} backdrop-blur-md border border-white/10`}
+              animate={{ scale: gestureState !== 'neutral' ? [1, 1.05, 1] : 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center gap-3">
+                <Hand className={`w-5 h-5 ${gestureInfo.color}`} />
+                <span className={`font-medium ${gestureInfo.color}`}>{gestureInfo.text}</span>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* 底部控制栏 */}
@@ -122,7 +183,7 @@ export default function GestureInteraction() {
                 {/* 控制按钮 */}
                 <Button
                   onClick={toggleTracking}
-                  disabled={isLoading}
+                  disabled={isLoading || !modelLoaded}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
                     trackingEnabled 
                       ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30' 
