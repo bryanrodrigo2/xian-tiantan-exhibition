@@ -85,8 +85,10 @@ export default function GestureInteraction() {
 
   const toggleTracking = () => {
     console.log('Toggle tracking, current:', trackingEnabled, 'modelLoaded:', modelLoaded);
-    setTrackingEnabled(!trackingEnabled);
-    if (trackingEnabled) {
+    const newTrackingState = !trackingEnabled;
+    setTrackingEnabled(newTrackingState);
+    // 关闭相机时立即清除手部位置，触发复原
+    if (!newTrackingState) {
       setCurrentHandPosition(null);
     }
   };
@@ -202,7 +204,7 @@ export default function GestureInteraction() {
             modelUrl={currentModelUrl}
             mtlUrl={currentModelUrl.endsWith('.obj') ? MTL_URL : undefined}
             gestureState={gestureState}
-            handPosition={cameraActive ? currentHandPosition : null}
+            handPosition={trackingEnabled && cameraActive ? currentHandPosition : null}
             className="absolute inset-0"
             onLoadComplete={handleModelLoadComplete}
             onLoadError={handleModelLoadError}

@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Info, User, Code2, BookOpen, X } from "lucide-react";
+import { Info, User, Code2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -114,6 +114,36 @@ const technologies: Technology[] = [
     description: "JavaScript 3D库",
     details: "基于WebGL的Three.js库实现粒子系统和三维场景渲染。支持多种模型格式加载、材质系统、光照系统和后处理效果。",
     icon: "🔺"
+  },
+  
+  // 网页开发技术
+  {
+    name: "Vite",
+    category: "构建工具",
+    description: "下一代前端构建工具",
+    details: "使用Vite作为项目构建工具，提供极速的开发服务器启动和热模块替换（HMR）。基于原生ES模块，无需打包即可在开发环境运行，显著提升开发效率。生产环境使用Rollup打包，优化输出体积。",
+    icon: "⚡"
+  },
+  {
+    name: "Wouter",
+    category: "路由管理",
+    description: "轻量级React路由",
+    details: "使用Wouter实现单页应用的路由管理。相比React Router体积更小（仅1.5KB），API简洁直观，支持路径匹配、导航守卫和动态路由。完美适配本项目的多页面导航需求。",
+    icon: "🧭"
+  },
+  {
+    name: "Vercel",
+    category: "部署平台",
+    description: "现代化Web部署",
+    details: "使用Vercel进行项目部署和托管。支持Git集成，自动构建和部署，提供全球CDN加速。零配置部署React应用，支持自定义域名、HTTPS和边缘函数。确保网站的高可用性和访问速度。",
+    icon: "▲"
+  },
+  {
+    name: "Lucide Icons",
+    category: "图标库",
+    description: "现代化图标集",
+    details: "使用Lucide Icons作为项目图标库。提供1000+精美的开源图标，支持React组件化使用，可自定义尺寸、颜色和描边宽度。图标设计简洁现代，完美契合项目的视觉风格。",
+    icon: "🎯"
   },
 ];
 
@@ -237,20 +267,10 @@ export function AboutDialog() {
         <Dialog open={!!selectedTech} onOpenChange={() => setSelectedTech(null)}>
           <DialogContent className="bg-black/95 border-primary/30 text-white max-w-2xl">
             <DialogHeader>
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-2xl font-bold text-primary flex items-center gap-3">
-                  {selectedTech.icon && <span className="text-3xl">{selectedTech.icon}</span>}
-                  {selectedTech.name}
-                </DialogTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedTech(null)}
-                  className="text-white/60 hover:text-white hover:bg-white/10"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
+              <DialogTitle className="text-2xl font-bold text-primary flex items-center gap-3">
+                {selectedTech.icon && <span className="text-3xl">{selectedTech.icon}</span>}
+                {selectedTech.name}
+              </DialogTitle>
               <DialogDescription className="text-primary/60 text-base">
                 {selectedTech.category} · {selectedTech.description}
               </DialogDescription>
@@ -267,17 +287,7 @@ export function AboutDialog() {
                 </p>
               </div>
               
-              <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                <span className="text-xs text-white/40">
-                  点击外部区域关闭
-                </span>
-                <Button
-                  onClick={() => setSelectedTech(null)}
-                  className="bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30"
-                >
-                  关闭
-                </Button>
-              </div>
+
             </div>
           </DialogContent>
         </Dialog>
