@@ -284,8 +284,8 @@ export default function ParticleScene({
   const pointsRef = useRef<THREE.Points | null>(null);
   const originalPositionsRef = useRef<Float32Array | null>(null);
   const animationIdRef = useRef<number | null>(null);
-  const progressRef = useRef(0);
-  const targetProgressRef = useRef(0);
+  const progressRef = useRef(1); // 初始状态为消散状态
+  const targetProgressRef = useRef(1); // 初始狮标也是消散状态
   const clockRef = useRef<THREE.Clock | null>(null);
   const isInitializedRef = useRef(false);
   
@@ -310,6 +310,11 @@ export default function ParticleScene({
       targetRotationRef.current.x += deltaY * 2;
       
       targetRotationRef.current.x = Math.max(-0.5, Math.min(0.5, targetRotationRef.current.x));
+    } else if (handPosition === null) {
+      // 当没有检测到手势时，停止旋转并复原到初始状态
+      targetRotationRef.current.x = 0;
+      targetRotationRef.current.y = 0;
+      targetProgressRef.current = 1; // 复原到消散状态
     }
     lastHandPositionRef.current = handPosition || null;
   }, [handPosition]);
