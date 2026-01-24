@@ -6,11 +6,15 @@ import { Button } from '@/components/ui/button';
 import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState, HandPosition } from '@/hooks/useHandGesture';
 
-// 模型 URL 列表 - 使用高质量大模型
+// 模型 URL 列表 - 使用高质量 OBJ 模型
 const MODEL_URLS = [
+  '/models/tiantan.obj',
   '/models/tiantan_large.glb',
   '/models/tiantan123.glb',
 ];
+
+// MTL 材质文件 URL
+const MTL_URL = '/models/tiantan.mtl';
 
 export default function GestureInteraction() {
   const [trackingEnabled, setTrackingEnabled] = useState(false);
@@ -155,6 +159,7 @@ export default function GestureInteraction() {
           <ParticleScene 
             key={`${currentModelUrl}-${retryCount}`}
             modelUrl={currentModelUrl}
+            mtlUrl={currentModelUrl.endsWith('.obj') ? MTL_URL : undefined}
             gestureState={gestureState}
             handPosition={cameraActive ? currentHandPosition : null}
             className="absolute inset-0"
