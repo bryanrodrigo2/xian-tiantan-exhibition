@@ -37,9 +37,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
               className="w-32 h-32 rounded-full border-4 border-primary flex items-center justify-center mb-8 bg-black"
             >
               <div className="w-24 h-24 rounded-full border border-white/20 flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
-                  <span className="text-4xl font-serif text-primary">天</span>
-                </div>
+                <img src="/logo_new.png" alt="Logo" className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(255,215,0,0.4)]" />
               </div>
             </motion.div>
           </motion.div>

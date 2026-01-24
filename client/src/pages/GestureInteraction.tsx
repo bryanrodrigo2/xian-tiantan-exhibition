@@ -125,9 +125,7 @@ export default function GestureInteraction() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-primary flex items-center justify-center bg-black/50 backdrop-blur group-hover:bg-primary/20 transition-colors">
-                <span className="text-primary font-serif text-lg md:text-xl">天</span>
-              </div>
+              <img src="/logo_new.png" alt="Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
 
             </motion.div>
           </Link>

@@ -58,7 +58,7 @@ export default function Home() {
         >
           <div className="relative w-[600px] h-[600px] md:w-[800px] md:h-[800px] opacity-30">
             {/* 核心轮廓：使用 Logo 图片作为背景，叠加模糊和脉冲动画 */}
-            <div className="absolute inset-0 bg-[url('/logo.png')] bg-contain bg-center bg-no-repeat opacity-20 blur-sm animate-pulse-slow" />
+            <div className="absolute inset-0 bg-[url('/logo_new.png')] bg-contain bg-center bg-no-repeat opacity-20 blur-sm animate-pulse-slow" />
             
             {/* 装饰性光环：多层旋转圆环增加科技感与神圣感 */}
             <div className="absolute inset-0 border border-primary/10 rounded-full scale-75 animate-[spin_60s_linear_infinite]" />
