@@ -45,16 +45,6 @@ async function fetchModelWithRetry(url: string, maxRetries = 3): Promise<ArrayBu
   throw lastError || new Error('Failed to fetch model');
 }
 
-// 天坛模型的典型颜色调色板
-const TIANTAN_COLORS = [
-  new THREE.Color(0x6b8e23), // 草地绿色
-  new THREE.Color(0x9a8b7a), // 石头灰褐色
-  new THREE.Color(0x8b7355), // 土黄色
-  new THREE.Color(0x7a8b6b), // 暗绿色
-  new THREE.Color(0xa0937a), // 浅褐色
-  new THREE.Color(0x5a6b4a), // 深绿色
-];
-
 export default function ParticleScene({ modelUrl, gestureState, className, onLoadComplete, onLoadError }: ParticleSceneProps) {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStatus, setLoadingStatus] = useState('正在加载模型...');
@@ -199,7 +189,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         positions.needsUpdate = true;
         
         const material = pointsRef.current.material as THREE.PointsMaterial;
-        material.opacity = 0.95 - progress * 0.3;
+        material.opacity = 0.9 - progress * 0.3;
       }
       
       controls.update();
@@ -227,33 +217,26 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           
           const model = gltf.scene;
           
-          // 收集所有顶点和颜色
+          // 收集所有顶点
           const positions: number[] = [];
           const colors: number[] = [];
           
-          let meshIndex = 0;
+          // 首先计算模型的边界框
+          const boundingBox = new THREE.Box3().setFromObject(model);
+          const modelSize = new THREE.Vector3();
+          boundingBox.getSize(modelSize);
+          const modelCenter = new THREE.Vector3();
+          boundingBox.getCenter(modelCenter);
+          
+          console.log('Model bounding box:', boundingBox);
+          console.log('Model size:', modelSize);
+          console.log('Model center:', modelCenter);
           
           // 遍历所有网格
           model.traverse((child) => {
             if (child instanceof THREE.Mesh && child.geometry) {
               const geometry = child.geometry;
               const positionAttribute = geometry.getAttribute('position');
-              const colorAttribute = geometry.getAttribute('color');
-              
-              // 获取材质信息
-              const material = Array.isArray(child.material) ? child.material[0] : child.material;
-              let baseColor = new THREE.Color(0x808080);
-              
-              if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshBasicMaterial) {
-                if (material.color) {
-                  baseColor = material.color.clone();
-                  // 如果材质颜色太暗，使用调色板中的颜色
-                  const brightness = (baseColor.r + baseColor.g + baseColor.b) / 3;
-                  if (brightness < 0.2) {
-                    baseColor = TIANTAN_COLORS[meshIndex % TIANTAN_COLORS.length].clone();
-                  }
-                }
-              }
               
               // 应用模型的世界矩阵
               child.updateWorldMatrix(true, false);
@@ -268,57 +251,45 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
                 vertex.applyMatrix4(matrix);
                 positions.push(vertex.x, vertex.y, vertex.z);
                 
+                // 基于位置计算颜色
+                // 归一化坐标到 0-1 范围
+                const normalizedY = (vertex.y - boundingBox.min.y) / modelSize.y;
+                const normalizedRadius = Math.sqrt(
+                  Math.pow(vertex.x - modelCenter.x, 2) + 
+                  Math.pow(vertex.z - modelCenter.z, 2)
+                ) / (Math.max(modelSize.x, modelSize.z) / 2);
+                
                 let color: THREE.Color;
                 
-                // 1. 优先使用顶点颜色
-                if (colorAttribute) {
-                  color = new THREE.Color(
-                    colorAttribute.getX(i),
-                    colorAttribute.getY(i),
-                    colorAttribute.getZ(i)
-                  );
-                  // 如果顶点颜色太暗，增加亮度
-                  const brightness = (color.r + color.g + color.b) / 3;
-                  if (brightness < 0.15) {
-                    // 使用基于位置的颜色变化
-                    const heightFactor = (vertex.y + 5) / 10; // 归一化高度
-                    if (heightFactor < 0.3) {
-                      // 底部 - 草地绿色
-                      color = TIANTAN_COLORS[0].clone();
-                    } else {
-                      // 上部 - 石头颜色
-                      color = TIANTAN_COLORS[1].clone();
-                    }
-                  }
+                // 根据高度和半径分配颜色
+                if (normalizedY < 0.15 && normalizedRadius > 0.7) {
+                  // 外围底部 - 草地绿色
+                  color = new THREE.Color(0x5a7a3a); // 暗绿色
+                } else if (normalizedY < 0.25 && normalizedRadius > 0.5) {
+                  // 外围中下部 - 草地绿色
+                  color = new THREE.Color(0x6b8b4a); // 草绿色
+                } else if (normalizedY < 0.4) {
+                  // 下层台阶 - 灰褐色
+                  color = new THREE.Color(0x8a7b6a); // 灰褐色
+                } else if (normalizedY < 0.6) {
+                  // 中层台阶 - 浅灰褐色
+                  color = new THREE.Color(0x9a8b7a); // 浅灰褐色
+                } else if (normalizedY < 0.8) {
+                  // 上层台阶 - 更浅的灰褐色
+                  color = new THREE.Color(0xa89b8a); // 更浅灰褐色
+                } else {
+                  // 顶部 - 最浅的颜色
+                  color = new THREE.Color(0xb8a898); // 米色
                 }
-                // 2. 使用材质基础颜色
-                else {
-                  // 基于位置添加颜色变化
-                  const heightFactor = (vertex.y + 5) / 10;
-                  const radiusFactor = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z) / 10;
-                  
-                  if (heightFactor < 0.3 && radiusFactor > 0.5) {
-                    // 外围底部 - 草地
-                    color = TIANTAN_COLORS[0].clone();
-                  } else if (heightFactor < 0.5) {
-                    // 中部 - 石头
-                    color = TIANTAN_COLORS[1].clone();
-                  } else {
-                    // 上部 - 浅色石头
-                    color = TIANTAN_COLORS[4].clone();
-                  }
-                  
-                  // 添加一些随机变化
-                  const variation = 0.1;
-                  color.r = Math.min(1, Math.max(0, color.r + (Math.random() - 0.5) * variation));
-                  color.g = Math.min(1, Math.max(0, color.g + (Math.random() - 0.5) * variation));
-                  color.b = Math.min(1, Math.max(0, color.b + (Math.random() - 0.5) * variation));
-                }
+                
+                // 添加一些随机变化增加真实感
+                const variation = 0.08;
+                color.r = Math.min(1, Math.max(0, color.r + (Math.random() - 0.5) * variation));
+                color.g = Math.min(1, Math.max(0, color.g + (Math.random() - 0.5) * variation));
+                color.b = Math.min(1, Math.max(0, color.b + (Math.random() - 0.5) * variation));
                 
                 colors.push(color.r, color.g, color.b);
               }
-              
-              meshIndex++;
             }
           });
 
@@ -364,11 +335,11 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
 
           // 创建粒子材质 - 使用普通混合保持原色
           const particleMaterial = new THREE.PointsMaterial({
-            size: 0.025, // 减小粒子大小
+            size: 0.02, // 小粒子
             vertexColors: true,
             transparent: true,
-            opacity: 0.85,
-            blending: THREE.NormalBlending, // 使用普通混合保持颜色
+            opacity: 0.9,
+            blending: THREE.NormalBlending,
             depthWrite: true,
             sizeAttenuation: true,
           });
@@ -387,7 +358,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
             const size = new THREE.Vector3();
             box.getSize(size);
             const maxDim = Math.max(size.x, size.y, size.z);
-            console.log('Model size:', size, 'Max dimension:', maxDim);
+            console.log('Particle system size:', size, 'Max dimension:', maxDim);
             camera.position.set(0, maxDim * 0.5, maxDim * 1.5);
             controls.target.set(0, 0, 0);
             controls.update();
