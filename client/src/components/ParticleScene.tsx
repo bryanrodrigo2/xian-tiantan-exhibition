@@ -99,43 +99,55 @@ function getColorByPosition(
   const normalizedDist = horizontalDist / maxHorizontalDist;
   const normalizedHeight = relY / size.y;
   
-  // 添加噪声
+  // 添加多层噪声以增强细节
   const noise = (Math.sin(vertex.x * 15) * Math.cos(vertex.z * 15) + 1) * 0.5;
   const noise2 = (Math.sin(vertex.x * 8 + vertex.z * 8) + 1) * 0.5;
+  const noise3 = (Math.sin(vertex.x * 25 + vertex.z * 25) + 1) * 0.5;
   
-  // 颜色定义 - 更接近真实天坛颜色
-  const grassGreen = new THREE.Color(0.32, 0.50, 0.22);
-  const grassDark = new THREE.Color(0.25, 0.42, 0.16);
-  const stoneGray = new THREE.Color(0.52, 0.50, 0.46);
-  const stoneBrown = new THREE.Color(0.48, 0.44, 0.38);
-  const dirtBrown = new THREE.Color(0.42, 0.36, 0.28);
-  const lightStone = new THREE.Color(0.58, 0.56, 0.52);
+  // 优化的颜色定义 - 更鲜艳的绿色和更真实的石头纹理
+  const grassGreen = new THREE.Color(0.35, 0.55, 0.20);      // 更鲜艳的绿色
+  const grassDark = new THREE.Color(0.22, 0.38, 0.12);       // 更深的绿色
+  const stoneGray = new THREE.Color(0.55, 0.53, 0.48);       // 更温暖的灰色
+  const stoneBrown = new THREE.Color(0.50, 0.46, 0.40);      // 更深的棕色
+  const dirtBrown = new THREE.Color(0.45, 0.38, 0.30);       // 更深的土棕色
+  const lightStone = new THREE.Color(0.62, 0.60, 0.55);      // 更浅的石头色
+  const darkStone = new THREE.Color(0.40, 0.38, 0.34);       // 深石头色
   
   let color: THREE.Color;
   
-  if (normalizedDist > 0.72) {
-    // 外围草地
-    color = grassGreen.clone().lerp(grassDark, noise * 0.6);
-    color.r += (noise2 - 0.5) * 0.06;
-    color.g += (noise2 - 0.5) * 0.08;
-  } else if (normalizedDist > 0.25) {
-    // 台阶区域
-    if (normalizedHeight < 0.25) {
-      color = stoneBrown.clone().lerp(dirtBrown, noise * 0.5);
-    } else if (normalizedHeight < 0.55) {
-      color = stoneGray.clone().lerp(stoneBrown, noise * 0.4);
+  // 优化的分层逻辑 - 更好地呈现圆形阶梯结构
+  if (normalizedDist > 0.75) {
+    // 外围草地区域 - 增加绿色比例
+    const grassBlend = noise * 0.7 + noise3 * 0.3;
+    color = grassGreen.clone().lerp(grassDark, grassBlend);
+    color.r += (noise2 - 0.5) * 0.08;
+    color.g += (noise2 - 0.5) * 0.12;
+    color.b += (noise2 - 0.5) * 0.04;
+  } else if (normalizedDist > 0.20) {
+    // 台阶区域 - 根据高度分层
+    if (normalizedHeight < 0.15) {
+      // 底部 - 土棕色
+      color = dirtBrown.clone().lerp(stoneBrown, noise * 0.6);
+    } else if (normalizedHeight < 0.35) {
+      // 中下层 - 棕色石头
+      color = stoneBrown.clone().lerp(stoneGray, noise * 0.5);
+    } else if (normalizedHeight < 0.65) {
+      // 中层 - 灰色石头
+      color = stoneGray.clone().lerp(lightStone, noise * 0.4);
     } else {
-      color = lightStone.clone().lerp(stoneGray, noise * 0.35);
+      // 上层 - 浅石头色
+      color = lightStone.clone().lerp(stoneGray, noise * 0.3);
     }
+    color.r += (noise2 - 0.5) * 0.06;
+    color.g += (noise2 - 0.5) * 0.06;
+    color.b += (noise2 - 0.5) * 0.06;
+  } else {
+    // 中心圆形顶部 - 更多细节
+    const centerBlend = normalizedHeight > 0.5 ? lightStone : stoneGray;
+    color = centerBlend.clone().lerp(darkStone, noise * 0.35);
     color.r += (noise2 - 0.5) * 0.05;
     color.g += (noise2 - 0.5) * 0.05;
     color.b += (noise2 - 0.5) * 0.05;
-  } else {
-    // 中心顶部
-    color = lightStone.clone().lerp(stoneGray, noise * 0.25);
-    color.r += (noise2 - 0.5) * 0.03;
-    color.g += (noise2 - 0.5) * 0.03;
-    color.b += (noise2 - 0.5) * 0.03;
   }
   
   return color;
@@ -314,7 +326,7 @@ export default function ParticleScene({
     
     // 计算粒子密度 - 根据模型大小自适应
     const modelVolume = modelSize.x * modelSize.y * modelSize.z;
-    const baseDensity = 750000; // 每单位体积的基础粒子数
+    const baseDensity = 1200000; // 增加粒子密度以获得更细致的细节
     const particleDensity = baseDensity / Math.max(1, modelVolume);
     
     console.log('Particle density:', particleDensity);
@@ -434,7 +446,7 @@ export default function ParticleScene({
     setLoadingProgress(80);
 
     // 限制最大粒子数
-    const maxParticles = 2500000; // 最大粒子数
+    const maxParticles = 4000000; // 增加最大粒子数以获得更好的视觉效果
     let sampledPositions = positions;
     let sampledColors = colors;
     
