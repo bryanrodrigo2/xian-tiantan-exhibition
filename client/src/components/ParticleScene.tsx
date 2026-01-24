@@ -2,9 +2,12 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 
 interface ParticleSceneProps {
   modelUrl: string;
+  mtlUrl?: string; // 可选的MTL材质文件URL（用于OBJ格式）
   gestureState: 'open' | 'closed' | 'neutral';
   handPosition?: { x: number; y: number } | null;
   className?: string;
@@ -84,65 +87,55 @@ function getColorByPosition(
   boundingBox: THREE.Box3,
   modelCenter: THREE.Vector3
 ): THREE.Color {
-  // 计算归一化的位置
   const size = new THREE.Vector3();
   boundingBox.getSize(size);
   
-  // 计算相对于中心的位置
   const relX = vertex.x - modelCenter.x;
-  const relY = vertex.y - boundingBox.min.y; // 相对于底部的高度
+  const relY = vertex.y - boundingBox.min.y;
   const relZ = vertex.z - modelCenter.z;
   
-  // 计算水平距离（到中心的距离）
   const horizontalDist = Math.sqrt(relX * relX + relZ * relZ);
   const maxHorizontalDist = Math.max(size.x, size.z) / 2;
   const normalizedDist = horizontalDist / maxHorizontalDist;
-  
-  // 计算归一化高度
   const normalizedHeight = relY / size.y;
   
-  // 添加一些随机变化
-  const noise = (Math.sin(vertex.x * 10) * Math.cos(vertex.z * 10) + 1) * 0.5;
+  // 添加噪声
+  const noise = (Math.sin(vertex.x * 15) * Math.cos(vertex.z * 15) + 1) * 0.5;
+  const noise2 = (Math.sin(vertex.x * 8 + vertex.z * 8) + 1) * 0.5;
   
-  // 颜色定义
-  const grassGreen = new THREE.Color(0.35, 0.55, 0.25);      // 草地绿色
-  const grassDark = new THREE.Color(0.25, 0.45, 0.18);       // 深草绿
-  const stoneGray = new THREE.Color(0.55, 0.52, 0.48);       // 石头灰色
-  const stoneBrown = new THREE.Color(0.50, 0.45, 0.38);      // 石头棕色
-  const dirtBrown = new THREE.Color(0.45, 0.38, 0.30);       // 泥土棕色
-  const lightStone = new THREE.Color(0.65, 0.62, 0.58);      // 浅石色
+  // 颜色定义 - 更接近真实天坛颜色
+  const grassGreen = new THREE.Color(0.32, 0.50, 0.22);
+  const grassDark = new THREE.Color(0.25, 0.42, 0.16);
+  const stoneGray = new THREE.Color(0.52, 0.50, 0.46);
+  const stoneBrown = new THREE.Color(0.48, 0.44, 0.38);
+  const dirtBrown = new THREE.Color(0.42, 0.36, 0.28);
+  const lightStone = new THREE.Color(0.58, 0.56, 0.52);
   
   let color: THREE.Color;
   
-  // 根据位置分配颜色
-  if (normalizedDist > 0.75) {
-    // 外围区域 - 草地
-    color = grassGreen.clone().lerp(grassDark, noise * 0.5);
-    // 添加一些黄绿色变化
-    color.r += (Math.random() - 0.5) * 0.08;
-    color.g += (Math.random() - 0.5) * 0.08;
-  } else if (normalizedDist > 0.3) {
-    // 中间区域 - 台阶/石头
-    if (normalizedHeight < 0.3) {
-      // 底部台阶
-      color = stoneBrown.clone().lerp(dirtBrown, noise * 0.4);
-    } else if (normalizedHeight < 0.6) {
-      // 中部台阶
-      color = stoneGray.clone().lerp(stoneBrown, noise * 0.3);
+  if (normalizedDist > 0.72) {
+    // 外围草地
+    color = grassGreen.clone().lerp(grassDark, noise * 0.6);
+    color.r += (noise2 - 0.5) * 0.06;
+    color.g += (noise2 - 0.5) * 0.08;
+  } else if (normalizedDist > 0.25) {
+    // 台阶区域
+    if (normalizedHeight < 0.25) {
+      color = stoneBrown.clone().lerp(dirtBrown, noise * 0.5);
+    } else if (normalizedHeight < 0.55) {
+      color = stoneGray.clone().lerp(stoneBrown, noise * 0.4);
     } else {
-      // 上部台阶
-      color = lightStone.clone().lerp(stoneGray, noise * 0.3);
+      color = lightStone.clone().lerp(stoneGray, noise * 0.35);
     }
-    // 添加石头纹理变化
-    color.r += (Math.random() - 0.5) * 0.06;
-    color.g += (Math.random() - 0.5) * 0.06;
-    color.b += (Math.random() - 0.5) * 0.06;
+    color.r += (noise2 - 0.5) * 0.05;
+    color.g += (noise2 - 0.5) * 0.05;
+    color.b += (noise2 - 0.5) * 0.05;
   } else {
-    // 中心区域 - 顶部平台
-    color = lightStone.clone().lerp(stoneGray, noise * 0.2);
-    color.r += (Math.random() - 0.5) * 0.04;
-    color.g += (Math.random() - 0.5) * 0.04;
-    color.b += (Math.random() - 0.5) * 0.04;
+    // 中心顶部
+    color = lightStone.clone().lerp(stoneGray, noise * 0.25);
+    color.r += (noise2 - 0.5) * 0.03;
+    color.g += (noise2 - 0.5) * 0.03;
+    color.b += (noise2 - 0.5) * 0.03;
   }
   
   return color;
@@ -157,7 +150,6 @@ function tryGetTextureColor(
     const image = texture.image;
     if (!image) return null;
     
-    // 检查是否是 ImageBitmap 或 HTMLImageElement
     let width: number, height: number;
     if (image instanceof ImageBitmap) {
       width = image.width;
@@ -174,37 +166,81 @@ function tryGetTextureColor(
     
     if (width === 0 || height === 0) return null;
     
-    // 创建 canvas 来读取像素
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return null;
     
-    // 绘制图像到 canvas
     ctx.drawImage(image, 0, 0);
     
-    // 计算像素坐标
     const x = Math.floor(Math.abs(uv.x % 1) * width);
     const y = Math.floor((1 - Math.abs(uv.y % 1)) * height);
     
-    // 读取像素
     const pixel = ctx.getImageData(x, y, 1, 1).data;
     
-    // 检查是否成功读取（非全黑）
     if (pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0 && pixel[3] === 0) {
       return null;
     }
     
     return new THREE.Color(pixel[0] / 255, pixel[1] / 255, pixel[2] / 255);
-  } catch (error) {
-    console.warn('Texture sampling failed:', error);
+  } catch {
     return null;
   }
 }
 
+// 从三角形面生成更多的粒子点
+function generatePointsFromTriangle(
+  v1: THREE.Vector3,
+  v2: THREE.Vector3,
+  v3: THREE.Vector3,
+  c1: THREE.Color,
+  c2: THREE.Color,
+  c3: THREE.Color,
+  density: number
+): { positions: number[], colors: number[] } {
+  const positions: number[] = [];
+  const colors: number[] = [];
+  
+  // 计算三角形面积
+  const edge1 = new THREE.Vector3().subVectors(v2, v1);
+  const edge2 = new THREE.Vector3().subVectors(v3, v1);
+  const cross = new THREE.Vector3().crossVectors(edge1, edge2);
+  const area = cross.length() / 2;
+  
+  // 根据面积和密度计算需要生成的点数
+  const numPoints = Math.max(1, Math.floor(area * density));
+  
+  for (let i = 0; i < numPoints; i++) {
+    // 使用重心坐标生成随机点
+    let r1 = Math.random();
+    let r2 = Math.random();
+    if (r1 + r2 > 1) {
+      r1 = 1 - r1;
+      r2 = 1 - r2;
+    }
+    const r3 = 1 - r1 - r2;
+    
+    // 插值位置
+    const x = v1.x * r1 + v2.x * r2 + v3.x * r3;
+    const y = v1.y * r1 + v2.y * r2 + v3.y * r3;
+    const z = v1.z * r1 + v2.z * r2 + v3.z * r3;
+    
+    // 插值颜色
+    const r = c1.r * r1 + c2.r * r2 + c3.r * r3;
+    const g = c1.g * r1 + c2.g * r2 + c3.g * r3;
+    const b = c1.b * r1 + c2.b * r2 + c3.b * r3;
+    
+    positions.push(x, y, z);
+    colors.push(r, g, b);
+  }
+  
+  return { positions, colors };
+}
+
 export default function ParticleScene({ 
   modelUrl, 
+  mtlUrl,
   gestureState, 
   handPosition,
   className, 
@@ -228,12 +264,10 @@ export default function ParticleScene({
   const clockRef = useRef<THREE.Clock | null>(null);
   const isInitializedRef = useRef(false);
   
-  // 手势控制的旋转
   const targetRotationRef = useRef({ x: 0, y: 0 });
   const currentRotationRef = useRef({ x: 0, y: 0 });
   const lastHandPositionRef = useRef<{ x: number; y: number } | null>(null);
 
-  // 根据手势状态更新目标进度
   useEffect(() => {
     if (gestureState === 'open') {
       targetProgressRef.current = 1;
@@ -242,7 +276,6 @@ export default function ParticleScene({
     }
   }, [gestureState]);
 
-  // 根据手的位置更新模型旋转
   useEffect(() => {
     if (handPosition && lastHandPositionRef.current) {
       const deltaX = handPosition.x - lastHandPositionRef.current.x;
@@ -255,6 +288,230 @@ export default function ParticleScene({
     }
     lastHandPositionRef.current = handPosition || null;
   }, [handPosition]);
+
+  // 处理模型并生成粒子
+  const processModel = useCallback((
+    model: THREE.Object3D,
+    scene: THREE.Scene,
+    camera: THREE.PerspectiveCamera,
+    controls: OrbitControls,
+    animate: () => void
+  ) => {
+    setLoadingStatus('正在生成粒子...');
+    setLoadingProgress(60);
+    
+    const positions: number[] = [];
+    const colors: number[] = [];
+    
+    const boundingBox = new THREE.Box3().setFromObject(model);
+    const modelSize = new THREE.Vector3();
+    boundingBox.getSize(modelSize);
+    const modelCenter = new THREE.Vector3();
+    boundingBox.getCenter(modelCenter);
+    
+    console.log('Model bounding box:', boundingBox);
+    console.log('Model size:', modelSize);
+    
+    // 计算粒子密度 - 根据模型大小自适应
+    const modelVolume = modelSize.x * modelSize.y * modelSize.z;
+    const baseDensity = 50000; // 每单位体积的基础粒子数
+    const particleDensity = baseDensity / Math.max(1, modelVolume);
+    
+    console.log('Particle density:', particleDensity);
+    
+    let totalVertices = 0;
+    let generatedPoints = 0;
+    
+    // 遍历所有网格
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.geometry) {
+        const geometry = child.geometry;
+        const positionAttribute = geometry.getAttribute('position');
+        const uvAttribute = geometry.getAttribute('uv');
+        const colorAttribute = geometry.getAttribute('color');
+        const indexAttribute = geometry.index;
+        
+        const material = Array.isArray(child.material) ? child.material[0] : child.material;
+        let texture: THREE.Texture | null = null;
+        
+        if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshBasicMaterial) {
+          if (material.map) {
+            texture = material.map;
+          }
+        }
+        
+        child.updateWorldMatrix(true, false);
+        const matrix = child.matrixWorld;
+        
+        // 获取所有顶点位置和颜色
+        const vertices: THREE.Vector3[] = [];
+        const vertexColors: THREE.Color[] = [];
+        
+        for (let i = 0; i < positionAttribute.count; i++) {
+          const vertex = new THREE.Vector3(
+            positionAttribute.getX(i),
+            positionAttribute.getY(i),
+            positionAttribute.getZ(i)
+          );
+          vertex.applyMatrix4(matrix);
+          vertices.push(vertex);
+          
+          let color: THREE.Color | null = null;
+          totalVertices++;
+          
+          // 尝试获取颜色
+          if (texture && uvAttribute) {
+            const uv = new THREE.Vector2(
+              uvAttribute.getX(i),
+              uvAttribute.getY(i)
+            );
+            color = tryGetTextureColor(texture, uv);
+          }
+          
+          if (!color && colorAttribute) {
+            const r = colorAttribute.getX(i);
+            const g = colorAttribute.getY(i);
+            const b = colorAttribute.getZ(i);
+            if (!(r === 0 && g === 0 && b === 0) && !(r === 1 && g === 1 && b === 1)) {
+              color = new THREE.Color(r, g, b);
+            }
+          }
+          
+          if (!color) {
+            color = getColorByPosition(vertex, boundingBox, modelCenter);
+          }
+          
+          vertexColors.push(color);
+        }
+        
+        // 从三角形面生成粒子
+        if (indexAttribute) {
+          // 有索引的几何体
+          for (let i = 0; i < indexAttribute.count; i += 3) {
+            const i1 = indexAttribute.getX(i);
+            const i2 = indexAttribute.getX(i + 1);
+            const i3 = indexAttribute.getX(i + 2);
+            
+            const result = generatePointsFromTriangle(
+              vertices[i1], vertices[i2], vertices[i3],
+              vertexColors[i1], vertexColors[i2], vertexColors[i3],
+              particleDensity
+            );
+            
+            positions.push(...result.positions);
+            colors.push(...result.colors);
+            generatedPoints += result.positions.length / 3;
+          }
+        } else {
+          // 无索引的几何体
+          for (let i = 0; i < vertices.length; i += 3) {
+            if (i + 2 < vertices.length) {
+              const result = generatePointsFromTriangle(
+                vertices[i], vertices[i + 1], vertices[i + 2],
+                vertexColors[i], vertexColors[i + 1], vertexColors[i + 2],
+                particleDensity
+              );
+              
+              positions.push(...result.positions);
+              colors.push(...result.colors);
+              generatedPoints += result.positions.length / 3;
+            }
+          }
+        }
+        
+        // 同时添加原始顶点
+        for (let i = 0; i < vertices.length; i++) {
+          positions.push(vertices[i].x, vertices[i].y, vertices[i].z);
+          colors.push(vertexColors[i].r, vertexColors[i].g, vertexColors[i].b);
+        }
+      }
+    });
+
+    console.log('Total original vertices:', totalVertices);
+    console.log('Generated points from triangles:', generatedPoints);
+    console.log('Total particles:', positions.length / 3);
+
+    setLoadingProgress(80);
+
+    // 限制最大粒子数
+    const maxParticles = 300000;
+    let sampledPositions = positions;
+    let sampledColors = colors;
+    
+    if (positions.length / 3 > maxParticles) {
+      sampledPositions = [];
+      sampledColors = [];
+      const step = Math.ceil(positions.length / 3 / maxParticles);
+      for (let i = 0; i < positions.length / 3; i += step) {
+        sampledPositions.push(
+          positions[i * 3],
+          positions[i * 3 + 1],
+          positions[i * 3 + 2]
+        );
+        sampledColors.push(
+          colors[i * 3],
+          colors[i * 3 + 1],
+          colors[i * 3 + 2]
+        );
+      }
+      console.log('Sampled to:', sampledPositions.length / 3, 'particles');
+    }
+
+    setLoadingProgress(90);
+
+    // 创建粒子几何体
+    const particleGeometry = new THREE.BufferGeometry();
+    const positionArray = new Float32Array(sampledPositions);
+    const colorArray = new Float32Array(sampledColors);
+    
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+    
+    originalPositionsRef.current = positionArray.slice();
+
+    // 创建粒子材质 - 更小的粒子
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.003, // 非常小的粒子
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.NormalBlending,
+      depthWrite: true,
+      sizeAttenuation: true,
+    });
+
+    const points = new THREE.Points(particleGeometry, particleMaterial);
+    
+    // 居中模型
+    particleGeometry.computeBoundingBox();
+    const box = particleGeometry.boundingBox;
+    if (box) {
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      points.position.sub(center);
+      
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z);
+      console.log('Particle system size:', size, 'Max dimension:', maxDim);
+      camera.position.set(0, maxDim * 0.4, maxDim * 1.2);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    }
+    
+    scene.add(points);
+    pointsRef.current = points;
+
+    console.log(`Final particle count: ${sampledPositions.length / 3}`);
+    
+    // 启动动画循环
+    console.log('Starting animation loop');
+    animate();
+    
+    setLoadingProgress(100);
+    setIsLoaded(true);
+    onLoadComplete?.();
+  }, [onLoadComplete]);
 
   const initScene = useCallback(async () => {
     if (!containerRef.current || isInitializedRef.current) return;
@@ -274,24 +531,20 @@ export default function ParticleScene({
 
     console.log('Initializing scene with dimensions:', width, height);
 
-    // 创建场景
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0a0a);
     sceneRef.current = scene;
 
-    // 创建相机
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
     camera.position.set(0, 5, 15);
     cameraRef.current = camera;
 
-    // 创建渲染器
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // 创建控制器
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -299,19 +552,15 @@ export default function ParticleScene({
     controls.autoRotateSpeed = 0.3;
     controlsRef.current = controls;
 
-    // 添加环境光
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
-    // 添加方向光
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(5, 10, 5);
     scene.add(directionalLight);
 
-    // 初始化时钟
     clockRef.current = new THREE.Clock();
 
-    // 处理窗口大小变化
     const handleResize = () => {
       if (!containerRef.current) return;
       const width = containerRef.current.clientWidth;
@@ -324,23 +573,19 @@ export default function ParticleScene({
     
     window.addEventListener('resize', handleResize);
 
-    // 动画循环函数
     const animate = () => {
       animationIdRef.current = requestAnimationFrame(animate);
       
       if (!clockRef.current) return;
       const time = clockRef.current.getElapsedTime();
       
-      // 平滑过渡进度
       const lerpSpeed = 0.02;
       progressRef.current += (targetProgressRef.current - progressRef.current) * lerpSpeed;
       
-      // 平滑过渡旋转
       const rotationLerpSpeed = 0.05;
       currentRotationRef.current.x += (targetRotationRef.current.x - currentRotationRef.current.x) * rotationLerpSpeed;
       currentRotationRef.current.y += (targetRotationRef.current.y - currentRotationRef.current.y) * rotationLerpSpeed;
       
-      // 更新粒子位置和旋转
       if (pointsRef.current && originalPositionsRef.current) {
         const positions = pointsRef.current.geometry.getAttribute('position');
         const original = originalPositionsRef.current;
@@ -360,9 +605,9 @@ export default function ParticleScene({
           
           const disperseDistance = 8 + Math.sin(time * 2 + i * 0.01) * 0.5;
           
-          const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.01;
-          const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.01;
-          const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.01;
+          const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.008;
+          const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.008;
+          const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.008;
           
           const targetX = ox + nx * disperseDistance * progress;
           const targetY = oy + ny * disperseDistance * progress;
@@ -377,228 +622,129 @@ export default function ParticleScene({
         }
         positions.needsUpdate = true;
         
-        // 应用手势控制的旋转
         pointsRef.current.rotation.x = currentRotationRef.current.x;
         pointsRef.current.rotation.y += currentRotationRef.current.y * 0.01;
         
         const material = pointsRef.current.material as THREE.PointsMaterial;
-        material.opacity = 0.9 - progress * 0.3;
+        material.opacity = 0.95 - progress * 0.3;
       }
       
       controls.update();
       renderer.render(scene, camera);
     };
 
-    // 使用 fetch 预加载模型
+    // 判断模型格式
+    const isOBJ = modelUrl.toLowerCase().endsWith('.obj');
+    
     try {
       setLoadingStatus('正在下载模型文件...');
       setLoadingProgress(5);
       
-      const modelBuffer = await fetchModelWithRetry(modelUrl, 3, (progress) => {
-        setLoadingProgress(5 + Math.round(progress * 0.45));
-      });
-      
-      setLoadingStatus('正在解析模型...');
-      setLoadingProgress(55);
-      
-      const loader = new GLTFLoader();
-      
-      loader.parse(
-        modelBuffer,
-        '',
-        (gltf) => {
-          setLoadingStatus('正在生成粒子...');
-          setLoadingProgress(60);
+      if (isOBJ) {
+        // 加载OBJ格式
+        const objLoader = new OBJLoader();
+        
+        if (mtlUrl) {
+          // 如果有MTL材质文件
+          const mtlLoader = new MTLLoader();
+          const basePath = mtlUrl.substring(0, mtlUrl.lastIndexOf('/') + 1);
+          mtlLoader.setPath(basePath);
           
-          const model = gltf.scene;
-          
-          // 收集所有顶点和颜色
-          const positions: number[] = [];
-          const colors: number[] = [];
-          
-          // 首先计算模型的边界框
-          const boundingBox = new THREE.Box3().setFromObject(model);
-          const modelSize = new THREE.Vector3();
-          boundingBox.getSize(modelSize);
-          const modelCenter = new THREE.Vector3();
-          boundingBox.getCenter(modelCenter);
-          
-          console.log('Model bounding box:', boundingBox);
-          console.log('Model size:', modelSize);
-          
-          let totalVertices = 0;
-          let texturedVertices = 0;
-          let coloredByPosition = 0;
-          
-          // 遍历所有网格
-          model.traverse((child) => {
-            if (child instanceof THREE.Mesh && child.geometry) {
-              const geometry = child.geometry;
-              const positionAttribute = geometry.getAttribute('position');
-              const uvAttribute = geometry.getAttribute('uv');
-              const colorAttribute = geometry.getAttribute('color');
+          mtlLoader.load(
+            mtlUrl.substring(mtlUrl.lastIndexOf('/') + 1),
+            (materials) => {
+              materials.preload();
+              objLoader.setMaterials(materials);
               
-              // 获取材质
-              const material = Array.isArray(child.material) ? child.material[0] : child.material;
-              let texture: THREE.Texture | null = null;
-              
-              if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshBasicMaterial) {
-                if (material.map) {
-                  texture = material.map;
-                  console.log('Found texture:', texture.name || 'unnamed', 'Image:', texture.image);
-                }
-              }
-              
-              // 应用模型的世界矩阵
-              child.updateWorldMatrix(true, false);
-              const matrix = child.matrixWorld;
-              
-              for (let i = 0; i < positionAttribute.count; i++) {
-                const vertex = new THREE.Vector3(
-                  positionAttribute.getX(i),
-                  positionAttribute.getY(i),
-                  positionAttribute.getZ(i)
-                );
-                vertex.applyMatrix4(matrix);
-                positions.push(vertex.x, vertex.y, vertex.z);
-                
-                let color: THREE.Color | null = null;
-                totalVertices++;
-                
-                // 1. 优先尝试从纹理采样颜色
-                if (texture && uvAttribute) {
-                  const uv = new THREE.Vector2(
-                    uvAttribute.getX(i),
-                    uvAttribute.getY(i)
-                  );
-                  color = tryGetTextureColor(texture, uv);
-                  if (color) texturedVertices++;
-                }
-                
-                // 2. 尝试使用顶点颜色
-                if (!color && colorAttribute) {
-                  const r = colorAttribute.getX(i);
-                  const g = colorAttribute.getY(i);
-                  const b = colorAttribute.getZ(i);
-                  // 检查是否是有效颜色（不是全黑或全白）
-                  if (!(r === 0 && g === 0 && b === 0) && !(r === 1 && g === 1 && b === 1)) {
-                    color = new THREE.Color(r, g, b);
+              objLoader.load(
+                modelUrl,
+                (obj) => {
+                  setLoadingProgress(55);
+                  processModel(obj, scene, camera, controls, animate);
+                },
+                (xhr) => {
+                  if (xhr.total > 0) {
+                    setLoadingProgress(5 + Math.round((xhr.loaded / xhr.total) * 45));
                   }
+                },
+                (error) => {
+                  console.error('Error loading OBJ:', error);
+                  setLoadError('Failed to load OBJ model');
+                  onLoadError?.('Failed to load OBJ model');
                 }
-                
-                // 3. 根据位置分配颜色（模拟天坛外观）
-                if (!color) {
-                  color = getColorByPosition(vertex, boundingBox, modelCenter);
-                  coloredByPosition++;
+              );
+            },
+            undefined,
+            (error) => {
+              console.warn('MTL load failed, loading OBJ without materials:', error);
+              // MTL加载失败，尝试只加载OBJ
+              objLoader.load(
+                modelUrl,
+                (obj) => {
+                  setLoadingProgress(55);
+                  processModel(obj, scene, camera, controls, animate);
+                },
+                (xhr) => {
+                  if (xhr.total > 0) {
+                    setLoadingProgress(5 + Math.round((xhr.loaded / xhr.total) * 45));
+                  }
+                },
+                (error) => {
+                  console.error('Error loading OBJ:', error);
+                  setLoadError('Failed to load OBJ model');
+                  onLoadError?.('Failed to load OBJ model');
                 }
-                
-                colors.push(color.r, color.g, color.b);
+              );
+            }
+          );
+        } else {
+          // 没有MTL文件，直接加载OBJ
+          objLoader.load(
+            modelUrl,
+            (obj) => {
+              setLoadingProgress(55);
+              processModel(obj, scene, camera, controls, animate);
+            },
+            (xhr) => {
+              if (xhr.total > 0) {
+                setLoadingProgress(5 + Math.round((xhr.loaded / xhr.total) * 45));
               }
+            },
+            (error) => {
+              console.error('Error loading OBJ:', error);
+              setLoadError('Failed to load OBJ model');
+              onLoadError?.('Failed to load OBJ model');
             }
-          });
-
-          console.log('Total vertices:', totalVertices);
-          console.log('Textured vertices:', texturedVertices);
-          console.log('Colored by position:', coloredByPosition);
-
-          setLoadingProgress(75);
-
-          // 如果顶点太多，进行采样
-          const maxParticles = 150000;
-          let sampledPositions = positions;
-          let sampledColors = colors;
-          
-          if (positions.length / 3 > maxParticles) {
-            sampledPositions = [];
-            sampledColors = [];
-            const step = Math.ceil(positions.length / 3 / maxParticles);
-            for (let i = 0; i < positions.length / 3; i += step) {
-              sampledPositions.push(
-                positions[i * 3],
-                positions[i * 3 + 1],
-                positions[i * 3 + 2]
-              );
-              sampledColors.push(
-                colors[i * 3],
-                colors[i * 3 + 1],
-                colors[i * 3 + 2]
-              );
-            }
-          }
-
-          console.log('Final particle count:', sampledPositions.length / 3);
-
-          setLoadingProgress(85);
-
-          // 创建粒子几何体
-          const particleGeometry = new THREE.BufferGeometry();
-          const positionArray = new Float32Array(sampledPositions);
-          const colorArray = new Float32Array(sampledColors);
-          
-          particleGeometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
-          particleGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-          
-          // 保存原始位置
-          originalPositionsRef.current = positionArray.slice();
-
-          // 创建粒子材质 - 小粒子，保持原色
-          const particleMaterial = new THREE.PointsMaterial({
-            size: 0.008, // 更小的粒子
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.95,
-            blending: THREE.NormalBlending,
-            depthWrite: true,
-            sizeAttenuation: true,
-          });
-
-          // 创建粒子系统
-          const points = new THREE.Points(particleGeometry, particleMaterial);
-          
-          // 居中模型
-          particleGeometry.computeBoundingBox();
-          const box = particleGeometry.boundingBox;
-          if (box) {
-            const center = new THREE.Vector3();
-            box.getCenter(center);
-            points.position.sub(center);
-            
-            const size = new THREE.Vector3();
-            box.getSize(size);
-            const maxDim = Math.max(size.x, size.y, size.z);
-            console.log('Particle system size:', size, 'Max dimension:', maxDim);
-            camera.position.set(0, maxDim * 0.4, maxDim * 1.2);
-            controls.target.set(0, 0, 0);
-            controls.update();
-          }
-          
-          scene.add(points);
-          pointsRef.current = points;
-
-          console.log(`Loaded ${sampledPositions.length / 3} particles`);
-          
-          // 启动动画循环
-          console.log('Starting animation loop');
-          animate();
-          
-          // 更新状态
-          setLoadingProgress(100);
-          setIsLoaded(true);
-          
-          // 通知父组件加载完成
-          console.log('Calling onLoadComplete');
-          onLoadComplete?.();
-        },
-        (error) => {
-          console.error('Error parsing model:', error);
-          const errorMsg = error instanceof Error ? error.message : 'Failed to parse model';
-          setLoadError(errorMsg);
-          onLoadError?.(errorMsg);
+          );
         }
-      );
+      } else {
+        // 加载GLB/GLTF格式
+        const modelBuffer = await fetchModelWithRetry(modelUrl, 3, (progress) => {
+          setLoadingProgress(5 + Math.round(progress * 0.45));
+        });
+        
+        setLoadingStatus('正在解析模型...');
+        setLoadingProgress(55);
+        
+        const loader = new GLTFLoader();
+        
+        loader.parse(
+          modelBuffer,
+          '',
+          (gltf) => {
+            processModel(gltf.scene, scene, camera, controls, animate);
+          },
+          (error) => {
+            console.error('Error parsing model:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Failed to parse model';
+            setLoadError(errorMsg);
+            onLoadError?.(errorMsg);
+          }
+        );
+      }
     } catch (error) {
-      console.error('Error fetching model:', error);
-      const errorMsg = error instanceof Error ? error.message : 'Failed to fetch model';
+      console.error('Error loading model:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Failed to load model';
       setLoadError(errorMsg);
       onLoadError?.(errorMsg);
       return;
@@ -615,7 +761,7 @@ export default function ParticleScene({
       }
       isInitializedRef.current = false;
     };
-  }, [modelUrl, onLoadComplete, onLoadError]);
+  }, [modelUrl, mtlUrl, onLoadComplete, onLoadError, processModel]);
 
   useEffect(() => {
     initScene();
@@ -640,7 +786,6 @@ export default function ParticleScene({
       className={`w-full h-full relative ${className || ''}`}
       style={{ minHeight: '400px' }}
     >
-      {/* 加载指示器 */}
       {!isLoaded && !loadError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-10">
           <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
@@ -654,7 +799,6 @@ export default function ParticleScene({
           <p className="text-white/60 text-xs mt-2">{loadingProgress}%</p>
         </div>
       )}
-      {/* 错误提示 */}
       {loadError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-10">
           <p className="text-red-400 text-sm mb-2">模型加载失败</p>
