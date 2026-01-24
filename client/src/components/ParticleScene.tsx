@@ -362,14 +362,14 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           // 保存原始位置
           originalPositionsRef.current = positionArray.slice();
 
-          // 创建粒子材质 - 使用加法混合让粒子更亮
+          // 创建粒子材质 - 使用普通混合保持原色
           const particleMaterial = new THREE.PointsMaterial({
-            size: 0.035,
+            size: 0.025, // 减小粒子大小
             vertexColors: true,
             transparent: true,
-            opacity: 0.95,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
+            opacity: 0.85,
+            blending: THREE.NormalBlending, // 使用普通混合保持颜色
+            depthWrite: true,
             sizeAttenuation: true,
           });
 
