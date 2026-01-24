@@ -68,7 +68,7 @@ export default function ComparisonFullscreen() {
         <img 
           src="/logo_new.png" 
           alt="Logo" 
-          className="w-12 h-12 drop-shadow-2xl hover:drop-shadow-[0_0_20px_rgba(255,215,0,0.5)] transition-all duration-300"
+          className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)] transition-all duration-300"
         />
       </motion.div>
 
