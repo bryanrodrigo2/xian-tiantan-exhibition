@@ -10,10 +10,10 @@ interface UseHandGestureOptions {
 }
 
 export function useHandGesture(options: UseHandGestureOptions = {}) {
-  const { onGestureChange, enabled = true } = options;
+  const { onGestureChange, enabled = false } = options;
   
   const [gestureState, setGestureState] = useState<GestureState>('neutral');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   
@@ -21,6 +21,13 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
   const handsRef = useRef<Hands | null>(null);
   const cameraRef = useRef<Camera | null>(null);
   const gestureHistoryRef = useRef<GestureState[]>([]);
+  const isInitializingRef = useRef(false);
+  const onGestureChangeRef = useRef(onGestureChange);
+
+  // 更新回调引用
+  useEffect(() => {
+    onGestureChangeRef.current = onGestureChange;
+  }, [onGestureChange]);
 
   // 分析手势
   const analyzeGesture = useCallback((landmarks: Results['multiHandLandmarks'][0]): GestureState => {
@@ -87,23 +94,54 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
     return 'neutral';
   }, []);
 
-  // 处理手势检测结果
-  const onResults = useCallback((results: Results) => {
-    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      const landmarks = results.multiHandLandmarks[0];
-      const rawGesture = analyzeGesture(landmarks);
-      const smoothedGesture = smoothGesture(rawGesture);
-      
-      if (smoothedGesture !== gestureState) {
-        setGestureState(smoothedGesture);
-        onGestureChange?.(smoothedGesture);
+  // 停止手势检测
+  const stopHands = useCallback(() => {
+    console.log('Stopping hand tracking...');
+    
+    if (cameraRef.current) {
+      try {
+        cameraRef.current.stop();
+      } catch (e) {
+        console.warn('Error stopping camera:', e);
       }
+      cameraRef.current = null;
     }
-  }, [analyzeGesture, smoothGesture, gestureState, onGestureChange]);
+    
+    if (handsRef.current) {
+      try {
+        handsRef.current.close();
+      } catch (e) {
+        console.warn('Error closing hands:', e);
+      }
+      handsRef.current = null;
+    }
+    
+    if (videoRef.current) {
+      try {
+        videoRef.current.srcObject = null;
+        videoRef.current.remove();
+      } catch (e) {
+        console.warn('Error removing video:', e);
+      }
+      videoRef.current = null;
+    }
+    
+    setCameraActive(false);
+    setGestureState('neutral');
+    setIsLoading(false);
+    gestureHistoryRef.current = [];
+    isInitializingRef.current = false;
+  }, []);
 
   // 初始化 MediaPipe Hands
   const initHands = useCallback(async () => {
-    if (!enabled) return;
+    if (isInitializingRef.current || cameraRef.current) {
+      console.log('Already initializing or initialized, skipping...');
+      return;
+    }
+
+    isInitializingRef.current = true;
+    console.log('Initializing hand tracking...');
 
     try {
       setIsLoading(true);
@@ -123,21 +161,44 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
         minTrackingConfidence: 0.5,
       });
 
-      hands.onResults(onResults);
+      // 设置结果回调
+      hands.onResults((results: Results) => {
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+          const landmarks = results.multiHandLandmarks[0];
+          const rawGesture = analyzeGesture(landmarks);
+          const smoothedGesture = smoothGesture(rawGesture);
+          
+          setGestureState(prev => {
+            if (smoothedGesture !== prev) {
+              onGestureChangeRef.current?.(smoothedGesture);
+              return smoothedGesture;
+            }
+            return prev;
+          });
+        }
+      });
+
       handsRef.current = hands;
 
       // 创建视频元素
       const video = document.createElement('video');
-      video.style.display = 'none';
+      video.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;';
       video.playsInline = true;
+      video.muted = true;
       document.body.appendChild(video);
       videoRef.current = video;
+
+      console.log('Requesting camera access...');
 
       // 启动摄像头
       const camera = new Camera(video, {
         onFrame: async () => {
-          if (handsRef.current && videoRef.current) {
-            await handsRef.current.send({ image: videoRef.current });
+          if (handsRef.current && videoRef.current && videoRef.current.readyState >= 2) {
+            try {
+              await handsRef.current.send({ image: videoRef.current });
+            } catch (e) {
+              // 忽略发送错误
+            }
           }
         },
         width: 640,
@@ -148,37 +209,33 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
       cameraRef.current = camera;
       setCameraActive(true);
       setIsLoading(false);
+      isInitializingRef.current = false;
+      
+      console.log('Hand tracking initialized successfully!');
 
     } catch (err) {
       console.error('Failed to initialize hand tracking:', err);
-      setError(err instanceof Error ? err.message : 'Failed to initialize hand tracking');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to initialize hand tracking';
+      
+      // 检查是否是权限错误
+      if (errorMessage.includes('Permission') || errorMessage.includes('NotAllowed')) {
+        setError('摄像头权限被拒绝，请在浏览器设置中允许访问摄像头');
+      } else if (errorMessage.includes('NotFound') || errorMessage.includes('DevicesNotFound')) {
+        setError('未找到摄像头设备');
+      } else {
+        setError(errorMessage);
+      }
+      
       setIsLoading(false);
+      isInitializingRef.current = false;
+      stopHands();
     }
-  }, [enabled, onResults]);
+  }, [analyzeGesture, smoothGesture, stopHands]);
 
-  // 停止手势检测
-  const stopHands = useCallback(() => {
-    if (cameraRef.current) {
-      cameraRef.current.stop();
-      cameraRef.current = null;
-    }
-    
-    if (handsRef.current) {
-      handsRef.current.close();
-      handsRef.current = null;
-    }
-    
-    if (videoRef.current) {
-      videoRef.current.remove();
-      videoRef.current = null;
-    }
-    
-    setCameraActive(false);
-    setGestureState('neutral');
-  }, []);
-
-  // 启动/停止手势检测
+  // 根据 enabled 状态启动/停止手势检测
   useEffect(() => {
+    console.log('useHandGesture effect - enabled:', enabled);
+    
     if (enabled) {
       initHands();
     } else {
@@ -186,9 +243,19 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
     }
 
     return () => {
+      // 组件卸载时清理
+      if (!enabled) {
+        stopHands();
+      }
+    };
+  }, [enabled]); // 只依赖 enabled
+
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
       stopHands();
     };
-  }, [enabled, initHands, stopHands]);
+  }, [stopHands]);
 
   return {
     gestureState,

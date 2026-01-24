@@ -45,6 +45,39 @@ async function fetchModelWithRetry(url: string, maxRetries = 3): Promise<ArrayBu
   throw lastError || new Error('Failed to fetch model');
 }
 
+// 从纹理中采样颜色
+function sampleTextureColor(
+  texture: THREE.Texture,
+  uv: { x: number; y: number }
+): THREE.Color {
+  const image = texture.image as HTMLImageElement | HTMLCanvasElement;
+  if (!image) {
+    return new THREE.Color(0x808080);
+  }
+
+  // 创建 canvas 来读取像素
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return new THREE.Color(0x808080);
+  }
+
+  canvas.width = image.width || 1;
+  canvas.height = image.height || 1;
+  ctx.drawImage(image, 0, 0);
+
+  // 计算像素坐标
+  const x = Math.floor(uv.x * canvas.width) % canvas.width;
+  const y = Math.floor((1 - uv.y) * canvas.height) % canvas.height; // UV y 坐标翻转
+
+  try {
+    const pixel = ctx.getImageData(Math.abs(x), Math.abs(y), 1, 1).data;
+    return new THREE.Color(pixel[0] / 255, pixel[1] / 255, pixel[2] / 255);
+  } catch {
+    return new THREE.Color(0x808080);
+  }
+}
+
 export default function ParticleScene({ modelUrl, gestureState, className, onLoadComplete, onLoadError }: ParticleSceneProps) {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStatus, setLoadingStatus] = useState('正在加载模型...');
@@ -62,6 +95,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
   const targetProgressRef = useRef(0);
   const clockRef = useRef<THREE.Clock | null>(null);
   const isInitializedRef = useRef(false);
+  const textureCanvasMapRef = useRef<Map<string, CanvasRenderingContext2D>>(new Map());
 
   // 根据手势状态更新目标进度
   useEffect(() => {
@@ -71,6 +105,46 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
       targetProgressRef.current = 0;
     }
   }, [gestureState]);
+
+  // 预处理纹理到 canvas
+  const prepareTextureCanvas = useCallback((texture: THREE.Texture, id: string): CanvasRenderingContext2D | null => {
+    if (textureCanvasMapRef.current.has(id)) {
+      return textureCanvasMapRef.current.get(id) || null;
+    }
+
+    const image = texture.image as HTMLImageElement | HTMLCanvasElement;
+    if (!image || !image.width || !image.height) {
+      return null;
+    }
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    canvas.width = image.width;
+    canvas.height = image.height;
+    ctx.drawImage(image, 0, 0);
+    
+    textureCanvasMapRef.current.set(id, ctx);
+    return ctx;
+  }, []);
+
+  // 从预处理的 canvas 采样颜色
+  const sampleFromCanvas = useCallback((
+    ctx: CanvasRenderingContext2D,
+    uv: { x: number; y: number }
+  ): THREE.Color => {
+    const canvas = ctx.canvas;
+    const x = Math.floor(Math.abs(uv.x % 1) * canvas.width);
+    const y = Math.floor(Math.abs((1 - uv.y % 1)) * canvas.height);
+
+    try {
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      return new THREE.Color(pixel[0] / 255, pixel[1] / 255, pixel[2] / 255);
+    } catch {
+      return new THREE.Color(0x808080);
+    }
+  }, []);
 
   const initScene = useCallback(async () => {
     if (!containerRef.current || isInitializedRef.current) return;
@@ -116,11 +190,11 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
     controlsRef.current = controls;
 
     // 添加环境光
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
     // 添加方向光
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
     directionalLight.position.set(5, 10, 5);
     scene.add(directionalLight);
 
@@ -171,9 +245,9 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           
           const disperseDistance = 8 + Math.sin(time * 2 + i * 0.01) * 0.5;
           
-          const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.02;
-          const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.02;
-          const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.02;
+          const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.015;
+          const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.015;
+          const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.015;
           
           const targetX = ox + nx * disperseDistance * progress;
           const targetY = oy + ny * disperseDistance * progress;
@@ -189,7 +263,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         positions.needsUpdate = true;
         
         const material = pointsRef.current.material as THREE.PointsMaterial;
-        material.opacity = 0.9 - progress * 0.4;
+        material.opacity = 0.85 - progress * 0.3;
       }
       
       controls.update();
@@ -221,37 +295,49 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           const positions: number[] = [];
           const colors: number[] = [];
           
+          // 预处理所有纹理
+          let textureIndex = 0;
+          model.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              const materials = Array.isArray(child.material) ? child.material : [child.material];
+              materials.forEach((mat) => {
+                if (mat instanceof THREE.MeshStandardMaterial && mat.map) {
+                  prepareTextureCanvas(mat.map, `texture_${textureIndex++}`);
+                }
+              });
+            }
+          });
+
+          console.log('Prepared textures:', textureIndex);
+          
+          let meshIndex = 0;
           model.traverse((child) => {
             if (child instanceof THREE.Mesh && child.geometry) {
               const geometry = child.geometry;
               const positionAttribute = geometry.getAttribute('position');
+              const uvAttribute = geometry.getAttribute('uv');
               
-              // 获取材质颜色 - 优先使用材质颜色，如果没有则使用默认颜色
-              let materialColor = new THREE.Color(0xd4a574); // 默认土黄色/古建筑色
-              let hasValidColor = false;
+              // 获取材质
+              const material = Array.isArray(child.material) ? child.material[0] : child.material;
+              let texture: THREE.Texture | null = null;
+              let baseColor = new THREE.Color(0x808080); // 默认灰色
               
-              if (child.material) {
-                if (Array.isArray(child.material)) {
-                  if (child.material[0] && 'color' in child.material[0]) {
-                    const matColor = (child.material[0] as THREE.MeshStandardMaterial).color;
-                    if (matColor) {
-                      materialColor = matColor.clone();
-                      hasValidColor = true;
-                    }
-                  }
-                } else if ('color' in child.material) {
-                  const matColor = (child.material as THREE.MeshStandardMaterial).color;
-                  if (matColor) {
-                    materialColor = matColor.clone();
-                    hasValidColor = true;
-                  }
+              if (material instanceof THREE.MeshStandardMaterial) {
+                texture = material.map;
+                if (material.color) {
+                  baseColor = material.color.clone();
+                }
+              } else if (material instanceof THREE.MeshBasicMaterial) {
+                texture = material.map;
+                if (material.color) {
+                  baseColor = material.color.clone();
                 }
               }
               
-              // 如果材质颜色太暗或太亮，使用默认颜色
-              const brightness = (materialColor.r + materialColor.g + materialColor.b) / 3;
-              if (brightness < 0.1 || brightness > 0.95) {
-                materialColor = new THREE.Color(0xd4a574); // 土黄色
+              // 准备纹理 canvas
+              let textureCtx: CanvasRenderingContext2D | null = null;
+              if (texture) {
+                textureCtx = prepareTextureCanvas(texture, `mesh_${meshIndex}`);
               }
               
               // 应用模型的世界矩阵
@@ -270,25 +356,33 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
                 vertex.applyMatrix4(matrix);
                 positions.push(vertex.x, vertex.y, vertex.z);
                 
-                // 使用顶点颜色或材质颜色
-                if (colorAttribute) {
-                  let r = colorAttribute.getX(i);
-                  let g = colorAttribute.getY(i);
-                  let b = colorAttribute.getZ(i);
-                  
-                  // 如果顶点颜色太暗，使用默认颜色
-                  const vertexBrightness = (r + g + b) / 3;
-                  if (vertexBrightness < 0.1) {
-                    r = materialColor.r;
-                    g = materialColor.g;
-                    b = materialColor.b;
-                  }
-                  
-                  colors.push(r, g, b);
-                } else {
-                  colors.push(materialColor.r, materialColor.g, materialColor.b);
+                let color: THREE.Color;
+                
+                // 优先使用纹理颜色
+                if (textureCtx && uvAttribute) {
+                  const uv = {
+                    x: uvAttribute.getX(i),
+                    y: uvAttribute.getY(i)
+                  };
+                  color = sampleFromCanvas(textureCtx, uv);
                 }
+                // 其次使用顶点颜色
+                else if (colorAttribute) {
+                  color = new THREE.Color(
+                    colorAttribute.getX(i),
+                    colorAttribute.getY(i),
+                    colorAttribute.getZ(i)
+                  );
+                }
+                // 最后使用材质基础颜色
+                else {
+                  color = baseColor.clone();
+                }
+                
+                colors.push(color.r, color.g, color.b);
               }
+              
+              meshIndex++;
             }
           });
 
@@ -319,6 +413,8 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
             }
           }
 
+          console.log('Final particle count:', sampledPositions.length / 3);
+
           // 创建粒子几何体
           const particleGeometry = new THREE.BufferGeometry();
           const positionArray = new Float32Array(sampledPositions);
@@ -330,14 +426,14 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           // 保存原始位置
           originalPositionsRef.current = positionArray.slice();
 
-          // 创建粒子材质 - 使用 AdditiveBlending 让粒子更亮
+          // 创建粒子材质 - 使用 NormalBlending 保持原色，减小粒子大小
           const particleMaterial = new THREE.PointsMaterial({
-            size: 0.06,
+            size: 0.025, // 减小粒子大小
             vertexColors: true,
             transparent: true,
             opacity: 0.85,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
+            blending: THREE.NormalBlending, // 使用普通混合模式保持原色
+            depthWrite: true,
             sizeAttenuation: true,
           });
 
@@ -364,7 +460,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           scene.add(points);
           pointsRef.current = points;
 
-          console.log(`Loaded ${sampledPositions.length / 3} particles`);
+          console.log(`Loaded ${sampledPositions.length / 3} particles with texture colors`);
           
           // 启动动画循环
           console.log('Starting animation loop');
@@ -403,8 +499,9 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         container.removeChild(renderer.domElement);
       }
       isInitializedRef.current = false;
+      textureCanvasMapRef.current.clear();
     };
-  }, [modelUrl, onLoadComplete, onLoadError]);
+  }, [modelUrl, onLoadComplete, onLoadError, prepareTextureCanvas, sampleFromCanvas]);
 
   useEffect(() => {
     initScene();
@@ -420,6 +517,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         }
       }
       isInitializedRef.current = false;
+      textureCanvasMapRef.current.clear();
     };
   }, [initScene]);
 
