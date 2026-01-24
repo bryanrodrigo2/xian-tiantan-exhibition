@@ -24,12 +24,12 @@ export default function Layout({ children, className, showBack = true }: LayoutP
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* 背景纹理层 */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-20" 
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-100" 
            style={{ 
-             backgroundImage: "url('https://images.unsplash.com/photo-1625123627242-97ef1000c6d1?q=80&w=2070&auto=format&fit=crop')",
+             backgroundImage: "linear-gradient(rgba(26, 26, 26, 0.7), rgba(26, 26, 26, 0.7)), url('/bg.jpg')",
              backgroundSize: "cover",
              backgroundPosition: "center",
-             mixBlendMode: "overlay"
+
            }} 
       />
       

@@ -110,7 +110,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    background-image: radial-gradient(circle at center, oklch(0.20 0.03 260) 0%, oklch(0.12 0.02 260) 100%);
+
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif tracking-wide;
