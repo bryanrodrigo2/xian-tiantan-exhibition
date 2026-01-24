@@ -333,10 +333,20 @@ export default function ParticleScene({
     console.log('Model bounding box:', boundingBox);
     console.log('Model size:', modelSize);
     
-    // 计算粒子密度 - 根据模型大小自适应
+    // 计算粒子密度 - 根据模型大小和设备类型自适应
     const modelVolume = modelSize.x * modelSize.y * modelSize.z;
-    const baseDensity = 800000; // 优化第三轮: 急速降低粒子密度 (-47%) 完全解决内存问题
+    
+    // 检测移动设备
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+      navigator.userAgent.toLowerCase()
+    ) || window.innerWidth <= 768;
+    
+    // 移动端进一步降低粒子密度，PC端保持原有设置
+    const baseDensity = isMobile ? 400000 : 800000; // 移动端: 400k (-50%), PC端: 800k
     const particleDensity = baseDensity / Math.max(1, modelVolume);
+    
+    console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
+    console.log('Base density:', baseDensity);
     
     console.log('Particle density:', particleDensity);
     
@@ -454,8 +464,8 @@ export default function ParticleScene({
 
     setLoadingProgress(80);
 
-    // 限制最大粒子数
-    const maxParticles = 1200000; // 优化第三轮: 急速降低最大粒子数 (-40%)
+    // 限制最大粒子数 - 移动端进一步降低
+    const maxParticles = isMobile ? 600000 : 1200000; // 移动端: 600k (-50%), PC端: 1200k
     let sampledPositions = positions;
     let sampledColors = colors;
     

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hand, Loader2, Camera, CameraOff, HelpCircle, X, RefreshCw } from 'lucide-react';
@@ -7,15 +7,43 @@ import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState, HandPosition } from '@/hooks/useHandGesture';
 
 
-// 模型 URL 列表 - 使用阿里云 OSS CDN 加速
-const MODEL_URLS = [
-  'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
-  '/models/tiantan_large.glb',
-  '/models/tiantan123.glb',
-];
+// 检测是否为移动设备
+const isMobileDevice = () => {
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+  const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+  const isMobile = mobileRegex.test(userAgent.toLowerCase());
+  const isSmallScreen = window.innerWidth <= 768;
+  return isMobile || isSmallScreen;
+};
 
-// MTL 材质文件 URL - 阿里云 OSS
-const MTL_URL = 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
+// 模型 URL 列表 - 根据设备类型选择
+const getModelUrls = () => {
+  const isMobile = isMobileDevice();
+  if (isMobile) {
+    // 移动端使用优化后的模型
+    return [
+      '/models/tiantan-mobile.obj',
+      'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
+    ];
+  } else {
+    // PC端使用原模型
+    return [
+      'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
+      '/models/tiantan_large.glb',
+      '/models/tiantan123.glb',
+    ];
+  }
+};
+
+// MTL 材质文件 URL - 根据设备类型选择
+const getMtlUrl = () => {
+  const isMobile = isMobileDevice();
+  if (isMobile) {
+    return '/models/tiantan-mobile.mtl';
+  } else {
+    return 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
+  }
+};
 
 export default function GestureInteraction() {
   const [trackingEnabled, setTrackingEnabled] = useState(false);
@@ -25,6 +53,10 @@ export default function GestureInteraction() {
   const [modelError, setModelError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [currentHandPosition, setCurrentHandPosition] = useState<HandPosition | null>(null);
+  
+  // 获取当前设备类型的模型 URL 列表
+  const MODEL_URLS = useMemo(() => getModelUrls(), []);
+  const MTL_URL = useMemo(() => getMtlUrl(), []);
   
   const handleGestureChange = useCallback((gesture: GestureState) => {
     console.log('Gesture changed:', gesture);
@@ -52,13 +84,15 @@ export default function GestureInteraction() {
   // 处理模型加载完成
   const handleModelLoadComplete = useCallback(() => {
     console.log('Model loaded successfully from:', MODEL_URLS[modelUrlIndex]);
+    console.log('Device type:', isMobileDevice() ? 'Mobile' : 'Desktop');
     setModelLoaded(true);
     setModelError(null);
-  }, [modelUrlIndex]);
+  }, [MODEL_URLS, modelUrlIndex]);
 
   // 处理模型加载错误 - 尝试备用源
   const handleModelLoadError = useCallback((errorMsg: string) => {
     console.error('Model load error:', errorMsg, 'Current URL index:', modelUrlIndex);
+    console.error('Device type:', isMobileDevice() ? 'Mobile' : 'Desktop');
     
     // 如果还有备用源，尝试下一个
     if (modelUrlIndex < MODEL_URLS.length - 1) {
@@ -68,7 +102,7 @@ export default function GestureInteraction() {
       // 所有源都失败了
       setModelError(`模型加载失败: ${errorMsg}`);
     }
-  }, [modelUrlIndex]);
+  }, [MODEL_URLS, modelUrlIndex]);
 
   // 手动重试
   const handleRetry = useCallback(() => {
