@@ -12,6 +12,7 @@ import Survey from "./pages/Survey";
 import Blueprint from "./pages/Blueprint";
 import Interaction from "./pages/Interaction";
 import GestureInteraction from "./pages/GestureInteraction";
+import ComparisonFullscreen from "./pages/ComparisonFullscreen";
 import SplashScreen from "./components/SplashScreen";
 import { useState } from "react";
 
@@ -25,6 +26,7 @@ function AppRouter() {
       <Route path={"/blueprint"} component={Blueprint} />
       <Route path={"/interaction"} component={Interaction} />
       <Route path={"/gesture"} component={GestureInteraction} />
+      <Route path={"/comparison"} component={ComparisonFullscreen} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

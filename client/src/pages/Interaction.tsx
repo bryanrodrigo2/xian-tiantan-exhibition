@@ -97,18 +97,37 @@ export default function Interaction() {
     setSliderValue(percentage);
   };
 
-  // 注册全局鼠标事件监听，确保拖动体验流畅
+  // 处理触摸事件（移动端）
+  const handleTouchStart = () => setIsResizing(true);
+  const handleTouchEnd = () => setIsResizing(false);
+  
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isResizing || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
+    const percentage = (x / rect.width) * 100;
+    setSliderValue(percentage);
+  };
+
+  // 注册全局鼠标和触摸事件监听，确保拖动体验流畅
   useEffect(() => {
     if (isResizing) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("touchend", handleTouchEnd);
     } else {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     }
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isResizing]);
 
@@ -226,32 +245,65 @@ export default function Interaction() {
               </div>
             </div>
 
-            {/* 手势交互入口 */}
-            <Link href="/gesture">
-              <motion.div 
-                className="bg-gradient-to-r from-primary/20 to-amber-600/20 border border-primary/30 rounded-lg p-6 cursor-pointer group hover:border-primary/60 transition-all duration-300"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-                    <Hand className="w-7 h-7 text-primary" />
+            {/* 手势交互和古今对比按钮并排 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* 手势交互按钮 */}
+              <Link href="/gesture">
+                <motion.div 
+                  className="bg-gradient-to-r from-primary/20 to-amber-600/20 border border-primary/30 rounded-lg p-4 cursor-pointer group hover:border-primary/60 transition-all duration-300 h-full"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors flex-shrink-0">
+                      <Hand className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-primary mb-1 flex items-center gap-2">
+                        手势交互
+                        <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">NEW</span>
+                      </h3>
+                      <p className="text-white/60 text-xs line-clamp-2">通过摄像头识别手势，控制天坛粒子效果</p>
+                    </div>
+                    <div className="text-primary group-hover:translate-x-1 transition-transform flex-shrink-0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-primary mb-1 flex items-center gap-2">
-                      手势交互
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">NEW</span>
-                    </h3>
-                    <p className="text-white/60 text-sm">通过摄像头识别手势，控制天坛粒子效果的消散与聚合</p>
+                </motion.div>
+              </Link>
+
+              {/* 古今对比按钮 */}
+              <Link href="/comparison">
+                <motion.div 
+                  className="bg-gradient-to-r from-blue-500/20 to-purple-600/20 border border-blue-400/30 rounded-lg p-4 cursor-pointer group hover:border-blue-400/60 transition-all duration-300 h-full"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-blue-400/20 flex items-center justify-center group-hover:bg-blue-400/30 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 8L22 12L18 16" />
+                        <path d="M6 8L2 12L6 16" />
+                        <line x1="12" y1="2" x2="12" y2="22" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-blue-400 mb-1">
+                        古今对比
+                      </h3>
+                      <p className="text-white/60 text-xs line-clamp-2">全屏展示现状遗址与唐代复原模型对比</p>
+                    </div>
+                    <div className="text-blue-400 group-hover:translate-x-1 transition-transform flex-shrink-0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div className="text-primary/60 group-hover:text-primary group-hover:translate-x-1 transition-all">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </motion.div>
-            </Link>
+                </motion.div>
+              </Link>
+            </div>
           </div>
 
           {/* 右侧：古今对比 (4列) */}
@@ -266,7 +318,7 @@ export default function Interaction() {
               {/* 底层：现状模型 (右侧) */}
               <div className="absolute inset-0 bg-gray-800">
                 <img 
-                  src="https://placehold.co/600x800/333/FFF?text=Current+Site+Model" 
+                  src="/xianzhuangyizhi.png" 
                   alt="现状模型" 
                   className="w-full h-full object-cover"
                 />
@@ -291,6 +343,7 @@ export default function Interaction() {
                 className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-10 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
                 style={{ left: `${sliderValue}%` }}
                 onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
               >
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
                   <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
