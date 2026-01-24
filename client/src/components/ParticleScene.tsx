@@ -61,6 +61,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
   const animationIdRef = useRef<number | null>(null);
   const progressRef = useRef(0); // 0 = 聚合, 1 = 消散
   const targetProgressRef = useRef(0);
+  const clockRef = useRef<THREE.Clock | null>(null);
 
   // 根据手势状态更新目标进度
   useEffect(() => {
@@ -71,6 +72,88 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
     }
   }, [gestureState]);
 
+  // 动画循环函数 - 独立出来以便在模型加载后启动
+  const startAnimationLoop = useCallback(() => {
+    if (!rendererRef.current || !sceneRef.current || !cameraRef.current || !controlsRef.current) {
+      console.error('Cannot start animation: missing required refs');
+      return;
+    }
+
+    const renderer = rendererRef.current;
+    const scene = sceneRef.current;
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+
+    // 初始化时钟
+    if (!clockRef.current) {
+      clockRef.current = new THREE.Clock();
+    }
+    const clock = clockRef.current;
+
+    const animate = () => {
+      animationIdRef.current = requestAnimationFrame(animate);
+      
+      const time = clock.getElapsedTime();
+      
+      // 平滑过渡进度
+      const lerpSpeed = 0.02;
+      progressRef.current += (targetProgressRef.current - progressRef.current) * lerpSpeed;
+      
+      // 更新粒子位置
+      if (pointsRef.current && originalPositionsRef.current) {
+        const positions = pointsRef.current.geometry.getAttribute('position');
+        const original = originalPositionsRef.current;
+        const progress = progressRef.current;
+        
+        for (let i = 0; i < positions.count; i++) {
+          const i3 = i * 3;
+          
+          // 原始位置
+          const ox = original[i3];
+          const oy = original[i3 + 1];
+          const oz = original[i3 + 2];
+          
+          // 消散方向（从中心向外）
+          const length = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1;
+          const nx = ox / length;
+          const ny = oy / length;
+          const nz = oz / length;
+          
+          // 消散距离
+          const disperseDistance = 8 + Math.sin(time * 2 + i * 0.01) * 0.5;
+          
+          // 轻微漂浮效果
+          const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.02;
+          const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.02;
+          const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.02;
+          
+          // 插值计算最终位置
+          const targetX = ox + nx * disperseDistance * progress;
+          const targetY = oy + ny * disperseDistance * progress;
+          const targetZ = oz + nz * disperseDistance * progress;
+          
+          positions.setXYZ(
+            i,
+            targetX + floatX * (1 - progress * 0.5),
+            targetY + floatY * (1 - progress * 0.5),
+            targetZ + floatZ * (1 - progress * 0.5)
+          );
+        }
+        positions.needsUpdate = true;
+        
+        // 更新透明度
+        const material = pointsRef.current.material as THREE.PointsMaterial;
+        material.opacity = 0.9 - progress * 0.4;
+      }
+      
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    
+    console.log('Starting animation loop');
+    animate();
+  }, []);
+
   const initScene = useCallback(async () => {
     if (!containerRef.current) return;
 
@@ -80,6 +163,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
     }
     if (animationIdRef.current) {
       cancelAnimationFrame(animationIdRef.current);
+      animationIdRef.current = null;
     }
 
     const container = containerRef.current;
@@ -119,6 +203,19 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(5, 10, 5);
     scene.add(directionalLight);
+
+    // 处理窗口大小变化
+    const handleResize = () => {
+      if (!containerRef.current) return;
+      const width = containerRef.current.clientWidth;
+      const height = containerRef.current.clientHeight;
+      
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    };
+    
+    window.addEventListener('resize', handleResize);
 
     // 使用 fetch 预加载模型
     try {
@@ -264,8 +361,15 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           pointsRef.current = points;
 
           console.log(`Loaded ${sampledPositions.length / 3} particles with original colors`);
-          setIsLoaded(true);
+          
+          // 关键修复：在模型解析完成后才启动动画循环
           setLoadingProgress(100);
+          setIsLoaded(true);
+          
+          // 启动动画循环
+          startAnimationLoop();
+          
+          // 通知父组件加载完成
           onLoadComplete?.();
         },
         (error) => {
@@ -283,83 +387,6 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
       return;
     }
 
-    // 动画循环
-    const clock = new THREE.Clock();
-    const animate = () => {
-      animationIdRef.current = requestAnimationFrame(animate);
-      
-      const time = clock.getElapsedTime();
-      
-      // 平滑过渡进度
-      const lerpSpeed = 0.02;
-      progressRef.current += (targetProgressRef.current - progressRef.current) * lerpSpeed;
-      
-      // 更新粒子位置
-      if (pointsRef.current && originalPositionsRef.current) {
-        const positions = pointsRef.current.geometry.getAttribute('position');
-        const original = originalPositionsRef.current;
-        const progress = progressRef.current;
-        
-        for (let i = 0; i < positions.count; i++) {
-          const i3 = i * 3;
-          
-          // 原始位置
-          const ox = original[i3];
-          const oy = original[i3 + 1];
-          const oz = original[i3 + 2];
-          
-          // 消散方向（从中心向外）
-          const length = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1;
-          const nx = ox / length;
-          const ny = oy / length;
-          const nz = oz / length;
-          
-          // 消散距离
-          const disperseDistance = 8 + Math.sin(time * 2 + i * 0.01) * 0.5;
-          
-          // 轻微漂浮效果
-          const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.02;
-          const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.02;
-          const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.02;
-          
-          // 插值计算最终位置
-          const targetX = ox + nx * disperseDistance * progress;
-          const targetY = oy + ny * disperseDistance * progress;
-          const targetZ = oz + nz * disperseDistance * progress;
-          
-          positions.setXYZ(
-            i,
-            targetX + floatX * (1 - progress * 0.5),
-            targetY + floatY * (1 - progress * 0.5),
-            targetZ + floatZ * (1 - progress * 0.5)
-          );
-        }
-        positions.needsUpdate = true;
-        
-        // 更新透明度
-        const material = pointsRef.current.material as THREE.PointsMaterial;
-        material.opacity = 0.9 - progress * 0.4;
-      }
-      
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    
-    animate();
-
-    // 处理窗口大小变化
-    const handleResize = () => {
-      if (!containerRef.current) return;
-      const width = containerRef.current.clientWidth;
-      const height = containerRef.current.clientHeight;
-      
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-    };
-    
-    window.addEventListener('resize', handleResize);
-
     return () => {
       window.removeEventListener('resize', handleResize);
       if (animationIdRef.current) {
@@ -370,7 +397,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         container.removeChild(renderer.domElement);
       }
     };
-  }, [modelUrl, onLoadComplete, onLoadError]);
+  }, [modelUrl, onLoadComplete, onLoadError, startAnimationLoop]);
 
   useEffect(() => {
     initScene();
