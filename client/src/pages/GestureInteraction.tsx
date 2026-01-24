@@ -127,10 +127,7 @@ export default function GestureInteraction() {
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-primary flex items-center justify-center bg-black/50 backdrop-blur group-hover:bg-primary/20 transition-colors">
                 <span className="text-primary font-serif text-lg md:text-xl">天</span>
               </div>
-              <div className="hidden md:flex items-center gap-2 text-white/60 group-hover:text-primary transition-colors">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="text-sm">返回交互复原</span>
-              </div>
+
             </motion.div>
           </Link>
 

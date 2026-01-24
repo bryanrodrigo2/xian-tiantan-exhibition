@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Globe } from "lucide-react";
 import { sound } from "@/lib/sound";
 import { useState } from "react";
 import { AboutDialog } from "./AboutDialog";
@@ -15,6 +15,7 @@ export default function Layout({ children, className, showBack = true }: LayoutP
   const [location] = useLocation();
   const isHome = location === "/";
   const [isMuted, setIsMuted] = useState(sound.getMuted());
+  const [language, setLanguage] = useState<'zh' | 'en'>('zh');
 
   const toggleMute = () => {
     const muted = sound.toggleMute();
@@ -54,6 +55,16 @@ export default function Layout({ children, className, showBack = true }: LayoutP
 
         {/* 右上角功能区 */}
         <div className="flex items-center gap-3">
+          {/* 语言切换按髦 */}
+          <button
+            onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+            className="p-3 rounded-full bg-black/50 border border-primary/30 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 group"
+            title={language === 'zh' ? 'Switch to English' : 'Switch to Chinese'}
+          >
+            <div className="flex items-center justify-center w-6 h-6 font-bold text-sm">
+              {language === 'zh' ? 'EN' : 'ZH'}
+            </div>
+          </button>
           <AboutDialog />
           <button 
             onClick={toggleMute}
