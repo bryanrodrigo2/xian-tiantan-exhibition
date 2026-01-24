@@ -28,17 +28,15 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
             transition={{ duration: 1.5, ease: "easeOut" }}
             className="relative"
           >
-            {/* Logo 呼吸动画 */}
+            {/* Logo 呼吸动画 - 放大至圆环大小，删除圆环 */}
             <motion.div
               animate={{ 
-                boxShadow: ["0 0 20px rgba(212, 175, 55, 0.2)", "0 0 60px rgba(212, 175, 55, 0.6)", "0 0 20px rgba(212, 175, 55, 0.2)"] 
+                filter: ["drop-shadow(0 0 20px rgba(212, 175, 55, 0.3))", "drop-shadow(0 0 60px rgba(212, 175, 55, 0.8))", "drop-shadow(0 0 20px rgba(212, 175, 55, 0.3))"] 
               }}
               transition={{ duration: 3, repeat: Infinity }}
-              className="w-32 h-32 rounded-full border-4 border-primary flex items-center justify-center mb-8 bg-black"
+              className="mb-8"
             >
-              <div className="w-24 h-24 rounded-full border border-white/20 flex items-center justify-center">
-                <img src="/logo_new.png" alt="Logo" className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(255,215,0,0.4)]" />
-              </div>
+              <img src="/logo_new.png" alt="Logo" className="w-32 h-32 object-contain" />
             </motion.div>
           </motion.div>
 
