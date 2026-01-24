@@ -492,13 +492,15 @@ export default function ParticleScene({
 
     // 创建粒子材质 - 优化的粒子大小
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.004, // 优化的粒子大小，平衡细节和可见性
+      size: 0.002,
       vertexColors: true,
       transparent: true,
       opacity: 0.95,
-      blending: THREE.NormalBlending,
+      blending: THREE.AdditiveBlending,
       depthWrite: true,
+      depthTest: true,
       sizeAttenuation: true,
+      fog: true,
     });
 
     const points = new THREE.Points(particleGeometry, particleMaterial);
@@ -554,6 +556,7 @@ export default function ParticleScene({
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0a0a);
+    scene.fog = new THREE.Fog(0x0a0a0a, 50, 200);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
@@ -573,12 +576,33 @@ export default function ParticleScene({
     controls.autoRotateSpeed = 0.3;
     controlsRef.current = controls;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // 增强环境光以提供基础照明
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(5, 10, 5);
+    // 主方向光 - 从左上方照射，增强立体感
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    directionalLight.position.set(8, 12, 8);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.left = -50;
+    directionalLight.shadow.camera.right = 50;
+    directionalLight.shadow.camera.top = 50;
+    directionalLight.shadow.camera.bottom = -50;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 500;
     scene.add(directionalLight);
+
+    // 补光 - 从右下方照射，减少阴影过深
+    const fillLight = new THREE.DirectionalLight(0x8899ff, 0.3);
+    fillLight.position.set(-5, 5, -5);
+    scene.add(fillLight);
+
+    // 背光 - 从后方照射，增强轮廓感
+    const backLight = new THREE.DirectionalLight(0xffaa88, 0.2);
+    backLight.position.set(0, 8, -10);
+    scene.add(backLight);
 
     clockRef.current = new THREE.Clock();
 
