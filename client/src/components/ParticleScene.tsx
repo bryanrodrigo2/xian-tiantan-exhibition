@@ -107,11 +107,11 @@ function getColorByPosition(
   // 优化的颜色定义 - 更鲜艳的绿色和更真实的石头纹理
   const grassGreen = new THREE.Color(0.45, 0.70, 0.25);      // 更鲜艳的绿色(+20%亮度)
   const grassDark = new THREE.Color(0.30, 0.45, 0.15);       // 深绿色(+50%亮度)
-  const stoneGray = new THREE.Color(0.70, 0.68, 0.62);       // 更亮的灰色(+20%亮度)
-  const stoneBrown = new THREE.Color(0.65, 0.60, 0.52);      // 更亮的棕色(+25%亮度)
-  const dirtBrown = new THREE.Color(0.60, 0.50, 0.40);       // 更亮的土棕色(+25%亮度)
-  const lightStone = new THREE.Color(0.78, 0.76, 0.70);      // 更亮的浅石头色(+20%亮度)
-  const darkStone = new THREE.Color(0.50, 0.48, 0.42);       // 更亮的深石头色(+30%亮度)
+  const stoneGray = new THREE.Color(0.50, 0.48, 0.42);       // 降低亮度的灰色(-30%)
+  const stoneBrown = new THREE.Color(0.45, 0.40, 0.32);      // 降低亮度的棕色(-30%)
+  const dirtBrown = new THREE.Color(0.40, 0.32, 0.24);       // 降低亮度的土棕色(-33%)
+  const lightStone = new THREE.Color(0.58, 0.56, 0.50);      // 降低亮度的浅石头色(-25%)
+  const darkStone = new THREE.Color(0.35, 0.33, 0.28);       // 降低亮度的深石头色(-30%)
   
   let color: THREE.Color;
   
