@@ -217,7 +217,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           
           const model = gltf.scene;
           
-          // 收集所有顶点和颜色 - 保留模型原本的材质颜色
+          // 收集所有顶点和颜色
           const positions: number[] = [];
           const colors: number[] = [];
           
@@ -226,22 +226,32 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
               const geometry = child.geometry;
               const positionAttribute = geometry.getAttribute('position');
               
-              // 获取材质颜色 - 保留原本颜色，默认白色
-              let materialColor = new THREE.Color(0xffffff);
+              // 获取材质颜色 - 优先使用材质颜色，如果没有则使用默认颜色
+              let materialColor = new THREE.Color(0xd4a574); // 默认土黄色/古建筑色
+              let hasValidColor = false;
+              
               if (child.material) {
                 if (Array.isArray(child.material)) {
                   if (child.material[0] && 'color' in child.material[0]) {
                     const matColor = (child.material[0] as THREE.MeshStandardMaterial).color;
                     if (matColor) {
                       materialColor = matColor.clone();
+                      hasValidColor = true;
                     }
                   }
                 } else if ('color' in child.material) {
                   const matColor = (child.material as THREE.MeshStandardMaterial).color;
                   if (matColor) {
                     materialColor = matColor.clone();
+                    hasValidColor = true;
                   }
                 }
+              }
+              
+              // 如果材质颜色太暗或太亮，使用默认颜色
+              const brightness = (materialColor.r + materialColor.g + materialColor.b) / 3;
+              if (brightness < 0.1 || brightness > 0.95) {
+                materialColor = new THREE.Color(0xd4a574); // 土黄色
               }
               
               // 应用模型的世界矩阵
@@ -260,13 +270,21 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
                 vertex.applyMatrix4(matrix);
                 positions.push(vertex.x, vertex.y, vertex.z);
                 
-                // 使用顶点颜色或材质颜色 - 保留原本颜色
+                // 使用顶点颜色或材质颜色
                 if (colorAttribute) {
-                  colors.push(
-                    colorAttribute.getX(i),
-                    colorAttribute.getY(i),
-                    colorAttribute.getZ(i)
-                  );
+                  let r = colorAttribute.getX(i);
+                  let g = colorAttribute.getY(i);
+                  let b = colorAttribute.getZ(i);
+                  
+                  // 如果顶点颜色太暗，使用默认颜色
+                  const vertexBrightness = (r + g + b) / 3;
+                  if (vertexBrightness < 0.1) {
+                    r = materialColor.r;
+                    g = materialColor.g;
+                    b = materialColor.b;
+                  }
+                  
+                  colors.push(r, g, b);
                 } else {
                   colors.push(materialColor.r, materialColor.g, materialColor.b);
                 }
@@ -312,13 +330,13 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           // 保存原始位置
           originalPositionsRef.current = positionArray.slice();
 
-          // 创建粒子材质 - 使用普通混合模式保留原本颜色
+          // 创建粒子材质 - 使用 AdditiveBlending 让粒子更亮
           const particleMaterial = new THREE.PointsMaterial({
             size: 0.06,
             vertexColors: true,
             transparent: true,
-            opacity: 0.9,
-            blending: THREE.NormalBlending, // 使用普通混合模式保留原本颜色
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending,
             depthWrite: false,
             sizeAttenuation: true,
           });
@@ -357,6 +375,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           setIsLoaded(true);
           
           // 通知父组件加载完成
+          console.log('Calling onLoadComplete');
           onLoadComplete?.();
         },
         (error) => {
