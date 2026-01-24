@@ -1,9 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Volume2, VolumeX, Globe } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { sound } from "@/lib/sound";
 import { useState } from "react";
 import { AboutDialog } from "./AboutDialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ export default function Layout({ children, className, showBack = true }: LayoutP
   const [location] = useLocation();
   const isHome = location === "/";
   const [isMuted, setIsMuted] = useState(sound.getMuted());
-  const [language, setLanguage] = useState<'zh' | 'en'>('zh');
+  const { language, setLanguage, t } = useLanguage();
 
   const toggleMute = () => {
     const muted = sound.toggleMute();
@@ -55,7 +56,7 @@ export default function Layout({ children, className, showBack = true }: LayoutP
 
         {/* 右上角功能区 */}
         <div className="flex items-center gap-3">
-          {/* 语言切换按髦 */}
+          {/* 语言切换按钮 */}
           <button
             onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
             className="p-3 rounded-full bg-black/50 border border-primary/30 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 group"
@@ -87,7 +88,7 @@ export default function Layout({ children, className, showBack = true }: LayoutP
       
       {/* 底部版权 */}
       <footer className="fixed bottom-4 w-full text-center z-40 pointer-events-none">
-        <p className="text-white/20 text-xs font-sans">西安隋唐天坛全息影像设计与交互实现 © 2026</p>
+        <p className="text-white/20 text-xs font-sans">{t('common.copyright')}</p>
       </footer>
     </div>
   );
