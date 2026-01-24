@@ -6,7 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 interface ParticleSceneProps {
   modelUrl: string;
   gestureState: 'open' | 'closed' | 'neutral';
-  handPosition?: { x: number; y: number } | null; // 手的位置用于控制模型旋转
+  handPosition?: { x: number; y: number } | null;
   className?: string;
   onLoadComplete?: () => void;
   onLoadError?: (error: string) => void;
@@ -30,7 +30,6 @@ async function fetchModelWithRetry(url: string, maxRetries = 3, onProgress?: (pr
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
-      // 获取文件大小用于进度计算
       const contentLength = response.headers.get('content-length');
       const total = contentLength ? parseInt(contentLength, 10) : 0;
       
@@ -40,7 +39,6 @@ async function fetchModelWithRetry(url: string, maxRetries = 3, onProgress?: (pr
         return buffer;
       }
       
-      // 使用流式读取来跟踪进度
       const reader = response.body.getReader();
       const chunks: Uint8Array[] = [];
       let receivedLength = 0;
@@ -58,7 +56,6 @@ async function fetchModelWithRetry(url: string, maxRetries = 3, onProgress?: (pr
         }
       }
       
-      // 合并所有块
       const buffer = new Uint8Array(receivedLength);
       let position = 0;
       for (const chunk of chunks) {
@@ -81,31 +78,127 @@ async function fetchModelWithRetry(url: string, maxRetries = 3, onProgress?: (pr
   throw lastError || new Error('Failed to fetch model');
 }
 
-// 从纹理中采样颜色
-function sampleTextureColor(
+// 根据顶点位置计算颜色（模拟天坛的真实外观）
+function getColorByPosition(
+  vertex: THREE.Vector3,
+  boundingBox: THREE.Box3,
+  modelCenter: THREE.Vector3
+): THREE.Color {
+  // 计算归一化的位置
+  const size = new THREE.Vector3();
+  boundingBox.getSize(size);
+  
+  // 计算相对于中心的位置
+  const relX = vertex.x - modelCenter.x;
+  const relY = vertex.y - boundingBox.min.y; // 相对于底部的高度
+  const relZ = vertex.z - modelCenter.z;
+  
+  // 计算水平距离（到中心的距离）
+  const horizontalDist = Math.sqrt(relX * relX + relZ * relZ);
+  const maxHorizontalDist = Math.max(size.x, size.z) / 2;
+  const normalizedDist = horizontalDist / maxHorizontalDist;
+  
+  // 计算归一化高度
+  const normalizedHeight = relY / size.y;
+  
+  // 添加一些随机变化
+  const noise = (Math.sin(vertex.x * 10) * Math.cos(vertex.z * 10) + 1) * 0.5;
+  
+  // 颜色定义
+  const grassGreen = new THREE.Color(0.35, 0.55, 0.25);      // 草地绿色
+  const grassDark = new THREE.Color(0.25, 0.45, 0.18);       // 深草绿
+  const stoneGray = new THREE.Color(0.55, 0.52, 0.48);       // 石头灰色
+  const stoneBrown = new THREE.Color(0.50, 0.45, 0.38);      // 石头棕色
+  const dirtBrown = new THREE.Color(0.45, 0.38, 0.30);       // 泥土棕色
+  const lightStone = new THREE.Color(0.65, 0.62, 0.58);      // 浅石色
+  
+  let color: THREE.Color;
+  
+  // 根据位置分配颜色
+  if (normalizedDist > 0.75) {
+    // 外围区域 - 草地
+    color = grassGreen.clone().lerp(grassDark, noise * 0.5);
+    // 添加一些黄绿色变化
+    color.r += (Math.random() - 0.5) * 0.08;
+    color.g += (Math.random() - 0.5) * 0.08;
+  } else if (normalizedDist > 0.3) {
+    // 中间区域 - 台阶/石头
+    if (normalizedHeight < 0.3) {
+      // 底部台阶
+      color = stoneBrown.clone().lerp(dirtBrown, noise * 0.4);
+    } else if (normalizedHeight < 0.6) {
+      // 中部台阶
+      color = stoneGray.clone().lerp(stoneBrown, noise * 0.3);
+    } else {
+      // 上部台阶
+      color = lightStone.clone().lerp(stoneGray, noise * 0.3);
+    }
+    // 添加石头纹理变化
+    color.r += (Math.random() - 0.5) * 0.06;
+    color.g += (Math.random() - 0.5) * 0.06;
+    color.b += (Math.random() - 0.5) * 0.06;
+  } else {
+    // 中心区域 - 顶部平台
+    color = lightStone.clone().lerp(stoneGray, noise * 0.2);
+    color.r += (Math.random() - 0.5) * 0.04;
+    color.g += (Math.random() - 0.5) * 0.04;
+    color.b += (Math.random() - 0.5) * 0.04;
+  }
+  
+  return color;
+}
+
+// 尝试从纹理采样颜色
+function tryGetTextureColor(
   texture: THREE.Texture,
-  uv: THREE.Vector2,
-  canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D
+  uv: THREE.Vector2
 ): THREE.Color | null {
   try {
     const image = texture.image;
-    if (!image || !image.width || !image.height) return null;
+    if (!image) return null;
     
-    // 确保 canvas 大小正确
-    if (canvas.width !== image.width || canvas.height !== image.height) {
-      canvas.width = image.width;
-      canvas.height = image.height;
-      ctx.drawImage(image, 0, 0);
+    // 检查是否是 ImageBitmap 或 HTMLImageElement
+    let width: number, height: number;
+    if (image instanceof ImageBitmap) {
+      width = image.width;
+      height = image.height;
+    } else if (image instanceof HTMLImageElement) {
+      width = image.naturalWidth || image.width;
+      height = image.naturalHeight || image.height;
+    } else if (image.width && image.height) {
+      width = image.width;
+      height = image.height;
+    } else {
+      return null;
     }
     
-    // 计算像素坐标
-    const x = Math.floor(uv.x * image.width) % image.width;
-    const y = Math.floor((1 - uv.y) * image.height) % image.height;
+    if (width === 0 || height === 0) return null;
     
-    const pixel = ctx.getImageData(Math.abs(x), Math.abs(y), 1, 1).data;
+    // 创建 canvas 来读取像素
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return null;
+    
+    // 绘制图像到 canvas
+    ctx.drawImage(image, 0, 0);
+    
+    // 计算像素坐标
+    const x = Math.floor(Math.abs(uv.x % 1) * width);
+    const y = Math.floor((1 - Math.abs(uv.y % 1)) * height);
+    
+    // 读取像素
+    const pixel = ctx.getImageData(x, y, 1, 1).data;
+    
+    // 检查是否成功读取（非全黑）
+    if (pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0 && pixel[3] === 0) {
+      return null;
+    }
+    
     return new THREE.Color(pixel[0] / 255, pixel[1] / 255, pixel[2] / 255);
-  } catch {
+  } catch (error) {
+    console.warn('Texture sampling failed:', error);
     return null;
   }
 }
@@ -152,15 +245,12 @@ export default function ParticleScene({
   // 根据手的位置更新模型旋转
   useEffect(() => {
     if (handPosition && lastHandPositionRef.current) {
-      // 计算手的移动差值
       const deltaX = handPosition.x - lastHandPositionRef.current.x;
       const deltaY = handPosition.y - lastHandPositionRef.current.y;
       
-      // 将移动转换为旋转（水平移动控制Y轴旋转，垂直移动控制X轴旋转）
-      targetRotationRef.current.y += deltaX * 3; // 水平移动 -> Y轴旋转
-      targetRotationRef.current.x += deltaY * 2; // 垂直移动 -> X轴旋转
+      targetRotationRef.current.y += deltaX * 3;
+      targetRotationRef.current.x += deltaY * 2;
       
-      // 限制X轴旋转范围
       targetRotationRef.current.x = Math.max(-0.5, Math.min(0.5, targetRotationRef.current.x));
     }
     lastHandPositionRef.current = handPosition || null;
@@ -289,7 +379,7 @@ export default function ParticleScene({
         
         // 应用手势控制的旋转
         pointsRef.current.rotation.x = currentRotationRef.current.x;
-        pointsRef.current.rotation.y += currentRotationRef.current.y * 0.01; // 累积Y轴旋转
+        pointsRef.current.rotation.y += currentRotationRef.current.y * 0.01;
         
         const material = pointsRef.current.material as THREE.PointsMaterial;
         material.opacity = 0.9 - progress * 0.3;
@@ -305,7 +395,7 @@ export default function ParticleScene({
       setLoadingProgress(5);
       
       const modelBuffer = await fetchModelWithRetry(modelUrl, 3, (progress) => {
-        setLoadingProgress(5 + Math.round(progress * 0.45)); // 5% - 50%
+        setLoadingProgress(5 + Math.round(progress * 0.45));
       });
       
       setLoadingStatus('正在解析模型...');
@@ -326,10 +416,6 @@ export default function ParticleScene({
           const positions: number[] = [];
           const colors: number[] = [];
           
-          // 创建用于纹理采样的 canvas
-          const textureCanvas = document.createElement('canvas');
-          const textureCtx = textureCanvas.getContext('2d', { willReadFrequently: true });
-          
           // 首先计算模型的边界框
           const boundingBox = new THREE.Box3().setFromObject(model);
           const modelSize = new THREE.Vector3();
@@ -342,6 +428,7 @@ export default function ParticleScene({
           
           let totalVertices = 0;
           let texturedVertices = 0;
+          let coloredByPosition = 0;
           
           // 遍历所有网格
           model.traverse((child) => {
@@ -354,14 +441,11 @@ export default function ParticleScene({
               // 获取材质
               const material = Array.isArray(child.material) ? child.material[0] : child.material;
               let texture: THREE.Texture | null = null;
-              let baseColor = new THREE.Color(0.5, 0.5, 0.5);
               
               if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshBasicMaterial) {
                 if (material.map) {
                   texture = material.map;
-                }
-                if (material.color) {
-                  baseColor = material.color.clone();
+                  console.log('Found texture:', texture.name || 'unnamed', 'Image:', texture.image);
                 }
               }
               
@@ -381,42 +465,31 @@ export default function ParticleScene({
                 let color: THREE.Color | null = null;
                 totalVertices++;
                 
-                // 1. 优先从纹理采样颜色
-                if (texture && uvAttribute && textureCtx) {
+                // 1. 优先尝试从纹理采样颜色
+                if (texture && uvAttribute) {
                   const uv = new THREE.Vector2(
                     uvAttribute.getX(i),
                     uvAttribute.getY(i)
                   );
-                  color = sampleTextureColor(texture, uv, textureCanvas, textureCtx);
+                  color = tryGetTextureColor(texture, uv);
                   if (color) texturedVertices++;
                 }
                 
-                // 2. 使用顶点颜色
+                // 2. 尝试使用顶点颜色
                 if (!color && colorAttribute) {
-                  color = new THREE.Color(
-                    colorAttribute.getX(i),
-                    colorAttribute.getY(i),
-                    colorAttribute.getZ(i)
-                  );
+                  const r = colorAttribute.getX(i);
+                  const g = colorAttribute.getY(i);
+                  const b = colorAttribute.getZ(i);
+                  // 检查是否是有效颜色（不是全黑或全白）
+                  if (!(r === 0 && g === 0 && b === 0) && !(r === 1 && g === 1 && b === 1)) {
+                    color = new THREE.Color(r, g, b);
+                  }
                 }
                 
-                // 3. 使用材质基础颜色
+                // 3. 根据位置分配颜色（模拟天坛外观）
                 if (!color) {
-                  color = baseColor.clone();
-                }
-                
-                // 如果颜色太暗或太亮，进行调整
-                const brightness = (color.r + color.g + color.b) / 3;
-                if (brightness < 0.1) {
-                  // 太暗，稍微提亮
-                  color.r = Math.min(1, color.r + 0.15);
-                  color.g = Math.min(1, color.g + 0.15);
-                  color.b = Math.min(1, color.b + 0.15);
-                } else if (brightness > 0.95) {
-                  // 太亮，稍微降低
-                  color.r *= 0.85;
-                  color.g *= 0.85;
-                  color.b *= 0.85;
+                  color = getColorByPosition(vertex, boundingBox, modelCenter);
+                  coloredByPosition++;
                 }
                 
                 colors.push(color.r, color.g, color.b);
@@ -426,11 +499,12 @@ export default function ParticleScene({
 
           console.log('Total vertices:', totalVertices);
           console.log('Textured vertices:', texturedVertices);
+          console.log('Colored by position:', coloredByPosition);
 
           setLoadingProgress(75);
 
           // 如果顶点太多，进行采样
-          const maxParticles = 100000;
+          const maxParticles = 150000;
           let sampledPositions = positions;
           let sampledColors = colors;
           
@@ -469,10 +543,10 @@ export default function ParticleScene({
 
           // 创建粒子材质 - 小粒子，保持原色
           const particleMaterial = new THREE.PointsMaterial({
-            size: 0.015, // 更小的粒子
+            size: 0.008, // 更小的粒子
             vertexColors: true,
             transparent: true,
-            opacity: 0.9,
+            opacity: 0.95,
             blending: THREE.NormalBlending,
             depthWrite: true,
             sizeAttenuation: true,
