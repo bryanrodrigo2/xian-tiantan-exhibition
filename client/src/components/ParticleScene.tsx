@@ -354,12 +354,12 @@ export default function ParticleScene({
     else if (isTablet) deviceType = 'tablet';
     else deviceType = 'desktop';
     
-    // 根据设备类型设置粒子密度
+    // 根据设备类型设置粒子密度 - 激进优化
     let baseDensity: number;
     if (deviceType === 'mobile') {
-      baseDensity = 150000; // 手机: 150k (-81.25%) - 大幅降低避免崩溃
+      baseDensity = 50000; // 手机: 50k (-93.75%) - 激进优化避免崩溃
     } else if (deviceType === 'tablet') {
-      baseDensity = 120000; // 平板: 120k (-85%) - 大幅降低避免崩溃
+      baseDensity = 60000; // 平板: 60k (-92.5%) - 激进优化避免崩溃
     } else {
       baseDensity = 800000; // PC: 800k
     }
@@ -485,12 +485,12 @@ export default function ParticleScene({
 
     setLoadingProgress(80);
 
-    // 限制最大粒子数 - 根据设备类型调整
+    // 限制最大粒子数 - 激进优化
     let maxParticles: number;
     if (deviceType === 'mobile') {
-      maxParticles = 200000; // 手机: 200k (-83.3%) - 大幅降低避免崩溃
+      maxParticles = 80000; // 手机: 80k (-93.3%) - 激进优化避免崩溃
     } else if (deviceType === 'tablet') {
-      maxParticles = 150000; // 平板: 150k (-87.5%) - 大幅降低避免崩溃
+      maxParticles = 100000; // 平板: 100k (-91.7%) - 激进优化避免崩溃
     } else {
       maxParticles = 1200000; // PC: 1200k
     }
