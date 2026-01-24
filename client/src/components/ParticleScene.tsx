@@ -105,13 +105,13 @@ function getColorByPosition(
   const noise3 = (Math.sin(vertex.x * 25 + vertex.z * 25) + 1) * 0.5;
   
   // 优化的颜色定义 - 更鲜艳的绿色和更真实的石头纹理
-  const grassGreen = new THREE.Color(0.38, 0.60, 0.18);      // 超鲜艳的绿色（增强鲜艳度）
-  const grassDark = new THREE.Color(0.20, 0.35, 0.10);       // 深绿色（增强深度）
-  const stoneGray = new THREE.Color(0.58, 0.56, 0.50);       // 温暖的灰色（增强温暖感）
-  const stoneBrown = new THREE.Color(0.52, 0.48, 0.42);      // 温暖棕色（增强温暖感）
-  const dirtBrown = new THREE.Color(0.48, 0.40, 0.32);       // 温暖土棕色（增强温暖感）
-  const lightStone = new THREE.Color(0.65, 0.63, 0.58);      // 浅石头色（增强亮度）
-  const darkStone = new THREE.Color(0.38, 0.36, 0.32);       // 深石头色（增强深度）
+  const grassGreen = new THREE.Color(0.45, 0.70, 0.25);      // 更鲜艳的绿色(+20%亮度)
+  const grassDark = new THREE.Color(0.30, 0.45, 0.15);       // 深绿色(+50%亮度)
+  const stoneGray = new THREE.Color(0.70, 0.68, 0.62);       // 更亮的灰色(+20%亮度)
+  const stoneBrown = new THREE.Color(0.65, 0.60, 0.52);      // 更亮的棕色(+25%亮度)
+  const dirtBrown = new THREE.Color(0.60, 0.50, 0.40);       // 更亮的土棕色(+25%亮度)
+  const lightStone = new THREE.Color(0.78, 0.76, 0.70);      // 更亮的浅石头色(+20%亮度)
+  const darkStone = new THREE.Color(0.50, 0.48, 0.42);       // 更亮的深石头色(+30%亮度)
   
   let color: THREE.Color;
   
@@ -335,7 +335,7 @@ export default function ParticleScene({
     
     // 计算粒子密度 - 根据模型大小自适应
     const modelVolume = modelSize.x * modelSize.y * modelSize.z;
-    const baseDensity = 5000000; // 方案 3: 超高粒子密度 (+426%)
+    const baseDensity = 2500000; // 优化第一轮: 降低粒子密度 (-50%) 改善性能
     const particleDensity = baseDensity / Math.max(1, modelVolume);
     
     console.log('Particle density:', particleDensity);
@@ -577,11 +577,11 @@ export default function ParticleScene({
     controlsRef.current = controls;
 
     // 增强环境光以提供基础照明
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);  // 提升环境光强度(+33%)
     scene.add(ambientLight);
 
     // 主方向光 - 从左上方照射，增强立体感
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);  // 提升主光强度(+29%)
     directionalLight.position.set(8, 12, 8);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
@@ -595,12 +595,12 @@ export default function ParticleScene({
     scene.add(directionalLight);
 
     // 补光 - 从右下方照射，减少阴影过深
-    const fillLight = new THREE.DirectionalLight(0x8899ff, 0.3);
+    const fillLight = new THREE.DirectionalLight(0x8899ff, 0.5);  // 提升补光强度(+67%)
     fillLight.position.set(-5, 5, -5);
     scene.add(fillLight);
 
     // 背光 - 从后方照射，增强轮廓感
-    const backLight = new THREE.DirectionalLight(0xffaa88, 0.2);
+    const backLight = new THREE.DirectionalLight(0xffaa88, 0.35);  // 提升背光强度(+75%)
     backLight.position.set(0, 8, -10);
     scene.add(backLight);
 
@@ -636,6 +636,12 @@ export default function ParticleScene({
         const original = originalPositionsRef.current;
         const progress = progressRef.current;
         
+        // 修改功能：手掌张开只改变模型大小，不需要炸开
+        // progress: 0 = 握拳（缩小），1 = 张开（放大）
+        const scaleFactorMin = 0.8;  // 握拳时的缩放因子
+        const scaleFactorMax = 1.3;  // 张开时的缩放因子
+        const scaleFactor = scaleFactorMin + (scaleFactorMax - scaleFactorMin) * progress;
+        
         for (let i = 0; i < positions.count; i++) {
           const i3 = i * 3;
           
@@ -643,26 +649,12 @@ export default function ParticleScene({
           const oy = original[i3 + 1];
           const oz = original[i3 + 2];
           
-          const length = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1;
-          const nx = ox / length;
-          const ny = oy / length;
-          const nz = oz / length;
-          
-          const disperseDistance = 8 + Math.sin(time * 2 + i * 0.01) * 0.5;
-          
-          const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.008;
-          const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.008;
-          const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.008;
-          
-          const targetX = ox + nx * disperseDistance * progress;
-          const targetY = oy + ny * disperseDistance * progress;
-          const targetZ = oz + nz * disperseDistance * progress;
-          
+          // 只应用缩放，不应用炸开效果
           positions.setXYZ(
             i,
-            targetX + floatX * (1 - progress * 0.5),
-            targetY + floatY * (1 - progress * 0.5),
-            targetZ + floatZ * (1 - progress * 0.5)
+            ox * scaleFactor,
+            oy * scaleFactor,
+            oz * scaleFactor
           );
         }
         positions.needsUpdate = true;
@@ -671,7 +663,7 @@ export default function ParticleScene({
         pointsRef.current.rotation.y += currentRotationRef.current.y * 0.01;
         
         const material = pointsRef.current.material as THREE.PointsMaterial;
-        material.opacity = 0.95 - progress * 0.3;
+        material.opacity = 0.95;  // 保持不透明度不变
       }
       
       controls.update();
