@@ -5,7 +5,7 @@ import { Route, Switch, Router as WouterRouter } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
+
 import Home from "./pages/Home";
 import History from "./pages/History";
 import Survey from "./pages/Survey";
@@ -46,8 +46,7 @@ function App() {
         defaultTheme="dark"
         // switchable
       >
-        <LanguageProvider>
-          <TooltipProvider>
+        <TooltipProvider>
           <Toaster />
           {showSplash ? (
             <SplashScreen onComplete={() => setShowSplash(false)} />
@@ -57,8 +56,7 @@ function App() {
               <AppRouter />
             </WouterRouter>
           )}
-          </TooltipProvider>
-        </LanguageProvider>
+        </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

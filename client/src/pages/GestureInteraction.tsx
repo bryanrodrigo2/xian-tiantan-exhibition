@@ -5,7 +5,7 @@ import { Hand, Loader2, Camera, CameraOff, HelpCircle, X, RefreshCw } from 'luci
 import { Button } from '@/components/ui/button';
 import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState, HandPosition } from '@/hooks/useHandGesture';
-import { useLanguage } from '@/contexts/LanguageContext';
+
 
 // 模型 URL 列表 - 使用阿里云 OSS CDN 加速
 const MODEL_URLS = [
@@ -18,7 +18,6 @@ const MODEL_URLS = [
 const MTL_URL = 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
 
 export default function GestureInteraction() {
-  const { t } = useLanguage();
   const [trackingEnabled, setTrackingEnabled] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [modelUrlIndex, setModelUrlIndex] = useState(0);
@@ -83,26 +82,26 @@ export default function GestureInteraction() {
   const getGestureInfo = () => {
     switch (gestureState) {
       case 'open':
-        return { text: t('gesture.openHand'), color: 'text-red-400', bgColor: 'bg-red-500/20' };
+        return { text: '张开手掌 - 粒子消散', color: 'text-red-400', bgColor: 'bg-red-500/20' };
       case 'closed':
-        return { text: t('gesture.closedHand'), color: 'text-green-400', bgColor: 'bg-green-500/20' };
+        return { text: '握拳 - 粒子聚合', color: 'text-green-400', bgColor: 'bg-green-500/20' };
       default:
-        return { text: t('gesture.moveHand'), color: 'text-white/60', bgColor: 'bg-white/10' };
+        return { text: '移动手掌控制旋转', color: 'text-white/60', bgColor: 'bg-white/10' };
     }
   };
 
   // 获取状态文本
   const getStatusText = () => {
     if (!modelLoaded) {
-      return t('gesture.loadingModel');
+      return '正在加载模型...';
     }
     if (trackingEnabled && handLoading) {
-      return t('gesture.initializingGesture');
+      return '正在初始化手势识别...';
     }
     if (cameraActive) {
-      return t('gesture.cameraEnabled');
+      return '摄像头已启用';
     }
-    return t('gesture.cameraDisabled');
+    return '摄像头未启用';
   };
 
   const gestureInfo = getGestureInfo();
@@ -135,8 +134,8 @@ export default function GestureInteraction() {
 
           {/* 标题 */}
           <div className="absolute left-1/2 -translate-x-1/2 text-center">
-            <h1 className="text-xl md:text-2xl font-bold text-primary">{t('gesture.title')}</h1>
-            <p className="text-xs text-white/40 tracking-widest hidden md:block">{t('gesture.subtitle')}</p>
+            <h1 className="text-xl md:text-2xl font-bold text-primary">手势交互</h1>
+            <p className="text-xs text-white/40 tracking-widest hidden md:block">GESTURE INTERACTION</p>
           </div>
 
           {/* 帮助按钮 */}
@@ -145,7 +144,7 @@ export default function GestureInteraction() {
             size="icon"
             className="text-white/60 hover:text-primary"
             onClick={() => setShowGuide(true)}
-            title={t('gesture.help')}
+
           >
             <HelpCircle className="w-5 h-5" />
           </Button>
@@ -171,16 +170,16 @@ export default function GestureInteraction() {
           {modelError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20">
               <div className="text-center p-6 max-w-md">
-                <div className="text-red-400 text-lg mb-4">{t('gesture.modelLoadError')}</div>
+                <div className="text-red-400 text-lg mb-4">模型加载失败</div>
                 <p className="text-white/60 text-sm mb-6">
-                  {t('gesture.modelLoadErrorMsg')}
+                  模型文件加载失败，可能是网络问题。请检查网络连接后重试。
                 </p>
                 <Button
                   onClick={handleRetry}
                   className="bg-primary text-black hover:bg-primary/80"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  {t('gesture.retry')}
+                  重新加载
                 </Button>
               </div>
             </div>
@@ -227,22 +226,22 @@ export default function GestureInteraction() {
                   {!modelLoaded ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {t('gesture.loadingModel')}
+                      加载模型中...
                     </>
                   ) : trackingEnabled && handLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {t('gesture.initializingGesture')}
+                      初始化中...
                     </>
                   ) : trackingEnabled ? (
                     <>
                       <CameraOff className="w-4 h-4 mr-2" />
-                      {t('gesture.stopTracking')}
+                      停止追踪
                     </>
                   ) : (
                     <>
                       <Camera className="w-4 h-4 mr-2" />
-                      {t('gesture.startTracking')}
+                      启动手势追踪
                     </>
                   )}
                 </Button>
