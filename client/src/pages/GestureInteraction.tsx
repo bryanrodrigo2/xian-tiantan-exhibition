@@ -4,12 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Hand, Loader2, Camera, CameraOff, ArrowLeft, HelpCircle, X, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ParticleScene from '@/components/ParticleScene';
-import { useHandGesture, GestureState } from '@/hooks/useHandGesture';
+import { useHandGesture, GestureState, HandPosition } from '@/hooks/useHandGesture';
 
-// 模型 URL 列表 - 优先使用本地路径，备用 jsDelivr CDN
+// 模型 URL 列表 - 使用高质量大模型
 const MODEL_URLS = [
+  '/models/tiantan_large.glb',
   '/models/tiantan123.glb',
-  'https://cdn.jsdelivr.net/gh/bryanrodrigo2/xian-tiantan-exhibition@main/client/public/models/tiantan123.glb',
 ];
 
 export default function GestureInteraction() {
@@ -19,20 +19,29 @@ export default function GestureInteraction() {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [modelError, setModelError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [currentHandPosition, setCurrentHandPosition] = useState<HandPosition | null>(null);
   
   const handleGestureChange = useCallback((gesture: GestureState) => {
     console.log('Gesture changed:', gesture);
   }, []);
 
+  const handleHandMove = useCallback((position: HandPosition) => {
+    setCurrentHandPosition(position);
+  }, []);
+
   // 只有在 trackingEnabled 为 true 时才启用手势识别
-  const { gestureState, isLoading: handLoading, error, cameraActive } = useHandGesture({
+  const { gestureState, handPosition, isLoading: handLoading, error, cameraActive } = useHandGesture({
     enabled: trackingEnabled,
     onGestureChange: handleGestureChange,
+    onHandMove: handleHandMove,
   });
 
   const toggleTracking = () => {
     console.log('Toggle tracking, current:', trackingEnabled, 'modelLoaded:', modelLoaded);
     setTrackingEnabled(!trackingEnabled);
+    if (trackingEnabled) {
+      setCurrentHandPosition(null);
+    }
   };
 
   // 处理模型加载完成
@@ -72,7 +81,7 @@ export default function GestureInteraction() {
       case 'closed':
         return { text: '握拳 - 粒子聚合', color: 'text-green-400', bgColor: 'bg-green-500/20' };
       default:
-        return { text: '等待手势...', color: 'text-white/60', bgColor: 'bg-white/10' };
+        return { text: '移动手掌控制旋转', color: 'text-white/60', bgColor: 'bg-white/10' };
     }
   };
 
@@ -147,6 +156,7 @@ export default function GestureInteraction() {
             key={`${currentModelUrl}-${retryCount}`}
             modelUrl={currentModelUrl}
             gestureState={gestureState}
+            handPosition={cameraActive ? currentHandPosition : null}
             className="absolute inset-0"
             onLoadComplete={handleModelLoadComplete}
             onLoadError={handleModelLoadError}
@@ -292,6 +302,17 @@ export default function GestureInteraction() {
                   </div>
                 </div>
 
+                {/* 新增：移动控制说明 */}
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="text-2xl">👋</div>
+                    <h3 className="font-bold text-white">移动手掌</h3>
+                  </div>
+                  <p className="text-sm text-white/60">
+                    左右移动手掌可以控制模型水平旋转，上下移动可以调整视角倾斜
+                  </p>
+                </div>
+
                 {/* 使用步骤 */}
                 <div className="space-y-3">
                   <h3 className="font-bold text-white">使用步骤</h3>
@@ -310,7 +331,7 @@ export default function GestureInteraction() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs flex-shrink-0">4</span>
-                      <span>观察粒子随手势变化的效果</span>
+                      <span>移动手掌可以控制模型旋转方向</span>
                     </li>
                   </ol>
                 </div>

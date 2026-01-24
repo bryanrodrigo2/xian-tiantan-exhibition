@@ -4,15 +4,22 @@ import { Camera } from '@mediapipe/camera_utils';
 
 export type GestureState = 'open' | 'closed' | 'neutral';
 
+export interface HandPosition {
+  x: number; // 0-1, 左到右
+  y: number; // 0-1, 上到下
+}
+
 interface UseHandGestureOptions {
   onGestureChange?: (gesture: GestureState) => void;
+  onHandMove?: (position: HandPosition) => void;
   enabled?: boolean;
 }
 
 export function useHandGesture(options: UseHandGestureOptions = {}) {
-  const { onGestureChange, enabled = false } = options;
+  const { onGestureChange, onHandMove, enabled = false } = options;
   
   const [gestureState, setGestureState] = useState<GestureState>('neutral');
+  const [handPosition, setHandPosition] = useState<HandPosition | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
@@ -23,11 +30,13 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
   const gestureHistoryRef = useRef<GestureState[]>([]);
   const isInitializingRef = useRef(false);
   const onGestureChangeRef = useRef(onGestureChange);
+  const onHandMoveRef = useRef(onHandMove);
 
   // 更新回调引用
   useEffect(() => {
     onGestureChangeRef.current = onGestureChange;
-  }, [onGestureChange]);
+    onHandMoveRef.current = onHandMove;
+  }, [onGestureChange, onHandMove]);
 
   // 分析手势
   const analyzeGesture = useCallback((landmarks: Results['multiHandLandmarks'][0]): GestureState => {
@@ -72,6 +81,20 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
     }
     
     return 'neutral';
+  }, []);
+
+  // 获取手掌中心位置
+  const getHandCenter = useCallback((landmarks: Results['multiHandLandmarks'][0]): HandPosition | null => {
+    if (!landmarks || landmarks.length < 21) return null;
+    
+    // 使用手掌中心点（手腕和中指根部的中点）
+    const wrist = landmarks[0];
+    const middleFingerBase = landmarks[9];
+    
+    return {
+      x: (wrist.x + middleFingerBase.x) / 2,
+      y: (wrist.y + middleFingerBase.y) / 2,
+    };
   }, []);
 
   // 平滑手势状态
@@ -128,6 +151,7 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
     
     setCameraActive(false);
     setGestureState('neutral');
+    setHandPosition(null);
     setIsLoading(false);
     gestureHistoryRef.current = [];
     isInitializingRef.current = false;
@@ -165,6 +189,8 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
       hands.onResults((results: Results) => {
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
           const landmarks = results.multiHandLandmarks[0];
+          
+          // 分析手势
           const rawGesture = analyzeGesture(landmarks);
           const smoothedGesture = smoothGesture(rawGesture);
           
@@ -175,6 +201,16 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
             }
             return prev;
           });
+          
+          // 获取手掌位置
+          const position = getHandCenter(landmarks);
+          if (position) {
+            setHandPosition(position);
+            onHandMoveRef.current?.(position);
+          }
+        } else {
+          // 没有检测到手，重置位置
+          setHandPosition(null);
         }
       });
 
@@ -230,7 +266,7 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
       isInitializingRef.current = false;
       stopHands();
     }
-  }, [analyzeGesture, smoothGesture, stopHands]);
+  }, [analyzeGesture, smoothGesture, getHandCenter, stopHands]);
 
   // 根据 enabled 状态启动/停止手势检测
   useEffect(() => {
@@ -259,6 +295,7 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
 
   return {
     gestureState,
+    handPosition,
     isLoading,
     error,
     cameraActive,
