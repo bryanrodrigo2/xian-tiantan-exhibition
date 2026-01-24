@@ -335,7 +335,7 @@ export default function ParticleScene({
     
     // 计算粒子密度 - 根据模型大小自适应
     const modelVolume = modelSize.x * modelSize.y * modelSize.z;
-    const baseDensity = 1500000; // 优化第二轮: 继续降低粒子密度 (-40%) 提升性能
+    const baseDensity = 800000; // 优化第三轮: 急速降低粒子密度 (-47%) 完全解决内存问题
     const particleDensity = baseDensity / Math.max(1, modelVolume);
     
     console.log('Particle density:', particleDensity);
@@ -455,7 +455,7 @@ export default function ParticleScene({
     setLoadingProgress(80);
 
     // 限制最大粒子数
-    const maxParticles = 2000000; // 优化第二轮: 降低最大粒子数 (-67%)
+    const maxParticles = 1200000; // 优化第三轮: 急速降低最大粒子数 (-40%)
     let sampledPositions = positions;
     let sampledColors = colors;
     
