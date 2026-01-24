@@ -314,7 +314,7 @@ export default function ParticleScene({
     
     // 计算粒子密度 - 根据模型大小自适应
     const modelVolume = modelSize.x * modelSize.y * modelSize.z;
-    const baseDensity = 400000; // 每单位体积的基础粒子数（增加8倍）
+    const baseDensity = 650000; // 每单位体积的基础粒子数
     const particleDensity = baseDensity / Math.max(1, modelVolume);
     
     console.log('Particle density:', particleDensity);
@@ -434,7 +434,7 @@ export default function ParticleScene({
     setLoadingProgress(80);
 
     // 限制最大粒子数
-    const maxParticles = 1200000; // 增加最大粒子数
+    const maxParticles = 2000000; // 最大粒子数
     let sampledPositions = positions;
     let sampledColors = colors;
     
@@ -471,7 +471,7 @@ export default function ParticleScene({
 
     // 创建粒子材质 - 更小的粒子
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.010, // 较小的粒子大小
+      size: 0.002, // 精细的粒子大小
       vertexColors: true,
       transparent: true,
       opacity: 0.95,
