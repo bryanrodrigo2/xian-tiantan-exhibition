@@ -6,14 +6,22 @@ import { ZoomIn, Quote, Lightbulb, Users } from "lucide-react";
 import { Lightbox } from "@/components/ui/lightbox";
 
 // 模拟CAD图纸数据
-const cadDrawings = Array.from({ length: 10 }).map((_, i) => ({
-  id: i + 1,
-  title: `天坛测绘图纸 ${i + 1}`,
-  type: i < 3 ? "平面图" : i < 6 ? "立面图" : "剖面图",
-  description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
-  // 使用占位图片
-  src: `https://placehold.co/1920x1080/1a1a1a/FFF?text=CAD+Drawing+${i + 1}`
-}));
+const cadDrawings = [
+  {
+    id: 1,
+    title: "天坛及周边地区总平图",
+    type: "",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/zongpingtu.png"
+  },
+  ...Array.from({ length: 9 }).map((_, i) => ({
+    id: i + 2,
+    title: `天坛测绘图纸 ${i + 2}`,
+    type: i < 2 ? "平面图" : i < 5 ? "立面图" : "剖面图",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: `https://placehold.co/1920x1080/1a1a1a/FFF?text=CAD+Drawing+${i + 2}`
+  }))
+];
 
 // 模拟现状模型截图
 const currentModels = [
@@ -126,8 +134,8 @@ export default function Survey() {
                     
                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
                       <h3 className="text-white font-bold truncate">{item.title}</h3>
-                      <p className="text-xs text-white/60">{item.type}</p>
-                      <p className="text-xs text-red-500 mt-1 font-mono">[待替换为真实CAD图]</p>
+                      {item.type && <p className="text-xs text-white/60">{item.type}</p>}
+                      {item.id !== 1 && <p className="text-xs text-red-500 mt-1 font-mono">[待替换为真实CAD图]</p>}
                     </div>
                   </div>
                 </motion.div>
