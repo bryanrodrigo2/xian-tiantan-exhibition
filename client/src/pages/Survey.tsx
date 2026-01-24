@@ -165,7 +165,6 @@ export default function Survey() {
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                     <h3 className="text-white font-bold">{item.title}</h3>
-                    <p className="text-xs text-red-500">[待替换为实景照片]</p>
                   </div>
                 </div>
               ))}
