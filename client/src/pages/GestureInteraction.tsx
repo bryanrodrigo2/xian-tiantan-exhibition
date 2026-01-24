@@ -7,20 +7,30 @@ import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState, HandPosition } from '@/hooks/useHandGesture';
 
 
-// 检测是否为移动设备
-const isMobileDevice = () => {
+// 检测设备类型：'desktop' | 'tablet' | 'mobile'
+const getDeviceType = (): 'desktop' | 'tablet' | 'mobile' => {
   const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-  const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
-  const isMobile = mobileRegex.test(userAgent.toLowerCase());
-  const isSmallScreen = window.innerWidth <= 768;
-  return isMobile || isSmallScreen;
+  const width = window.innerWidth;
+  
+  // 检测平板设备
+  const isTablet = /ipad|android(?!.*mobile)|tablet|kindle|silk|playbook/i.test(userAgent.toLowerCase()) ||
+                  (width > 768 && width <= 1024);
+  
+  // 检测手机设备
+  const isMobile = /android.*mobile|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase()) ||
+                   width <= 768;
+  
+  if (isMobile) return 'mobile';
+  if (isTablet) return 'tablet';
+  return 'desktop';
 };
 
 // 模型 URL 列表 - 根据设备类型选择
 const getModelUrls = () => {
-  const isMobile = isMobileDevice();
-  if (isMobile) {
-    // 移动端使用优化后的模型
+  const deviceType = getDeviceType();
+  
+  if (deviceType === 'mobile' || deviceType === 'tablet') {
+    // 移动端和平板使用优化后的模型
     return [
       '/models/tiantan-mobile.obj',
       'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
@@ -37,8 +47,8 @@ const getModelUrls = () => {
 
 // MTL 材质文件 URL - 根据设备类型选择
 const getMtlUrl = () => {
-  const isMobile = isMobileDevice();
-  if (isMobile) {
+  const deviceType = getDeviceType();
+  if (deviceType === 'mobile' || deviceType === 'tablet') {
     return '/models/tiantan-mobile.mtl';
   } else {
     return 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
@@ -84,7 +94,7 @@ export default function GestureInteraction() {
   // 处理模型加载完成
   const handleModelLoadComplete = useCallback(() => {
     console.log('Model loaded successfully from:', MODEL_URLS[modelUrlIndex]);
-    console.log('Device type:', isMobileDevice() ? 'Mobile' : 'Desktop');
+    console.log('Device type:', getDeviceType());
     setModelLoaded(true);
     setModelError(null);
   }, [MODEL_URLS, modelUrlIndex]);
@@ -92,7 +102,7 @@ export default function GestureInteraction() {
   // 处理模型加载错误 - 尝试备用源
   const handleModelLoadError = useCallback((errorMsg: string) => {
     console.error('Model load error:', errorMsg, 'Current URL index:', modelUrlIndex);
-    console.error('Device type:', isMobileDevice() ? 'Mobile' : 'Desktop');
+    console.error('Device type:', getDeviceType());
     
     // 如果还有备用源，尝试下一个
     if (modelUrlIndex < MODEL_URLS.length - 1) {

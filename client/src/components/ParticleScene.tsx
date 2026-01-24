@@ -340,16 +340,33 @@ export default function ParticleScene({
     // 计算粒子密度 - 根据模型大小和设备类型自适应
     const modelVolume = modelSize.x * modelSize.y * modelSize.z;
     
-    // 检测移动设备
-    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-      navigator.userAgent.toLowerCase()
-    ) || window.innerWidth <= 768;
+    // 检测设备类型
+    const userAgent = navigator.userAgent.toLowerCase();
+    const width = window.innerWidth;
     
-    // 移动端进一步降低粒子密度，PC端保持原有设置
-    const baseDensity = isMobile ? 400000 : 800000; // 移动端: 400k (-50%), PC端: 800k
+    const isTablet = /ipad|android(?!.*mobile)|tablet|kindle|silk|playbook/i.test(userAgent) ||
+                    (width > 768 && width <= 1024);
+    const isMobile = /android.*mobile|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent) ||
+                     width <= 768;
+    
+    let deviceType: 'desktop' | 'tablet' | 'mobile';
+    if (isMobile) deviceType = 'mobile';
+    else if (isTablet) deviceType = 'tablet';
+    else deviceType = 'desktop';
+    
+    // 根据设备类型设置粒子密度
+    let baseDensity: number;
+    if (deviceType === 'mobile') {
+      baseDensity = 300000; // 手机: 300k (-62.5%)
+    } else if (deviceType === 'tablet') {
+      baseDensity = 250000; // 平板: 250k (-68.75%) - 进一步降低
+    } else {
+      baseDensity = 800000; // PC: 800k
+    }
+    
     const particleDensity = baseDensity / Math.max(1, modelVolume);
     
-    console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
+    console.log('Device type:', deviceType);
     console.log('Base density:', baseDensity);
     
     console.log('Particle density:', particleDensity);
@@ -468,8 +485,15 @@ export default function ParticleScene({
 
     setLoadingProgress(80);
 
-    // 限制最大粒子数 - 移动端进一步降低
-    const maxParticles = isMobile ? 600000 : 1200000; // 移动端: 600k (-50%), PC端: 1200k
+    // 限制最大粒子数 - 根据设备类型调整
+    let maxParticles: number;
+    if (deviceType === 'mobile') {
+      maxParticles = 450000; // 手机: 450k (-62.5%)
+    } else if (deviceType === 'tablet') {
+      maxParticles = 375000; // 平板: 375k (-68.75%) - 进一步降低
+    } else {
+      maxParticles = 1200000; // PC: 1200k
+    }
     let sampledPositions = positions;
     let sampledColors = colors;
     
