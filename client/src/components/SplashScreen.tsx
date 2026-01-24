@@ -36,7 +36,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
               transition={{ duration: 3, repeat: Infinity }}
               className="mb-8"
             >
-              <img src="/logo_new.png" alt="Logo" className="w-32 h-32 object-contain" />
+              <img src="/logo_new.png" alt="Logo" className="w-128 h-128 object-contain" />
             </motion.div>
           </motion.div>
 
