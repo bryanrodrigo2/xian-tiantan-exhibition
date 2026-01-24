@@ -41,12 +41,12 @@ export default function Layout({ children, className, showBack = true }: LayoutP
             <Link href="/">
               <div className="group flex items-center gap-3 cursor-pointer transition-all duration-300 hover:opacity-80 hover:scale-105">
                 {/* 仅保留放大的Logo，移除背景圆圈和文字 */}
-                <img src="/logo_new.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
+                <img src="/logo_new.png" alt="Logo" className="w-28 h-28 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
               </div>
             </Link>
           ) : (
             <div className="flex items-center gap-3">
-              <img src="/logo_new.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
+              <img src="/logo_new.png" alt="Logo" className="w-28 h-28 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
               {/* 移除了文字 "西安隋唐天坛" */}
             </div>
           )}

@@ -169,7 +169,7 @@ export default function GestureInteraction() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <img src="/logo_new.png" alt="Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
+              <img src="/logo_new.png" alt="Logo" className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]" />
 
             </motion.div>
           </Link>

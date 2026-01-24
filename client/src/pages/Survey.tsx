@@ -28,17 +28,17 @@ const currentModels = [
   {
     id: 1,
     title: "天坛遗址全景",
-    src: "https://placehold.co/800x600/2a2a2a/FFF?text=Site+Panorama"
+    src: "/tiantan_panorama.jpg"
   },
   {
     id: 2,
-    title: "圜丘遗址细节",
-    src: "https://placehold.co/800x600/2a2a2a/FFF?text=Detail+View"
+    title: "圆丘遗址细节",
+    src: "/yuanqiu_detail.jpg"
   },
   {
     id: 3,
     title: "周边环境现状",
-    src: "https://placehold.co/800x600/2a2a2a/FFF?text=Surroundings"
+    src: "/surrounding_environment.jpg"
   }
 ];
 
