@@ -45,6 +45,16 @@ async function fetchModelWithRetry(url: string, maxRetries = 3): Promise<ArrayBu
   throw lastError || new Error('Failed to fetch model');
 }
 
+// 天坛模型的典型颜色调色板
+const TIANTAN_COLORS = [
+  new THREE.Color(0x6b8e23), // 草地绿色
+  new THREE.Color(0x9a8b7a), // 石头灰褐色
+  new THREE.Color(0x8b7355), // 土黄色
+  new THREE.Color(0x7a8b6b), // 暗绿色
+  new THREE.Color(0xa0937a), // 浅褐色
+  new THREE.Color(0x5a6b4a), // 深绿色
+];
+
 export default function ParticleScene({ modelUrl, gestureState, className, onLoadComplete, onLoadError }: ParticleSceneProps) {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStatus, setLoadingStatus] = useState('正在加载模型...');
@@ -116,11 +126,11 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
     controlsRef.current = controls;
 
     // 添加环境光
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
     scene.add(ambientLight);
 
     // 添加方向光
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
     directionalLight.position.set(5, 10, 5);
     scene.add(directionalLight);
 
@@ -189,46 +199,11 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         positions.needsUpdate = true;
         
         const material = pointsRef.current.material as THREE.PointsMaterial;
-        material.opacity = 0.9 - progress * 0.3;
+        material.opacity = 0.95 - progress * 0.3;
       }
       
       controls.update();
       renderer.render(scene, camera);
-    };
-
-    // 从纹理采样颜色的辅助函数
-    const sampleTextureColor = (
-      texture: THREE.Texture,
-      uv: { x: number; y: number }
-    ): THREE.Color | null => {
-      const image = texture.image;
-      if (!image) return null;
-
-      try {
-        // 创建临时 canvas
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return null;
-
-        const imgWidth = image.width || image.naturalWidth || 256;
-        const imgHeight = image.height || image.naturalHeight || 256;
-        
-        canvas.width = imgWidth;
-        canvas.height = imgHeight;
-        
-        // 绘制图像
-        ctx.drawImage(image, 0, 0, imgWidth, imgHeight);
-
-        // 计算像素坐标 (UV y 坐标需要翻转)
-        const x = Math.floor(Math.abs(uv.x % 1) * imgWidth);
-        const y = Math.floor(Math.abs((1 - uv.y % 1)) * imgHeight);
-
-        const pixel = ctx.getImageData(x, y, 1, 1).data;
-        return new THREE.Color(pixel[0] / 255, pixel[1] / 255, pixel[2] / 255);
-      } catch (e) {
-        console.warn('Failed to sample texture:', e);
-        return null;
-      }
     };
 
     // 使用 fetch 预加载模型
@@ -256,39 +231,33 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           const positions: number[] = [];
           const colors: number[] = [];
           
+          let meshIndex = 0;
+          
           // 遍历所有网格
           model.traverse((child) => {
             if (child instanceof THREE.Mesh && child.geometry) {
               const geometry = child.geometry;
               const positionAttribute = geometry.getAttribute('position');
-              const uvAttribute = geometry.getAttribute('uv');
               const colorAttribute = geometry.getAttribute('color');
               
               // 获取材质信息
               const material = Array.isArray(child.material) ? child.material[0] : child.material;
-              let texture: THREE.Texture | null = null;
               let baseColor = new THREE.Color(0x808080);
               
               if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshBasicMaterial) {
-                texture = material.map;
                 if (material.color) {
                   baseColor = material.color.clone();
+                  // 如果材质颜色太暗，使用调色板中的颜色
+                  const brightness = (baseColor.r + baseColor.g + baseColor.b) / 3;
+                  if (brightness < 0.2) {
+                    baseColor = TIANTAN_COLORS[meshIndex % TIANTAN_COLORS.length].clone();
+                  }
                 }
               }
               
               // 应用模型的世界矩阵
               child.updateWorldMatrix(true, false);
               const matrix = child.matrixWorld;
-              
-              // 尝试从纹理采样一次，检查是否可用
-              let textureAvailable = false;
-              if (texture && uvAttribute && texture.image) {
-                const testColor = sampleTextureColor(texture, { x: 0.5, y: 0.5 });
-                textureAvailable = testColor !== null;
-                if (textureAvailable) {
-                  console.log('Texture sampling available for mesh');
-                }
-              }
               
               for (let i = 0; i < positionAttribute.count; i++) {
                 const vertex = new THREE.Vector3(
@@ -299,40 +268,57 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
                 vertex.applyMatrix4(matrix);
                 positions.push(vertex.x, vertex.y, vertex.z);
                 
-                let color: THREE.Color | null = null;
+                let color: THREE.Color;
                 
-                // 1. 优先尝试从纹理采样
-                if (textureAvailable && texture && uvAttribute) {
-                  const uv = {
-                    x: uvAttribute.getX(i),
-                    y: uvAttribute.getY(i)
-                  };
-                  color = sampleTextureColor(texture, uv);
-                }
-                
-                // 2. 其次使用顶点颜色
-                if (!color && colorAttribute) {
+                // 1. 优先使用顶点颜色
+                if (colorAttribute) {
                   color = new THREE.Color(
                     colorAttribute.getX(i),
                     colorAttribute.getY(i),
                     colorAttribute.getZ(i)
                   );
+                  // 如果顶点颜色太暗，增加亮度
+                  const brightness = (color.r + color.g + color.b) / 3;
+                  if (brightness < 0.15) {
+                    // 使用基于位置的颜色变化
+                    const heightFactor = (vertex.y + 5) / 10; // 归一化高度
+                    if (heightFactor < 0.3) {
+                      // 底部 - 草地绿色
+                      color = TIANTAN_COLORS[0].clone();
+                    } else {
+                      // 上部 - 石头颜色
+                      color = TIANTAN_COLORS[1].clone();
+                    }
+                  }
                 }
-                
-                // 3. 最后使用材质基础颜色
-                if (!color) {
-                  color = baseColor.clone();
-                }
-                
-                // 确保颜色不是纯黑色（可能是采样失败）
-                const brightness = (color.r + color.g + color.b) / 3;
-                if (brightness < 0.05) {
-                  // 使用默认的土黄色/灰色（天坛的颜色）
-                  color = new THREE.Color(0x9a8b7a);
+                // 2. 使用材质基础颜色
+                else {
+                  // 基于位置添加颜色变化
+                  const heightFactor = (vertex.y + 5) / 10;
+                  const radiusFactor = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z) / 10;
+                  
+                  if (heightFactor < 0.3 && radiusFactor > 0.5) {
+                    // 外围底部 - 草地
+                    color = TIANTAN_COLORS[0].clone();
+                  } else if (heightFactor < 0.5) {
+                    // 中部 - 石头
+                    color = TIANTAN_COLORS[1].clone();
+                  } else {
+                    // 上部 - 浅色石头
+                    color = TIANTAN_COLORS[4].clone();
+                  }
+                  
+                  // 添加一些随机变化
+                  const variation = 0.1;
+                  color.r = Math.min(1, Math.max(0, color.r + (Math.random() - 0.5) * variation));
+                  color.g = Math.min(1, Math.max(0, color.g + (Math.random() - 0.5) * variation));
+                  color.b = Math.min(1, Math.max(0, color.b + (Math.random() - 0.5) * variation));
                 }
                 
                 colors.push(color.r, color.g, color.b);
               }
+              
+              meshIndex++;
             }
           });
 
@@ -376,13 +362,13 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           // 保存原始位置
           originalPositionsRef.current = positionArray.slice();
 
-          // 创建粒子材质
+          // 创建粒子材质 - 使用加法混合让粒子更亮
           const particleMaterial = new THREE.PointsMaterial({
-            size: 0.03, // 小粒子
+            size: 0.035,
             vertexColors: true,
             transparent: true,
-            opacity: 0.9,
-            blending: THREE.AdditiveBlending, // 使用加法混合让粒子更亮
+            opacity: 0.95,
+            blending: THREE.AdditiveBlending,
             depthWrite: false,
             sizeAttenuation: true,
           });
