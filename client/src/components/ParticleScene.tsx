@@ -471,7 +471,7 @@ export default function ParticleScene({
 
     // 创建粒子材质 - 更小的粒子
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.025, // 适中的粒子大小
+      size: 0.010, // 较小的粒子大小
       vertexColors: true,
       transparent: true,
       opacity: 0.95,
@@ -579,7 +579,7 @@ export default function ParticleScene({
       if (!clockRef.current) return;
       const time = clockRef.current.getElapsedTime();
       
-      const lerpSpeed = 0.02;
+      const lerpSpeed = 0.08; // 增加聚合速度
       progressRef.current += (targetProgressRef.current - progressRef.current) * lerpSpeed;
       
       const rotationLerpSpeed = 0.05;
