@@ -104,58 +104,62 @@ function getColorByPosition(
   const noise2 = (Math.sin(vertex.x * 8 + vertex.z * 8) + 1) * 0.5;
   const noise3 = (Math.sin(vertex.x * 25 + vertex.z * 25) + 1) * 0.5;
   
-  // 优化的颜色定义 - 更鲜艳的绿色和更真实的石头纹理
-  const grassGreen = new THREE.Color(0.45, 0.70, 0.25);      // 更鲜艳的绿色(+20%亮度)
-  const grassDark = new THREE.Color(0.30, 0.45, 0.15);       // 深绿色(+50%亮度)
-  const stoneGray = new THREE.Color(0.38, 0.36, 0.32);       // 深沉的灰色(-45%)
-  const stoneBrown = new THREE.Color(0.32, 0.28, 0.22);      // 深沉的棕色(-50%)
-  const dirtBrown = new THREE.Color(0.28, 0.22, 0.16);       // 深沉的土棕色(-53%)
-  const lightStone = new THREE.Color(0.45, 0.43, 0.38);      // 深沉的浅石色(-42%)
-  const darkStone = new THREE.Color(0.25, 0.23, 0.20);       // 深沉的深石色(-50%)
+  // 冬天风格颜色定义 - 浅灰色建筑、土黄色地面、深绿色植被
+  // 植被区域 - 冬季深绿色，增强对比度
+  const grassGreen = new THREE.Color(0.20, 0.30, 0.18);      // 深墨绿 - 冬季树木
+  const grassDark = new THREE.Color(0.15, 0.22, 0.13);       // 暗绿色 - 阴影植被
+  // 建筑石材 - 浅灰色（冷色调），替换原有的白色
+  const stoneGray = new THREE.Color(0.60, 0.63, 0.65);       // 中灰色 - 主体建筑
+  const stoneBrown = new THREE.Color(0.55, 0.48, 0.35);      // 土黄色 - 地面区域
+  const dirtBrown = new THREE.Color(0.45, 0.38, 0.28);       // 深棕色 - 裸露土地
+  const lightStone = new THREE.Color(0.75, 0.78, 0.80);      // 浅灰白 - 顶部建筑
+  const darkStone = new THREE.Color(0.45, 0.48, 0.50);       // 深灰色 - 边缘阴影
   
   let color: THREE.Color;
   
-  // 优化的分层逻辑 - 更好地呈现圆形阶梯结构
+  // 冬天风格分层逻辑 - 增强边缘对比度
   if (normalizedDist > 0.75) {
-    // 外围草地区域 - 增加绿色比例，更鲜艳的效果
-    const grassBlend = noise * 0.6 + noise3 * 0.4;
-    color = grassGreen.clone().lerp(grassDark, grassBlend * 0.5);
-    color.r += (noise2 - 0.5) * 0.10;
-    color.g += (noise2 - 0.5) * 0.15;
-    color.b += (noise2 - 0.5) * 0.05;
+    // 外围植被区域 - 冬季深绿色，与浅灰建筑形成强烈对比
+    const grassBlend = noise * 0.7 + noise3 * 0.3;
+    color = grassGreen.clone().lerp(grassDark, grassBlend * 0.6);
+    // 增强绿色的深度，减少红蓝分量
+    color.r += (noise2 - 0.5) * 0.05;
+    color.g += (noise2 - 0.5) * 0.08;
+    color.b += (noise2 - 0.5) * 0.03;
   } else if (normalizedDist > 0.20) {
-    // 台阶区域 - 根据高度分为 4 层，从土棕色到浅石头色
+    // 台阶区域 - 根据高度分层，从土黄色地面到浅灰色建筑
     if (normalizedHeight < 0.15) {
-      // 底部 - 温暖土棕色
-      color = dirtBrown.clone().lerp(stoneBrown, noise * 0.5);
-      color.r += (noise2 - 0.5) * 0.08;
-      color.g += (noise2 - 0.5) * 0.06;
-      color.b += (noise2 - 0.5) * 0.04;
+      // 底部 - 深棕色土地，与绿色植被对比
+      color = dirtBrown.clone().lerp(stoneBrown, noise * 0.6);
+      color.r += (noise2 - 0.5) * 0.10;
+      color.g += (noise2 - 0.5) * 0.08;
+      color.b += (noise2 - 0.5) * 0.05;
     } else if (normalizedHeight < 0.35) {
-      // 中下层 - 温暖棕色石头
-      color = stoneBrown.clone().lerp(stoneGray, noise * 0.4);
-      color.r += (noise2 - 0.5) * 0.07;
-      color.g += (noise2 - 0.5) * 0.07;
+      // 中下层 - 土黄色地面，温暖色调
+      color = stoneBrown.clone().lerp(stoneGray, noise * 0.5);
+      color.r += (noise2 - 0.5) * 0.09;
+      color.g += (noise2 - 0.5) * 0.08;
       color.b += (noise2 - 0.5) * 0.06;
     } else if (normalizedHeight < 0.65) {
-      // 中层 - 温暖灰色石头
-      color = stoneGray.clone().lerp(lightStone, noise * 0.3);
-      color.r += (noise2 - 0.5) * 0.07;
-      color.g += (noise2 - 0.5) * 0.07;
+      // 中层 - 中灰色建筑，冷色调
+      color = stoneGray.clone().lerp(lightStone, noise * 0.4);
+      color.r += (noise2 - 0.5) * 0.06;
+      color.g += (noise2 - 0.5) * 0.06;
       color.b += (noise2 - 0.5) * 0.07;
     } else {
-      // 上层 - 浅温暖石头色
-      color = lightStone.clone().lerp(stoneGray, noise * 0.25);
-      color.r += (noise2 - 0.5) * 0.08;
-      color.g += (noise2 - 0.5) * 0.08;
-      color.b += (noise2 - 0.5) * 0.08;
+      // 上层 - 浅灰白建筑，替换原有的白色
+      color = lightStone.clone().lerp(stoneGray, noise * 0.3);
+      color.r += (noise2 - 0.5) * 0.05;
+      color.g += (noise2 - 0.5) * 0.05;
+      color.b += (noise2 - 0.5) * 0.06;
     }
   } else {
-    // 中心圆形顶部 - 增加细节，更丰富的颜色变化
+    // 中心圆形顶部 - 浅灰色主体，增强边缘阴影对比
     const centerBlend = normalizedHeight > 0.5 ? lightStone : stoneGray;
-    color = centerBlend.clone().lerp(darkStone, noise * 0.40);
-    color.r += (noise2 - 0.5) * 0.08;
-    color.g += (noise2 - 0.5) * 0.08;
+    color = centerBlend.clone().lerp(darkStone, noise * 0.35);
+    // 冷色调，微微增强蓝色分量
+    color.r += (noise2 - 0.5) * 0.05;
+    color.g += (noise2 - 0.5) * 0.05;
     color.b += (noise2 - 0.5) * 0.08;
   }
   
