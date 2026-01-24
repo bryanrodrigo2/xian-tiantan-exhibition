@@ -62,6 +62,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
   const progressRef = useRef(0); // 0 = 聚合, 1 = 消散
   const targetProgressRef = useRef(0);
   const clockRef = useRef<THREE.Clock | null>(null);
+  const isInitializedRef = useRef(false);
 
   // 根据手势状态更新目标进度
   useEffect(() => {
@@ -72,28 +73,81 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
     }
   }, [gestureState]);
 
-  // 动画循环函数 - 独立出来以便在模型加载后启动
-  const startAnimationLoop = useCallback(() => {
-    if (!rendererRef.current || !sceneRef.current || !cameraRef.current || !controlsRef.current) {
-      console.error('Cannot start animation: missing required refs');
-      return;
+  const initScene = useCallback(async () => {
+    if (!containerRef.current || isInitializedRef.current) return;
+    isInitializedRef.current = true;
+
+    // 清理旧场景
+    if (rendererRef.current) {
+      rendererRef.current.dispose();
+    }
+    if (animationIdRef.current) {
+      cancelAnimationFrame(animationIdRef.current);
+      animationIdRef.current = null;
     }
 
-    const renderer = rendererRef.current;
-    const scene = sceneRef.current;
-    const camera = cameraRef.current;
-    const controls = controlsRef.current;
+    const container = containerRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    console.log('Initializing scene with dimensions:', width, height);
+
+    // 创建场景
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a0a);
+    sceneRef.current = scene;
+
+    // 创建相机
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    camera.position.set(0, 5, 15);
+    cameraRef.current = camera;
+
+    // 创建渲染器
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    // 创建控制器
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
+    controlsRef.current = controls;
+
+    // 添加环境光
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    // 添加方向光
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 10, 5);
+    scene.add(directionalLight);
 
     // 初始化时钟
-    if (!clockRef.current) {
-      clockRef.current = new THREE.Clock();
-    }
-    const clock = clockRef.current;
+    clockRef.current = new THREE.Clock();
 
+    // 处理窗口大小变化
+    const handleResize = () => {
+      if (!containerRef.current) return;
+      const width = containerRef.current.clientWidth;
+      const height = containerRef.current.clientHeight;
+      
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    };
+    
+    window.addEventListener('resize', handleResize);
+
+    // 动画循环函数
     const animate = () => {
       animationIdRef.current = requestAnimationFrame(animate);
       
-      const time = clock.getElapsedTime();
+      if (!clockRef.current) return;
+      const time = clockRef.current.getElapsedTime();
       
       // 平滑过渡进度
       const lerpSpeed = 0.02;
@@ -149,73 +203,6 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
       controls.update();
       renderer.render(scene, camera);
     };
-    
-    console.log('Starting animation loop');
-    animate();
-  }, []);
-
-  const initScene = useCallback(async () => {
-    if (!containerRef.current) return;
-
-    // 清理旧场景
-    if (rendererRef.current) {
-      rendererRef.current.dispose();
-    }
-    if (animationIdRef.current) {
-      cancelAnimationFrame(animationIdRef.current);
-      animationIdRef.current = null;
-    }
-
-    const container = containerRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-
-    // 创建场景
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0a0a);
-    sceneRef.current = scene;
-
-    // 创建相机
-    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-    camera.position.set(0, 5, 15);
-    cameraRef.current = camera;
-
-    // 创建渲染器
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
-
-    // 创建控制器
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.5;
-    controlsRef.current = controls;
-
-    // 添加环境光
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-
-    // 添加方向光
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 10, 5);
-    scene.add(directionalLight);
-
-    // 处理窗口大小变化
-    const handleResize = () => {
-      if (!containerRef.current) return;
-      const width = containerRef.current.clientWidth;
-      const height = containerRef.current.clientHeight;
-      
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-    };
-    
-    window.addEventListener('resize', handleResize);
 
     // 使用 fetch 预加载模型
     try {
@@ -248,15 +235,21 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
               const geometry = child.geometry;
               const positionAttribute = geometry.getAttribute('position');
               
-              // 获取材质颜色
-              let materialColor = new THREE.Color(0xffffff);
+              // 获取材质颜色 - 使用金色作为默认颜色
+              let materialColor = new THREE.Color(0xd4af37); // 金色
               if (child.material) {
                 if (Array.isArray(child.material)) {
                   if (child.material[0] && 'color' in child.material[0]) {
-                    materialColor = (child.material[0] as THREE.MeshStandardMaterial).color || new THREE.Color(0xffffff);
+                    const matColor = (child.material[0] as THREE.MeshStandardMaterial).color;
+                    if (matColor && (matColor.r > 0.01 || matColor.g > 0.01 || matColor.b > 0.01)) {
+                      materialColor = matColor;
+                    }
                   }
                 } else if ('color' in child.material) {
-                  materialColor = (child.material as THREE.MeshStandardMaterial).color || new THREE.Color(0xffffff);
+                  const matColor = (child.material as THREE.MeshStandardMaterial).color;
+                  if (matColor && (matColor.r > 0.01 || matColor.g > 0.01 || matColor.b > 0.01)) {
+                    materialColor = matColor;
+                  }
                 }
               }
               
@@ -278,17 +271,24 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
                 
                 // 使用顶点颜色或材质颜色
                 if (colorAttribute) {
-                  colors.push(
-                    colorAttribute.getX(i),
-                    colorAttribute.getY(i),
-                    colorAttribute.getZ(i)
-                  );
+                  const r = colorAttribute.getX(i);
+                  const g = colorAttribute.getY(i);
+                  const b = colorAttribute.getZ(i);
+                  // 如果顶点颜色太暗，使用默认金色
+                  if (r > 0.01 || g > 0.01 || b > 0.01) {
+                    colors.push(r, g, b);
+                  } else {
+                    colors.push(materialColor.r, materialColor.g, materialColor.b);
+                  }
                 } else {
                   colors.push(materialColor.r, materialColor.g, materialColor.b);
                 }
               }
             }
           });
+
+          console.log('Collected vertices:', positions.length / 3);
+          console.log('Sample colors:', colors.slice(0, 9));
 
           setLoadingProgress(85);
 
@@ -328,10 +328,10 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
 
           // 创建粒子材质 - 使用顶点颜色，发光软圆点
           const particleMaterial = new THREE.PointsMaterial({
-            size: 0.06,
+            size: 0.08, // 稍微增大粒子尺寸
             vertexColors: true, // 使用顶点颜色保持原始颜色
             transparent: true,
-            opacity: 0.9,
+            opacity: 0.95,
             blending: THREE.AdditiveBlending,
             depthWrite: false,
             sizeAttenuation: true,
@@ -352,6 +352,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
             const size = new THREE.Vector3();
             box.getSize(size);
             const maxDim = Math.max(size.x, size.y, size.z);
+            console.log('Model size:', size, 'Max dimension:', maxDim);
             camera.position.set(0, maxDim * 0.5, maxDim * 1.5);
             controls.target.set(0, 0, 0);
             controls.update();
@@ -360,14 +361,15 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           scene.add(points);
           pointsRef.current = points;
 
-          console.log(`Loaded ${sampledPositions.length / 3} particles with original colors`);
-          
-          // 关键修复：在模型解析完成后才启动动画循环
-          setLoadingProgress(100);
-          setIsLoaded(true);
+          console.log(`Loaded ${sampledPositions.length / 3} particles`);
           
           // 启动动画循环
-          startAnimationLoop();
+          console.log('Starting animation loop');
+          animate();
+          
+          // 更新状态
+          setLoadingProgress(100);
+          setIsLoaded(true);
           
           // 通知父组件加载完成
           onLoadComplete?.();
@@ -396,11 +398,25 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
+      isInitializedRef.current = false;
     };
-  }, [modelUrl, onLoadComplete, onLoadError, startAnimationLoop]);
+  }, [modelUrl, onLoadComplete, onLoadError]);
 
   useEffect(() => {
     initScene();
+    
+    return () => {
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+      }
+      if (rendererRef.current && containerRef.current) {
+        rendererRef.current.dispose();
+        if (containerRef.current.contains(rendererRef.current.domElement)) {
+          containerRef.current.removeChild(rendererRef.current.domElement);
+        }
+      }
+      isInitializedRef.current = false;
+    };
   }, [initScene]);
 
   return (
