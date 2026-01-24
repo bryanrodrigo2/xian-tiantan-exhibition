@@ -471,7 +471,7 @@ export default function ParticleScene({
 
     // 创建粒子材质 - 更小的粒子
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.015, // 适中的粒子大小
+      size: 0.040, // 较大的粒子大小
       vertexColors: true,
       transparent: true,
       opacity: 0.95,
