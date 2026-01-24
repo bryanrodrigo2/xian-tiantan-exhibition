@@ -6,15 +6,15 @@ import { Button } from '@/components/ui/button';
 import ParticleScene from '@/components/ParticleScene';
 import { useHandGesture, GestureState, HandPosition } from '@/hooks/useHandGesture';
 
-// 模型 URL 列表 - 使用高质量 OBJ 模型
+// 模型 URL 列表 - 使用阿里云 OSS CDN 加速
 const MODEL_URLS = [
-  '/models/tiantan.obj',
+  'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
   '/models/tiantan_large.glb',
   '/models/tiantan123.glb',
 ];
 
-// MTL 材质文件 URL
-const MTL_URL = '/models/tiantan.mtl';
+// MTL 材质文件 URL - 阿里云 OSS
+const MTL_URL = 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
 
 export default function GestureInteraction() {
   const [trackingEnabled, setTrackingEnabled] = useState(false);
