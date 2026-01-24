@@ -24,12 +24,14 @@ export default function GestureInteraction() {
     console.log('Gesture changed:', gesture);
   }, []);
 
-  const { gestureState, isLoading, error, cameraActive } = useHandGesture({
+  // 只有在 trackingEnabled 为 true 时才启用手势识别
+  const { gestureState, isLoading: handLoading, error, cameraActive } = useHandGesture({
     enabled: trackingEnabled,
     onGestureChange: handleGestureChange,
   });
 
   const toggleTracking = () => {
+    console.log('Toggle tracking, current:', trackingEnabled, 'modelLoaded:', modelLoaded);
     setTrackingEnabled(!trackingEnabled);
   };
 
@@ -74,8 +76,25 @@ export default function GestureInteraction() {
     }
   };
 
+  // 获取状态文本
+  const getStatusText = () => {
+    if (!modelLoaded) {
+      return '正在加载模型...';
+    }
+    if (trackingEnabled && handLoading) {
+      return '正在初始化手势识别...';
+    }
+    if (cameraActive) {
+      return '摄像头已启用';
+    }
+    return '摄像头未启用';
+  };
+
   const gestureInfo = getGestureInfo();
   const currentModelUrl = MODEL_URLS[modelUrlIndex];
+
+  // 按钮是否禁用：只有在模型未加载或手势识别正在初始化时禁用
+  const isButtonDisabled = !modelLoaded || (trackingEnabled && handLoading);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
@@ -152,8 +171,8 @@ export default function GestureInteraction() {
             </div>
           )}
 
-          {/* 手势状态指示器 */}
-          {modelLoaded && (
+          {/* 手势状态指示器 - 只在摄像头启用时显示 */}
+          {modelLoaded && cameraActive && (
             <motion.div 
               className={`absolute bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full ${gestureInfo.bgColor} backdrop-blur-md border border-white/10`}
               animate={{ scale: gestureState !== 'neutral' ? [1, 1.05, 1] : 1 }}
@@ -174,26 +193,31 @@ export default function GestureInteraction() {
               <div className="flex items-center justify-between gap-4">
                 {/* 摄像头状态 */}
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${cameraActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                  <div className={`w-3 h-3 rounded-full ${cameraActive ? 'bg-green-500 animate-pulse' : modelLoaded ? 'bg-yellow-500' : 'bg-red-500'}`} />
                   <span className="text-sm text-white/60">
-                    {isLoading ? '正在初始化...' : cameraActive ? '摄像头已启用' : '摄像头未启用'}
+                    {getStatusText()}
                   </span>
                 </div>
 
                 {/* 控制按钮 */}
                 <Button
                   onClick={toggleTracking}
-                  disabled={isLoading || !modelLoaded}
+                  disabled={isButtonDisabled}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
                     trackingEnabled 
                       ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30' 
                       : 'bg-primary text-black hover:bg-primary/80'
-                  }`}
+                  } ${isButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {isLoading ? (
+                  {!modelLoaded ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      加载中...
+                      加载模型中...
+                    </>
+                  ) : trackingEnabled && handLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      初始化中...
                     </>
                   ) : trackingEnabled ? (
                     <>

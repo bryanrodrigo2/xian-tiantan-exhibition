@@ -36,7 +36,6 @@ async function fetchModelWithRetry(url: string, maxRetries = 3): Promise<ArrayBu
       lastError = error instanceof Error ? error : new Error(String(error));
       console.warn(`Fetch attempt ${attempt + 1} failed:`, lastError.message);
       
-      // 等待一段时间后重试
       if (attempt < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
       }
@@ -59,7 +58,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
   const pointsRef = useRef<THREE.Points | null>(null);
   const originalPositionsRef = useRef<Float32Array | null>(null);
   const animationIdRef = useRef<number | null>(null);
-  const progressRef = useRef(0); // 0 = 聚合, 1 = 消散
+  const progressRef = useRef(0);
   const targetProgressRef = useRef(0);
   const clockRef = useRef<THREE.Clock | null>(null);
   const isInitializedRef = useRef(false);
@@ -67,9 +66,9 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
   // 根据手势状态更新目标进度
   useEffect(() => {
     if (gestureState === 'open') {
-      targetProgressRef.current = 1; // 消散
+      targetProgressRef.current = 1;
     } else if (gestureState === 'closed') {
-      targetProgressRef.current = 0; // 聚合
+      targetProgressRef.current = 0;
     }
   }, [gestureState]);
 
@@ -77,7 +76,6 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
     if (!containerRef.current || isInitializedRef.current) return;
     isInitializedRef.current = true;
 
-    // 清理旧场景
     if (rendererRef.current) {
       rendererRef.current.dispose();
     }
@@ -162,26 +160,21 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         for (let i = 0; i < positions.count; i++) {
           const i3 = i * 3;
           
-          // 原始位置
           const ox = original[i3];
           const oy = original[i3 + 1];
           const oz = original[i3 + 2];
           
-          // 消散方向（从中心向外）
           const length = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1;
           const nx = ox / length;
           const ny = oy / length;
           const nz = oz / length;
           
-          // 消散距离
           const disperseDistance = 8 + Math.sin(time * 2 + i * 0.01) * 0.5;
           
-          // 轻微漂浮效果
           const floatX = Math.sin(time * 1.5 + i * 0.1) * 0.02;
           const floatY = Math.cos(time * 1.2 + i * 0.15) * 0.02;
           const floatZ = Math.sin(time * 1.8 + i * 0.12) * 0.02;
           
-          // 插值计算最终位置
           const targetX = ox + nx * disperseDistance * progress;
           const targetY = oy + ny * disperseDistance * progress;
           const targetZ = oz + nz * disperseDistance * progress;
@@ -195,7 +188,6 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
         }
         positions.needsUpdate = true;
         
-        // 更新透明度
         const material = pointsRef.current.material as THREE.PointsMaterial;
         material.opacity = 0.9 - progress * 0.4;
       }
@@ -214,7 +206,6 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
       setLoadingStatus('正在解析模型...');
       setLoadingProgress(50);
       
-      // 使用 GLTFLoader 解析已下载的数据
       const loader = new GLTFLoader();
       
       loader.parse(
@@ -226,7 +217,7 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           
           const model = gltf.scene;
           
-          // 收集所有顶点和颜色
+          // 收集所有顶点和颜色 - 保留模型原本的材质颜色
           const positions: number[] = [];
           const colors: number[] = [];
           
@@ -235,20 +226,20 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
               const geometry = child.geometry;
               const positionAttribute = geometry.getAttribute('position');
               
-              // 获取材质颜色 - 使用金色作为默认颜色
-              let materialColor = new THREE.Color(0xd4af37); // 金色
+              // 获取材质颜色 - 保留原本颜色，默认白色
+              let materialColor = new THREE.Color(0xffffff);
               if (child.material) {
                 if (Array.isArray(child.material)) {
                   if (child.material[0] && 'color' in child.material[0]) {
                     const matColor = (child.material[0] as THREE.MeshStandardMaterial).color;
-                    if (matColor && (matColor.r > 0.01 || matColor.g > 0.01 || matColor.b > 0.01)) {
-                      materialColor = matColor;
+                    if (matColor) {
+                      materialColor = matColor.clone();
                     }
                   }
                 } else if ('color' in child.material) {
                   const matColor = (child.material as THREE.MeshStandardMaterial).color;
-                  if (matColor && (matColor.r > 0.01 || matColor.g > 0.01 || matColor.b > 0.01)) {
-                    materialColor = matColor;
+                  if (matColor) {
+                    materialColor = matColor.clone();
                   }
                 }
               }
@@ -269,17 +260,13 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
                 vertex.applyMatrix4(matrix);
                 positions.push(vertex.x, vertex.y, vertex.z);
                 
-                // 使用顶点颜色或材质颜色
+                // 使用顶点颜色或材质颜色 - 保留原本颜色
                 if (colorAttribute) {
-                  const r = colorAttribute.getX(i);
-                  const g = colorAttribute.getY(i);
-                  const b = colorAttribute.getZ(i);
-                  // 如果顶点颜色太暗，使用默认金色
-                  if (r > 0.01 || g > 0.01 || b > 0.01) {
-                    colors.push(r, g, b);
-                  } else {
-                    colors.push(materialColor.r, materialColor.g, materialColor.b);
-                  }
+                  colors.push(
+                    colorAttribute.getX(i),
+                    colorAttribute.getY(i),
+                    colorAttribute.getZ(i)
+                  );
                 } else {
                   colors.push(materialColor.r, materialColor.g, materialColor.b);
                 }
@@ -288,7 +275,6 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           });
 
           console.log('Collected vertices:', positions.length / 3);
-          console.log('Sample colors:', colors.slice(0, 9));
 
           setLoadingProgress(85);
 
@@ -326,13 +312,13 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
           // 保存原始位置
           originalPositionsRef.current = positionArray.slice();
 
-          // 创建粒子材质 - 使用顶点颜色，发光软圆点
+          // 创建粒子材质 - 使用普通混合模式保留原本颜色
           const particleMaterial = new THREE.PointsMaterial({
-            size: 0.08, // 稍微增大粒子尺寸
-            vertexColors: true, // 使用顶点颜色保持原始颜色
+            size: 0.06,
+            vertexColors: true,
             transparent: true,
-            opacity: 0.95,
-            blending: THREE.AdditiveBlending,
+            opacity: 0.9,
+            blending: THREE.NormalBlending, // 使用普通混合模式保留原本颜色
             depthWrite: false,
             sizeAttenuation: true,
           });
@@ -348,7 +334,6 @@ export default function ParticleScene({ modelUrl, gestureState, className, onLoa
             box.getCenter(center);
             points.position.sub(center);
             
-            // 调整相机位置以适应模型大小
             const size = new THREE.Vector3();
             box.getSize(size);
             const maxDim = Math.max(size.x, size.y, size.z);
