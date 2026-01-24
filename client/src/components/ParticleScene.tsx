@@ -107,11 +107,11 @@ function getColorByPosition(
   // 优化的颜色定义 - 更鲜艳的绿色和更真实的石头纹理
   const grassGreen = new THREE.Color(0.45, 0.70, 0.25);      // 更鲜艳的绿色(+20%亮度)
   const grassDark = new THREE.Color(0.30, 0.45, 0.15);       // 深绿色(+50%亮度)
-  const stoneGray = new THREE.Color(0.50, 0.48, 0.42);       // 降低亮度的灰色(-30%)
-  const stoneBrown = new THREE.Color(0.45, 0.40, 0.32);      // 降低亮度的棕色(-30%)
-  const dirtBrown = new THREE.Color(0.40, 0.32, 0.24);       // 降低亮度的土棕色(-33%)
-  const lightStone = new THREE.Color(0.58, 0.56, 0.50);      // 降低亮度的浅石头色(-25%)
-  const darkStone = new THREE.Color(0.35, 0.33, 0.28);       // 降低亮度的深石头色(-30%)
+  const stoneGray = new THREE.Color(0.38, 0.36, 0.32);       // 深沉的灰色(-45%)
+  const stoneBrown = new THREE.Color(0.32, 0.28, 0.22);      // 深沉的棕色(-50%)
+  const dirtBrown = new THREE.Color(0.28, 0.22, 0.16);       // 深沉的土棕色(-53%)
+  const lightStone = new THREE.Color(0.45, 0.43, 0.38);      // 深沉的浅石色(-42%)
+  const darkStone = new THREE.Color(0.25, 0.23, 0.20);       // 深沉的深石色(-50%)
   
   let color: THREE.Color;
   
@@ -577,11 +577,11 @@ export default function ParticleScene({
     controlsRef.current = controls;
 
     // 增强环境光以提供基础照明
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);  // 提升环境光强度(+33%)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);  // 降低环境光强度(-38%)
     scene.add(ambientLight);
 
     // 主方向光 - 从左上方照射，增强立体感
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);  // 提升主光强度(+29%)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);  // 降低主光强度(-22%)
     directionalLight.position.set(8, 12, 8);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
@@ -595,12 +595,12 @@ export default function ParticleScene({
     scene.add(directionalLight);
 
     // 补光 - 从右下方照射，减少阴影过深
-    const fillLight = new THREE.DirectionalLight(0x8899ff, 0.5);  // 提升补光强度(+67%)
+    const fillLight = new THREE.DirectionalLight(0x8899ff, 0.3);  // 降低补光强度(-40%)
     fillLight.position.set(-5, 5, -5);
     scene.add(fillLight);
 
     // 背光 - 从后方照射，增强轮廓感
-    const backLight = new THREE.DirectionalLight(0xffaa88, 0.35);  // 提升背光强度(+75%)
+    const backLight = new THREE.DirectionalLight(0xffaa88, 0.2);  // 降低背光强度(-43%)
     backLight.position.set(0, 8, -10);
     scene.add(backLight);
 
