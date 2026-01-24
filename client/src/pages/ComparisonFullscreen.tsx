@@ -68,7 +68,7 @@ export default function ComparisonFullscreen() {
         <img 
           src="/logo_new.png" 
           alt="Logo" 
-          className="w-16 h-16 md:w-20 md:h-20 drop-shadow-2xl hover:drop-shadow-[0_0_20px_rgba(255,215,0,0.5)] transition-all duration-300"
+          className="w-12 h-12 drop-shadow-2xl hover:drop-shadow-[0_0_20px_rgba(255,215,0,0.5)] transition-all duration-300"
         />
       </motion.div>
 
@@ -82,7 +82,7 @@ export default function ComparisonFullscreen() {
           <img 
             src="/xianzhuangyizhi.png" 
             alt="现状遗址" 
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
           <div className="absolute top-6 right-6 bg-black/70 backdrop-blur-sm px-6 py-3 rounded-lg border border-white/20">
             <p className="text-white/90 text-lg md:text-2xl font-bold">现状遗址</p>
@@ -98,9 +98,9 @@ export default function ComparisonFullscreen() {
           <img 
             src="https://placehold.co/1920x1080/5d4037/FFF?text=Restored+Tang+Model" 
             alt="唐代复原" 
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute top-6 left-6 bg-primary/90 backdrop-blur-sm px-6 py-3 rounded-lg border border-black/20">
+          <div className="absolute bottom-6 left-6 bg-primary/90 backdrop-blur-sm px-6 py-3 rounded-lg border border-black/20">
             <p className="text-black text-lg md:text-2xl font-bold">唐代复原</p>
             <p className="text-black/70 text-xs md:text-sm mt-1">Tang Dynasty Restoration</p>
           </div>
@@ -124,21 +124,7 @@ export default function ComparisonFullscreen() {
         </div>
       </div>
 
-      {/* 底部说明文字 */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50"
-      >
-        <div className="bg-black/70 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
-          <p className="text-white/80 text-sm md:text-base">
-            <span className="hidden md:inline">拖动中间滑块</span>
-            <span className="md:hidden">滑动</span>
-            对比古今变化
-          </p>
-        </div>
-      </motion.div>
+
     </div>
   );
 }

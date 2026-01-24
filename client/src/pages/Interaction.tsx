@@ -144,9 +144,9 @@ export default function Interaction() {
           <p className="text-white/60 tracking-widest">INTERACTIVE RESTORATION</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* 左侧：UE交互区域 (8列) */}
-          <div className="lg:col-span-8 flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-8">
+          {/* UE交互区域 */}
+          <div className="flex flex-col gap-4">
             <div className="bg-black/60 border border-primary/30 rounded-xl overflow-hidden relative aspect-video shadow-[0_0_30px_rgba(0,0,0,0.5)]">
               {/* UE5 Pixel Streaming 嵌入区域占位符 */}
               {/* 实际项目中应在此处嵌入 Pixel Streaming 的 Video 标签 */}
@@ -306,63 +306,7 @@ export default function Interaction() {
             </div>
           </div>
 
-          {/* 右侧：古今对比 (4列) */}
-          <div className="lg:col-span-4 flex flex-col h-full">
-            <h2 className="text-2xl font-serif text-white mb-4 border-l-4 border-secondary pl-4">古今对比</h2>
-            
-            {/* 对比容器：包含两张重叠的图片 */}
-            <div 
-              ref={containerRef}
-              className="relative w-full aspect-[3/4] rounded-xl overflow-hidden cursor-ew-resize select-none border border-white/20 shadow-2xl"
-            >
-              {/* 底层：现状模型 (右侧) */}
-              <div className="absolute inset-0 bg-gray-800">
-                <img 
-                  src="/xianzhuangyizhi.png" 
-                  alt="现状模型" 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded text-white/80 text-sm font-bold">现状遗址</div>
-              </div>
 
-              {/* 顶层：复原模型 (左侧) - 通过 clip-path 动态裁剪实现遮罩效果 */}
-              <div 
-                className="absolute inset-0 bg-amber-900"
-                style={{ clipPath: `inset(0 ${100 - sliderValue}% 0 0)` }}
-              >
-                <img 
-                  src="https://placehold.co/600x800/5d4037/FFF?text=Restored+Tang+Model" 
-                  alt="复原模型" 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-4 left-4 bg-primary/80 px-3 py-1 rounded text-black text-sm font-bold">唐代复原</div>
-              </div>
-
-              {/* 滑动条控制杆：跟随 sliderValue 移动 */}
-              <div 
-                className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-10 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
-                style={{ left: `${sliderValue}%` }}
-                onMouseDown={handleMouseDown}
-                onTouchStart={handleTouchStart}
-              >
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 8L22 12L18 16" />
-                      <path d="M6 8L2 12L6 16" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-4 bg-white/5 p-4 rounded-lg border border-white/10">
-              <h3 className="text-primary font-bold mb-2">建筑形制对比</h3>
-              <p className="text-sm text-white/70 leading-relaxed">
-                拖动滑块对比现状遗址与唐代复原模型。可见唐代圜丘为四层圆坛，而现状仅存土芯。复原模型依据《大唐开元礼》及考古数据重建了白灰抹面与朱红栏杆。
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* 祭天大典流程详解 - 增加 AI 礼官解说 */}
