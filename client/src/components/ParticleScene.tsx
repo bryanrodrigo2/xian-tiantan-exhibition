@@ -105,49 +105,58 @@ function getColorByPosition(
   const noise3 = (Math.sin(vertex.x * 25 + vertex.z * 25) + 1) * 0.5;
   
   // 优化的颜色定义 - 更鲜艳的绿色和更真实的石头纹理
-  const grassGreen = new THREE.Color(0.35, 0.55, 0.20);      // 更鲜艳的绿色
-  const grassDark = new THREE.Color(0.22, 0.38, 0.12);       // 更深的绿色
-  const stoneGray = new THREE.Color(0.55, 0.53, 0.48);       // 更温暖的灰色
-  const stoneBrown = new THREE.Color(0.50, 0.46, 0.40);      // 更深的棕色
-  const dirtBrown = new THREE.Color(0.45, 0.38, 0.30);       // 更深的土棕色
-  const lightStone = new THREE.Color(0.62, 0.60, 0.55);      // 更浅的石头色
-  const darkStone = new THREE.Color(0.40, 0.38, 0.34);       // 深石头色
+  const grassGreen = new THREE.Color(0.38, 0.60, 0.18);      // 超鲜艳的绿色（增强鲜艳度）
+  const grassDark = new THREE.Color(0.20, 0.35, 0.10);       // 深绿色（增强深度）
+  const stoneGray = new THREE.Color(0.58, 0.56, 0.50);       // 温暖的灰色（增强温暖感）
+  const stoneBrown = new THREE.Color(0.52, 0.48, 0.42);      // 温暖棕色（增强温暖感）
+  const dirtBrown = new THREE.Color(0.48, 0.40, 0.32);       // 温暖土棕色（增强温暖感）
+  const lightStone = new THREE.Color(0.65, 0.63, 0.58);      // 浅石头色（增强亮度）
+  const darkStone = new THREE.Color(0.38, 0.36, 0.32);       // 深石头色（增强深度）
   
   let color: THREE.Color;
   
   // 优化的分层逻辑 - 更好地呈现圆形阶梯结构
   if (normalizedDist > 0.75) {
-    // 外围草地区域 - 增加绿色比例
-    const grassBlend = noise * 0.7 + noise3 * 0.3;
-    color = grassGreen.clone().lerp(grassDark, grassBlend);
-    color.r += (noise2 - 0.5) * 0.08;
-    color.g += (noise2 - 0.5) * 0.12;
-    color.b += (noise2 - 0.5) * 0.04;
-  } else if (normalizedDist > 0.20) {
-    // 台阶区域 - 根据高度分层
-    if (normalizedHeight < 0.15) {
-      // 底部 - 土棕色
-      color = dirtBrown.clone().lerp(stoneBrown, noise * 0.6);
-    } else if (normalizedHeight < 0.35) {
-      // 中下层 - 棕色石头
-      color = stoneBrown.clone().lerp(stoneGray, noise * 0.5);
-    } else if (normalizedHeight < 0.65) {
-      // 中层 - 灰色石头
-      color = stoneGray.clone().lerp(lightStone, noise * 0.4);
-    } else {
-      // 上层 - 浅石头色
-      color = lightStone.clone().lerp(stoneGray, noise * 0.3);
-    }
-    color.r += (noise2 - 0.5) * 0.06;
-    color.g += (noise2 - 0.5) * 0.06;
-    color.b += (noise2 - 0.5) * 0.06;
-  } else {
-    // 中心圆形顶部 - 更多细节
-    const centerBlend = normalizedHeight > 0.5 ? lightStone : stoneGray;
-    color = centerBlend.clone().lerp(darkStone, noise * 0.35);
-    color.r += (noise2 - 0.5) * 0.05;
-    color.g += (noise2 - 0.5) * 0.05;
+    // 外围草地区域 - 增加绿色比例，更鲜艳的效果
+    const grassBlend = noise * 0.6 + noise3 * 0.4;
+    color = grassGreen.clone().lerp(grassDark, grassBlend * 0.5);
+    color.r += (noise2 - 0.5) * 0.10;
+    color.g += (noise2 - 0.5) * 0.15;
     color.b += (noise2 - 0.5) * 0.05;
+  } else if (normalizedDist > 0.20) {
+    // 台阶区域 - 根据高度分为 4 层，从土棕色到浅石头色
+    if (normalizedHeight < 0.15) {
+      // 底部 - 温暖土棕色
+      color = dirtBrown.clone().lerp(stoneBrown, noise * 0.5);
+      color.r += (noise2 - 0.5) * 0.08;
+      color.g += (noise2 - 0.5) * 0.06;
+      color.b += (noise2 - 0.5) * 0.04;
+    } else if (normalizedHeight < 0.35) {
+      // 中下层 - 温暖棕色石头
+      color = stoneBrown.clone().lerp(stoneGray, noise * 0.4);
+      color.r += (noise2 - 0.5) * 0.07;
+      color.g += (noise2 - 0.5) * 0.07;
+      color.b += (noise2 - 0.5) * 0.06;
+    } else if (normalizedHeight < 0.65) {
+      // 中层 - 温暖灰色石头
+      color = stoneGray.clone().lerp(lightStone, noise * 0.3);
+      color.r += (noise2 - 0.5) * 0.07;
+      color.g += (noise2 - 0.5) * 0.07;
+      color.b += (noise2 - 0.5) * 0.07;
+    } else {
+      // 上层 - 浅温暖石头色
+      color = lightStone.clone().lerp(stoneGray, noise * 0.25);
+      color.r += (noise2 - 0.5) * 0.08;
+      color.g += (noise2 - 0.5) * 0.08;
+      color.b += (noise2 - 0.5) * 0.08;
+    }
+  } else {
+    // 中心圆形顶部 - 增加细节，更丰富的颜色变化
+    const centerBlend = normalizedHeight > 0.5 ? lightStone : stoneGray;
+    color = centerBlend.clone().lerp(darkStone, noise * 0.40);
+    color.r += (noise2 - 0.5) * 0.08;
+    color.g += (noise2 - 0.5) * 0.08;
+    color.b += (noise2 - 0.5) * 0.08;
   }
   
   return color;
@@ -481,9 +490,9 @@ export default function ParticleScene({
     
     originalPositionsRef.current = positionArray.slice();
 
-    // 创建粒子材质 - 更小的粒子
+    // 创建粒子材质 - 优化的粒子大小
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.001, // 极小粒子展示精细细节
+      size: 0.004, // 优化的粒子大小，平衡细节和可见性
       vertexColors: true,
       transparent: true,
       opacity: 0.95,
