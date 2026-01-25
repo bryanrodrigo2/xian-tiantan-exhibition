@@ -362,7 +362,7 @@ export default function ParticleScene({
     // 根据设备类型设置粒子密度 - 终极优化
     let baseDensity: number;
     if (deviceType === 'mobile') {
-      baseDensity = 10000; // 手机: 10k (-98.75%) - 超级优化，最低可用配置
+      baseDensity = 5000; // 手机: 10k (-98.75%) - 超级优化，最低可用配置
     } else if (deviceType === 'tablet') {
       baseDensity = 30000; // 平板: 30k (-96.25%) - 终极优化，确保稳定
     } else {
@@ -493,7 +493,7 @@ export default function ParticleScene({
     // 限制最大粒子数 - 终极优化
     let maxParticles: number;
     if (deviceType === 'mobile') {
-      maxParticles = 15000; // 手机: 15k (-98.75%) - 超级优化，最低可用配置
+      maxParticles = 10000; // 手机: 15k (-98.75%) - 超级优化，最低可用配置
     } else if (deviceType === 'tablet') {
       maxParticles = 50000; // 平板: 50k (-95.8%) - 终极优化，确保稳定
     } else {
