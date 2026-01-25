@@ -25,34 +25,18 @@ const getDeviceType = (): 'desktop' | 'tablet' | 'mobile' => {
   return 'desktop';
 };
 
-// 模型 URL 列表 - 根据设备类型选择
+// 模型 URL 列表 - 统一使用阿里云 OSS 托管的模型文件
 const getModelUrls = () => {
-  const deviceType = getDeviceType();
-  
-  if (deviceType === 'mobile' || deviceType === 'tablet') {
-    // 移动端和平板使用优化后的模型
-    return [
-      '/models/tiantan-mobile.obj',
-      'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
-    ];
-  } else {
-    // PC端使用原模型
-    return [
-      'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
-      '/models/tiantan_large.glb',
-      '/models/tiantan123.glb',
-    ];
-  }
+  // 所有设备统一使用阿里云 OSS 的模型文件，确保稳定性和加载速度
+  return [
+    'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
+  ];
 };
 
-// MTL 材质文件 URL - 根据设备类型选择
+// MTL 材质文件 URL - 统一使用阿里云 OSS 托管的材质文件
 const getMtlUrl = () => {
-  const deviceType = getDeviceType();
-  if (deviceType === 'mobile' || deviceType === 'tablet') {
-    return '/models/tiantan-mobile.mtl';
-  } else {
-    return 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
-  }
+  // 所有设备统一使用阿里云 OSS 的材质文件
+  return 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
 };
 
 export default function GestureInteraction() {
