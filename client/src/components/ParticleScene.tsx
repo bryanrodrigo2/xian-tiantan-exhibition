@@ -721,83 +721,27 @@ export default function ParticleScene({
       setLoadingProgress(5);
       
       if (isOBJ) {
-        // 加载OBJ格式
         const objLoader = new OBJLoader();
-        
-        if (mtlUrl) {
-          // 如果有MTL材质文件
-          const mtlLoader = new MTLLoader();
-          const basePath = mtlUrl.substring(0, mtlUrl.lastIndexOf('/') + 1);
-          mtlLoader.setPath(basePath);
-          
-          mtlLoader.load(
-            mtlUrl.substring(mtlUrl.lastIndexOf('/') + 1),
-            (materials) => {
-              materials.preload();
-              objLoader.setMaterials(materials);
-              
-              objLoader.load(
-                modelUrl,
-                (obj) => {
-                  setLoadingProgress(55);
-                  processModel(obj, scene, camera, controls, animate);
-                },
-                (xhr) => {
-                  if (xhr.total > 0) {
-                    setLoadingProgress(5 + Math.round((xhr.loaded / xhr.total) * 45));
-                  }
-                },
-                (error) => {
-                  console.error('Error loading OBJ:', error);
-                  setLoadError('Failed to load OBJ model');
-                  onLoadError?.('Failed to load OBJ model');
-                }
-              );
-            },
-            undefined,
-            (error) => {
-              console.warn('MTL load failed, loading OBJ without materials:', error);
-              // MTL加载失败，尝试只加载OBJ
-              objLoader.load(
-                modelUrl,
-                (obj) => {
-                  setLoadingProgress(55);
-                  processModel(obj, scene, camera, controls, animate);
-                },
-                (xhr) => {
-                  if (xhr.total > 0) {
-                    setLoadingProgress(5 + Math.round((xhr.loaded / xhr.total) * 45));
-                  }
-                },
-                (error) => {
-                  console.error('Error loading OBJ:', error);
-                  setLoadError('Failed to load OBJ model');
-                  onLoadError?.('Failed to load OBJ model');
-                }
-              );
+        console.log("Loading OBJ model (ignoring MTL):", modelUrl);
+        objLoader.load(
+          modelUrl,
+          (obj) => {
+            console.log("OBJ model loaded successfully");
+            setLoadingProgress(55);
+            processModel(obj, scene, camera, controls, animate);
+          },
+          (xhr) => {
+            if (xhr.total > 0) {
+              setLoadingProgress(5 + Math.round((xhr.loaded / xhr.total) * 45));
             }
-          );
-        } else {
-          // 没有MTL文件，直接加载OBJ
-          objLoader.load(
-            modelUrl,
-            (obj) => {
-              setLoadingProgress(55);
-              processModel(obj, scene, camera, controls, animate);
-            },
-            (xhr) => {
-              if (xhr.total > 0) {
-                setLoadingProgress(5 + Math.round((xhr.loaded / xhr.total) * 45));
-              }
-            },
-            (error) => {
-              console.error('Error loading OBJ:', error);
-              setLoadError('Failed to load OBJ model');
-              onLoadError?.('Failed to load OBJ model');
-            }
-          );
-        }
-      } else {
+          },
+          (error) => {
+            console.error("Error loading OBJ:", error);
+            setLoadError("Failed to load OBJ model");
+            onLoadError?.("Failed to load OBJ model");
+          }
+        );
+      }
         // 加载GLB/GLTF格式
         const modelBuffer = await fetchModelWithRetry(modelUrl, 3, (progress) => {
           setLoadingProgress(5 + Math.round(progress * 0.45));
