@@ -29,14 +29,14 @@ const getDeviceType = (): 'desktop' | 'tablet' | 'mobile' => {
 const getModelUrls = () => {
   // 所有设备统一使用阿里云 OSS 的模型文件，确保稳定性和加载速度
   return [
-    'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.obj',
+    'https://tiantan-model.oss-cn-beijing.aliyuncs.com/ttiantan.obj',
   ];
 };
 
 // MTL 材质文件 URL - 统一使用阿里云 OSS 托管的材质文件
 const getMtlUrl = () => {
   // 所有设备统一使用阿里云 OSS 的材质文件
-  return 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/tiantan.mtl';
+  return 'https://tiantan-model.oss-cn-beijing.aliyuncs.com/ttiantan.mtl';
 };
 
 export default function GestureInteraction() {
