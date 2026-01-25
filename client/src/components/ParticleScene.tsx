@@ -742,7 +742,7 @@ export default function ParticleScene({
           }
         );
       }
-        // 加载GLB/GLTF格式
+        else { // 加载GLB/GLTF格式
         const modelBuffer = await fetchModelWithRetry(modelUrl, 3, (progress) => {
           setLoadingProgress(5 + Math.round(progress * 0.45));
         });
