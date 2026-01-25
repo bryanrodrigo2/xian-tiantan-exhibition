@@ -171,10 +171,20 @@ export function useHandGesture(options: UseHandGestureOptions = {}) {
       setIsLoading(true);
       setError(null);
 
-      // 创建 Hands 实例
+      // 创建 Hands 实例 - 使用多个 CDN 源以提高稳定性
+      const cdnSources = [
+        'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
+        'https://unpkg.com/@mediapipe/hands',
+        'https://cdn.skypack.dev/@mediapipe/hands'
+      ];
+      
+      let currentCdnIndex = 0;
+      
       const hands = new Hands({
         locateFile: (file) => {
-          return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+          const cdn = cdnSources[currentCdnIndex % cdnSources.length];
+          console.log(`Loading MediaPipe file from CDN: ${cdn}/${file}`);
+          return `${cdn}/${file}`;
         },
       });
 
