@@ -235,11 +235,6 @@ export default function Interaction() {
                 /* 未激活状态：显示启动按钮 */
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <div className="text-center p-8">
-                    <p className="text-blue-400 font-mono text-lg mb-4 code-text">
-                      // UE5 Pixel Streaming Integration Code<br/>
-                      // const pixelStreaming = new PixelStreaming(config);<br/>
-                      // pixelStreaming.connect();
-                    </p>
                     <p className="text-white/50 mb-6">点击下方按钮启动交互体验</p>
                     <Button 
                       size="lg" 
@@ -303,32 +298,21 @@ export default function Interaction() {
                 </motion.div>
               )}
 
-              {/* 底部交互控制栏 */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur p-4 flex items-center justify-between border-t border-white/10 z-10">
-                <div className="flex items-center gap-2">
-                  <span className="text-primary font-bold mr-2">当前环节:</span>
-                  <span className="text-white">
-                    {streamingActive ? "像素流送已连接 · 正在运行" : "步骤一：陈设与省牲"}
-                  </span>
-                  {streamingActive && (
-                    <span className="ml-2 w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {streamingActive && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="border-red-500/40 hover:bg-red-500/20 text-red-400"
-                      onClick={handleStopStreaming}
-                      title="停止流送"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                  <Button variant="outline" size="icon" className="border-white/20 hover:bg-white/10" onClick={() => { setStreamingActive(false); setShowGuide(false); }}><RotateCcw className="w-4 h-4" /></Button>
-                  <Button variant="outline" size="icon" className="border-white/20 hover:bg-white/10" onClick={handleToggleFullscreen}><Maximize className="w-4 h-4" /></Button>
-                </div>
+              {/* 底部交互控制栏 - 仅保留功能按钮，移除状态文字 */}
+              <div className="absolute bottom-4 right-4 flex gap-2 z-10">
+                {streamingActive && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-black/40 border-red-500/40 hover:bg-red-500/20 text-red-400"
+                    onClick={handleStopStreaming}
+                    title="停止流送"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+                <Button variant="outline" size="icon" className="bg-black/40 border-white/20 hover:bg-white/10" onClick={() => { setStreamingActive(false); setShowGuide(false); }}><RotateCcw className="w-4 h-4" /></Button>
+                <Button variant="outline" size="icon" className="bg-black/40 border-white/20 hover:bg-white/10" onClick={handleToggleFullscreen}><Maximize className="w-4 h-4" /></Button>
               </div>
             </div>
 
@@ -409,69 +393,7 @@ export default function Interaction() {
 
         </div>
 
-        {/* 祭天大典流程详解 - 增加 AI 礼官解说 */}
-        <div className="mt-12">
-          <h2 className="text-3xl font-serif text-white mb-8 text-center border-b border-white/10 pb-4">
-            六步祭天大典流程详解
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ritualSteps.map((step, index) => (
-              <motion.div
-                key={step.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group bg-black/40 border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 hover:-translate-y-1"
-              >
-                {/* 图片区域 */}
-                <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={step.image} 
-                    alt={step.title} 
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute top-4 left-4 bg-black/60 backdrop-blur px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-                    <span className="text-primary">{step.icon}</span>
-                    <span className="text-white text-xs font-bold">STEP 0{step.id}</span>
-                  </div>
-                </div>
 
-                {/* 内容区域 */}
-                <div className="p-6 space-y-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1 flex items-center justify-between">
-                      {step.title}
-                      <span className="text-xs font-normal text-white/40 font-sans">{step.enTitle}</span>
-                    </h3>
-                    <div className="w-12 h-1 bg-primary/50 rounded-full mt-2 group-hover:w-full transition-all duration-500"></div>
-                  </div>
-
-                  {/* AI 礼官解说词 - 新增 */}
-                  <div className="bg-primary/10 border-l-2 border-primary p-3 rounded-r relative">
-                    <MessageSquareQuote className="absolute top-2 right-2 w-4 h-4 text-primary/40" />
-                    <p className="text-primary text-sm font-serif italic">
-                      "{step.npcScript}"
-                    </p>
-                    <p className="text-[10px] text-primary/60 mt-1 text-right">— AI 礼官</p>
-                  </div>
-                  
-                  <p className="text-white/70 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
-                  
-                  <div className="pt-4 border-t border-white/5">
-                    <p className="text-xs text-white/40 font-mono">
-                      <span className="text-primary/60 mr-2">[技术实现]</span>
-                      {step.detail}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
       </div>
     </Layout>
   );
