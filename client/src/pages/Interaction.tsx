@@ -238,10 +238,10 @@ export default function Interaction() {
                     <p className="text-white/50 mb-6">点击下方按钮启动交互体验</p>
                     <Button 
                       size="lg" 
-                      className="bg-primary text-black hover:bg-primary/80 font-bold px-8 py-6 text-lg glow-effect"
+                      className="bg-primary text-black hover:bg-primary/80 font-bold w-20 h-20 rounded-full flex items-center justify-center glow-effect"
                       onClick={handleStartInteraction}
                     >
-                      <Play className="mr-2 w-6 h-6" /> 启动祭祀大典交互
+                      <Play className="w-10 h-10 fill-current" />
                     </Button>
                   </div>
                 </div>
