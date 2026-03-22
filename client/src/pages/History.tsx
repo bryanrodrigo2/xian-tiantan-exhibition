@@ -197,33 +197,34 @@ export default function History() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
           
           {/* 左侧：时间轴列表 */}
-          <div className="lg:col-span-4 flex flex-col h-[600px] lg:h-[760px]">
-            <h2 className="text-2xl font-serif text-white mb-4 border-l-4 border-primary pl-4">历代祭祀时间轴</h2>
-            <div className="flex-1 min-h-0 rounded-lg border border-white/10 bg-black/20 overflow-hidden">
-            <ScrollArea className="h-full w-full">
-              <div className="relative border-l border-white/10 ml-6 space-y-6 py-4 pr-4">
-                {timelineData.map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="relative pl-8 cursor-pointer group"
-                    onClick={() => setSelectedEvent(item)}
-                  >
-                    {/* 时间节点圆点：选中时放大并发光 */}
-                    <div className={`absolute left-[-5px] top-2 w-2.5 h-2.5 rounded-full border-2 border-primary transition-all duration-300 ${selectedEvent.id === item.id ? 'bg-primary scale-150 shadow-[0_0_10px_#EAB308]' : 'bg-black group-hover:scale-125'}`} />
-                    
-                    {/* 时间轴项内容 */}
-                    <div className={`transition-all duration-300 ${selectedEvent.id === item.id ? 'opacity-100 translate-x-2' : 'opacity-60 group-hover:opacity-90'}`}>
-                      <span className="text-primary font-mono text-sm">{item.year}</span>
-                      <h3 className="text-xl font-serif text-white">{item.dynasty} · {item.emperor}</h3>
-                      <p className="text-sm text-white/50">{item.event}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </ScrollArea>
+          <div className="lg:col-span-4 flex flex-col h-[500px] lg:h-[600px]">
+            <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-primary pl-4">历代祭祀时间轴</h2>
+            <div className="flex-1 min-h-0 rounded-lg border border-white/5 bg-black/20 overflow-hidden">
+              <ScrollArea className="h-full w-full">
+                <div className="p-4 space-y-2">
+                  {timelineData.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="relative pl-8 cursor-pointer group"
+                      onClick={() => setSelectedEvent(item)}
+                    >
+                      {/* 时间轴左侧线条 */}
+                      <div className="absolute left-3 top-0 bottom-0 w-px bg-white/10" />
+                      {/* 时间节点圆点：选中时放大并发光 */}
+                      <div className={`absolute left-[7px] top-3 w-2.5 h-2.5 rounded-full border-2 border-primary transition-all duration-300 ${selectedEvent.id === item.id ? 'bg-primary scale-150 shadow-[0_0_10px_#EAB308]' : 'bg-black/80 group-hover:scale-125'}`} />
+                      {/* 时间轴项内容 */}
+                      <div className={`py-3 px-2 rounded-lg transition-all duration-300 ${selectedEvent.id === item.id ? 'opacity-100 bg-primary/10 border border-primary/20' : 'opacity-60 group-hover:opacity-90 hover:bg-white/5'}`}>
+                        <span className="text-primary font-mono text-sm">{item.year}</span>
+                        <h3 className="text-base font-serif text-white leading-snug">{item.dynasty} · {item.emperor}</h3>
+                        <p className="text-xs text-white/50 mt-0.5">{item.event}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
           </div>
 
