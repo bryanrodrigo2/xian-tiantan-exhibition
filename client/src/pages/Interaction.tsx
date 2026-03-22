@@ -3,7 +3,10 @@ import { Link } from "wouter";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard, MessageSquareQuote, Hand } from "lucide-react";
+import { Play, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard, MessageSquareQuote, Hand, X } from "lucide-react";
+
+// UE5 像素流送服务地址
+const PIXEL_STREAMING_URL = "http://127.0.0.1:9000/s?loadType=auto&group=f59yyp331917&runType=box";
 
 // 祭天大典六步流程数据
 const ritualSteps = [
@@ -75,13 +78,44 @@ export default function Interaction() {
   const containerRef = useRef<HTMLDivElement>(null); // 对比容器的引用
   const [isResizing, setIsResizing] = useState(false); // 是否正在拖动滑动条
   const [showGuide, setShowGuide] = useState(false); // 是否显示新手引导动画
+  const [streamingActive, setStreamingActive] = useState(false); // 是否已启动像素流送
+  const [isFullscreen, setIsFullscreen] = useState(false); // 是否全屏
+  const iframeContainerRef = useRef<HTMLDivElement>(null); // 全屏容器引用
 
-  // 启动交互时显示引导
+  // 启动交互：激活像素流送并显示引导
   const handleStartInteraction = () => {
+    setStreamingActive(true);
     setShowGuide(true);
     // 5秒后自动隐藏引导，以免干扰用户操作
     setTimeout(() => setShowGuide(false), 5000);
   };
+
+  // 停止流送
+  const handleStopStreaming = () => {
+    setStreamingActive(false);
+    setShowGuide(false);
+    setIsFullscreen(false);
+  };
+
+  // 切换全屏
+  const handleToggleFullscreen = () => {
+    if (!isFullscreen) {
+      iframeContainerRef.current?.requestFullscreen?.();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.();
+      setIsFullscreen(false);
+    }
+  };
+
+  // 监听全屏退出事件
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) setIsFullscreen(false);
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
 
   // 处理滑动条拖动逻辑
   const handleMouseDown = () => setIsResizing(true);
@@ -148,25 +182,37 @@ export default function Interaction() {
           {/* UE交互区域 */}
           <div className="flex flex-col gap-4">
             <div className="bg-black/60 border border-primary/30 rounded-xl overflow-hidden relative aspect-video shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-              {/* UE5 Pixel Streaming 嵌入区域占位符 */}
-              {/* 实际项目中应在此处嵌入 Pixel Streaming 的 Video 标签 */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black">
-                <div className="text-center p-8">
-                  <p className="text-blue-400 font-mono text-lg mb-4 code-text">
-                    // UE5 Pixel Streaming Integration Code<br/>
-                    // const pixelStreaming = new PixelStreaming(config);<br/>
-                    // pixelStreaming.connect();
-                  </p>
-                  <p className="text-white/50 mb-6">点击下方按钮启动交互体验</p>
-                  <Button 
-                    size="lg" 
-                    className="bg-primary text-black hover:bg-primary/80 font-bold px-8 py-6 text-lg glow-effect"
-                    onClick={handleStartInteraction}
-                  >
-                    <Play className="mr-2 w-6 h-6" /> 启动祭祀大典交互
-                  </Button>
+              {/* UE5 Pixel Streaming 嵌入区域 */}
+              {streamingActive ? (
+                /* 激活状态：嵌入像素流送 iframe */
+                <div ref={iframeContainerRef} className="absolute inset-0 bg-black">
+                  <iframe
+                    src={PIXEL_STREAMING_URL}
+                    className="w-full h-full border-0"
+                    allow="camera; microphone; fullscreen; autoplay"
+                    title="UE5 像素流送 - 西安隋唐天坛交互复原"
+                  />
                 </div>
-              </div>
+              ) : (
+                /* 未激活状态：显示启动按钮 */
+                <div className="absolute inset-0 flex items-center justify-center bg-black">
+                  <div className="text-center p-8">
+                    <p className="text-blue-400 font-mono text-lg mb-4 code-text">
+                      // UE5 Pixel Streaming Integration Code<br/>
+                      // const pixelStreaming = new PixelStreaming(config);<br/>
+                      // pixelStreaming.connect();
+                    </p>
+                    <p className="text-white/50 mb-6">点击下方按钮启动交互体验</p>
+                    <Button 
+                      size="lg" 
+                      className="bg-primary text-black hover:bg-primary/80 font-bold px-8 py-6 text-lg glow-effect"
+                      onClick={handleStartInteraction}
+                    >
+                      <Play className="mr-2 w-6 h-6" /> 启动祭祀大典交互
+                    </Button>
+                  </div>
+                </div>
+              )}
               
               {/* 新手引导动画层：半透明覆盖层，展示操作指引 */}
               {showGuide && (
@@ -220,14 +266,30 @@ export default function Interaction() {
               )}
 
               {/* 底部交互控制栏 */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur p-4 flex items-center justify-between border-t border-white/10">
+              <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur p-4 flex items-center justify-between border-t border-white/10 z-10">
                 <div className="flex items-center gap-2">
                   <span className="text-primary font-bold mr-2">当前环节:</span>
-                  <span className="text-white">步骤一：陈设与省牲</span>
+                  <span className="text-white">
+                    {streamingActive ? "像素流送已连接 · 正在运行" : "步骤一：陈设与省牲"}
+                  </span>
+                  {streamingActive && (
+                    <span className="ml-2 w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
+                  )}
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="icon" className="border-white/20 hover:bg-white/10"><RotateCcw className="w-4 h-4" /></Button>
-                  <Button variant="outline" size="icon" className="border-white/20 hover:bg-white/10"><Maximize className="w-4 h-4" /></Button>
+                  {streamingActive && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="border-red-500/40 hover:bg-red-500/20 text-red-400"
+                      onClick={handleStopStreaming}
+                      title="停止流送"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                  <Button variant="outline" size="icon" className="border-white/20 hover:bg-white/10" onClick={() => { setStreamingActive(false); setShowGuide(false); }}><RotateCcw className="w-4 h-4" /></Button>
+                  <Button variant="outline" size="icon" className="border-white/20 hover:bg-white/10" onClick={handleToggleFullscreen}><Maximize className="w-4 h-4" /></Button>
                 </div>
               </div>
             </div>
