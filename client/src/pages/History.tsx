@@ -10,57 +10,129 @@ import { Separator } from "@/components/ui/separator";
 const timelineData = [
   {
     id: 1,
-    year: "589年",
+    year: "582年",
     dynasty: "隋朝",
-    emperor: "隋文帝",
-    event: "初建天坛",
-    description: "隋文帝杨坚在长安城南建立圜丘，作为祭天的场所，确立了隋唐天坛的规制。",
-    details: "隋文帝开皇九年（589年），隋朝统一天下，杨坚下诏在长安城南圜丘祭天，以告上苍。这是隋唐天坛历史的开端，其形制参考了《周礼》中的记载，采用四层圆坛结构，象征天圆地方。"
+    emperor: "隋文帝 杨坚",
+    event: "初建圆丘",
+    description: "开皇二年，隋文帝令辛彦之为圆丘于国之南太阳门外道东一里。",
+    details: "《大唐郊祀录》详细记录了隋文帝初建天坛与祭祀的规制：'至隋文帝令辛彦之为圆丘于国之南太阳门外道东一里，其五四成各高八尺... 冬至日祀昊天上帝于其上也'。"
   },
   {
     id: 2,
-    year: "618年",
-    dynasty: "唐朝",
-    emperor: "唐高祖",
-    event: "受禅祭天",
-    description: "唐高祖李渊在天坛举行受禅仪式，正式建立唐朝。",
-    details: "武德元年（618年），李渊在长安南郊圜丘举行隆重的受禅大典，正式登基称帝，改国号为唐。天坛见证了唐王朝的诞生。"
+    year: "614年",
+    dynasty: "隋朝",
+    emperor: "隋炀帝 杨广",
+    event: "大业祀圆丘",
+    description: "大业十年，冬至祀圆丘。帝不斋于次，至便行礼。",
+    details: "《大唐郊祀录》中记载了其时营建明堂与祭坛的沿革：'隋炀帝即位恺又造明堂议及样奏因圈都舆役事误不及就终于隋氏故恒于云坛上设祀台'。旧唐书等文献亦载其'大业十年，冬至祀圆丘。帝不斋于次，诘朝备法驾，至便行礼'。"
   },
   {
     id: 3,
-    year: "627年",
+    year: "621年",
     dynasty: "唐朝",
-    emperor: "唐太宗",
-    event: "贞观祭天",
-    description: "唐太宗李世民多次在天坛祭天，祈求国泰民安。",
-    details: "贞观元年（627年）及随后的多年中，唐太宗多次亲临天坛举行冬至祭天大典。他强调'王者以民为天'，祭天不仅是礼仪，更是安民的象征。"
+    emperor: "唐高祖 李渊",
+    event: "亲祀南郊",
+    description: "武德四年，确立唐初祭祀配享制度。",
+    details: "《大唐郊祀录》载明了唐初确立的配享制度：'武德以来礼令皆用十月... 高祖神尧大圣大光孝皇帝配座'。旧唐书载：'武德四年十一月甲申，有事于南郊'。"
   },
   {
     id: 4,
-    year: "666年",
+    year: "628-643年",
     dynasty: "唐朝",
-    emperor: "唐高宗",
-    event: "封禅大典",
-    description: "唐高宗与武则天共同祭天，开创了帝后同祭的先河。",
-    details: "麟德二年（666年），唐高宗与武则天在泰山封禅后，回到长安亦在天坛举行隆重祭祀。武则天作为亚献参与祭祀，打破了传统礼制，显示了其政治地位的提升。"
+    emperor: "唐太宗 李世民",
+    event: "贞观改制",
+    description: "太宗多次亲临，修订礼典，确立恒式。",
+    details: "唐太宗多次亲临，《大唐郊祀录》中多处留下太宗时期修订礼典的记录，如'太宗贞观一年正月亲行其闰至今谁典将为恒式'，并在论及礼乐时称'皇朝贞观中'为重要改制期。旧唐书载：'贞观二年十一月辛酉，有事于南郊'。"
   },
   {
     id: 5,
-    year: "712年",
+    year: "651-668年",
     dynasty: "唐朝",
-    emperor: "唐玄宗",
-    event: "开元盛世",
-    description: "唐玄宗在位期间多次修缮天坛，祭祀规格达到顶峰。",
-    details: "开元期间，唐玄宗对天坛进行了大规模修缮，并制定了详细的《大唐开元礼》，规范了祭天仪式的每一个细节，使其成为国家最高等级的礼仪活动。"
+    emperor: "唐高宗 李治",
+    event: "永徽配祀",
+    description: "高宗亲享南郊，奉太宗配祀於明堂。",
+    details: "《旧唐书》礼仪志中详载了高宗南郊祭天的服饰与配享之制的变更：'永徽二年，高宗亲享南郊用之（指大裘之冕）。永徽二年，又奉太宗配祀於明堂，有司遂以高祖配五天帝，太宗配五人帝'。"
   },
   {
     id: 6,
-    year: "904年",
+    year: "695-702年",
     dynasty: "唐朝",
-    emperor: "唐昭宗",
-    event: "最后祭祀",
-    description: "唐朝末年，随着迁都洛阳，西安天坛逐渐废弃。",
-    details: "天祐元年（904年），朱温逼迫唐昭宗迁都洛阳，长安城被毁，天坛也随之荒废。这座见证了隋唐三百多年兴衰的皇家祭坛，从此沉寂在历史的尘埃中。"
+    emperor: "武则天",
+    event: "合祭天地",
+    description: "天册金轮大圣皇帝，亲享南郊，合祭天地。",
+    details: "《旧唐书》礼仪志明确记载：'及则天革命，天册万岁元年，加号为天册金轮大圣皇帝，亲享南郊，合祭天地'。并且'长安二年又亲享南郊，合祭天地及诸郊丘，并以配焉'。《大唐郊祀录》亦载其对祭祀名称的改动：'则天太后摄位，又改为先农'。"
+  },
+  {
+    id: 7,
+    year: "709年",
+    dynasty: "唐朝",
+    emperor: "唐中宗 李显",
+    event: "景龙调整",
+    description: "神龙元年，祝钦明上表恢复神祇和坛位。",
+    details: "《大唐郊祀录》详细记载了中宗时期对神祇和坛位的恢复与调整：'至神龙元年祝钦明上表孟春吉亥祀后土以句龙氏配改先农为帝社... 又于社晦西立帝稷礼同大社大稷其坛随不备五色与大社有殊'。"
+  },
+  {
+    id: 8,
+    year: "712年",
+    dynasty: "唐朝",
+    emperor: "唐睿宗 李旦",
+    event: "景云祭天",
+    description: "正月辛巳，祀昊天上帝于南郊，大赦天下。",
+    details: "《旧唐书》载睿宗'正月辛巳，祀昊天上帝于南郊，大赦天下'。《大唐郊祀录》中则记有其在位期间追赠前代太子的礼仪记录：'中宗长予本名重照... 中宗追赠皇太予谥懿德... 睿示（睿宗）迫赠谥节愍以举兵诛乐安公主也'。"
+  },
+  {
+    id: 9,
+    year: "723-754年",
+    dynasty: "唐朝",
+    emperor: "唐玄宗 李隆基",
+    event: "开元盛世",
+    description: "玄宗是盛唐来此最频繁的帝王，规范神位，颁为恒典。",
+    details: "玄宗是盛唐来此最频繁的帝王。《旧唐书》舆服志记载其出行仪仗的变更：'开元十一年冬，将有事于南郊，乘辂而往，礼毕，骑而还'。《大唐郊祀录》则详载其在开元十一年规范神位之事：'开元十一年十月二十一日，参定南郊... 诏令礼官详定... 颁于有司至今以为恒典'。且'天宝六载始讵诸列武举八上省先讹太公旗拜将出师亦先告之'。"
+  },
+  {
+    id: 10,
+    year: "758-761年",
+    dynasty: "唐朝",
+    emperor: "唐肃宗 李亨",
+    event: "乾元恢复",
+    description: "平叛期间依然亲祀，力主恢复古代理念。",
+    details: "肃宗在平叛期间依然亲祀。《大唐郊祀录》记录了他力主恢复古代理念的细节：'肃宗乾元一年将耕，阅耒耜有雕刻文饰者，上谓左右曰：‘农人执之在于朴素，岂须文饰乎？’乃撤之'。"
+  },
+  {
+    id: 11,
+    year: "764年",
+    dynasty: "唐朝",
+    emperor: "唐代宗 李豫",
+    event: "广德祭天",
+    description: "冬至，祀昊天上帝于南郊，奏保大之舞。",
+    details: "旧唐书载其'冬至，祀昊天上帝于南郊'。《大唐郊祀录》记录了其后世的酌献乐章及庙制：'代宗庙酌献奏保大之舞... 肃勺韦慝含弘还方万物茂遂非策宾王惜惜云韶德音不忘'。"
+  },
+  {
+    id: 12,
+    year: "780-793年",
+    dynasty: "唐朝",
+    emperor: "唐德宗 李适",
+    event: "建中升格",
+    description: "亲郊时对星辰神位进行升格，诏令名将形于壁。",
+    details: "《大唐郊祀录》极其详尽地记载了建中元年他亲郊时对星辰神位的升格：'至建中元年正月，圣上亲郊，司天台郭... 奏弓星经及大实中敕并合升在耶一等'。并载'建中四年又诏令睡范钟绳名将六卞回刚形于壁每囚释奠皆从祭焉'。"
+  },
+  {
+    id: 13,
+    year: "805-874年",
+    dynasty: "唐朝",
+    emperor: "宪宗至僖宗",
+    event: "中晚唐维系",
+    description: "共8位皇帝均曾亲祀南郊，维系正统核心。",
+    details: "大唐中晚期，南郊祭天依然是维系正统的核心。《大唐郊祀录》虽未逐一列举所有祭典，但详细记录了此时期诸帝的宗庙乐章与祭祀祝文：如'武宗烂奏受天明命敷布下士夏化滞似验卫戍以武气消夷夏裕臻往阶亿万斯年'；'宣宗庙秦夏候孩于砾令主圣神重目池起教义申明典章俗尚素桃'；'懿（懿宗）深烂哭圣祚无疆庆传乐章金减绣茂区叶延长'。"
+  },
+  {
+    id: 14,
+    year: "889年",
+    dynasty: "唐朝",
+    emperor: "唐昭宗 李晔",
+    event: "最后祭典",
+    description: "长安圜丘见证的最后一次大唐皇家祭天大典。",
+    details: "《旧唐书》载：'龙纪元年正月... 亲祀南郊，大赦天下，改元龙纪'。此为长安圜丘见证的最后一次大唐皇家祭天大典，此后唐朝风雨飘摇，再无皇帝亲祀南郊。这是大唐王朝在长安圜丘进行的最后一次皇家祭天大典。"
   }
 ];
 
@@ -69,45 +141,38 @@ const timelineData = [
 const bookRecords = [
   {
     id: 1,
-    book: "《周礼·春官·大宗伯》",
-    quote: "以玉作六器，以礼天地四方：以苍璧礼天，以黄琮礼地。",
-    translation: "用玉石制作六种礼器，用来祭祀天地和四方神灵：用青色的璧祭祀天，用黄色的琮祭祀地。",
-    significance: "确立了'苍璧礼天'的核心祭祀礼制，是天坛祭祀玉器使用的理论基础。"
+    book: "《大唐郊祀录》",
+    quote: "至隋文帝令辛彦之为圆丘于国之南太阳门外道东一里，其五四成各高八尺... 冬至日祀昊天上帝于其上也。",
+    translation: "隋文帝命令辛彦之在国都南面的太阳门外道东一里处建造圆丘，分为五层和四层，各高八尺... 冬至那天在上面祭祀昊天上帝。",
+    significance: "详细记录了隋代天坛的初建位置、形制规格及祭祀时间。"
   },
   {
     id: 2,
     book: "《旧唐书·礼仪志》",
-    quote: "圜丘，在明德门外二里，高二丈三尺，四面为陛，三成。",
-    translation: "圜丘（天坛）位于长安城明德门外二里处，高二丈三尺，四面有台阶，分为三层。",
-    significance: "详细记载了唐代天坛的地理位置和建筑形制，是现代考古发掘和复原的重要依据。"
+    quote: "及则天革命，天册万岁元年，加号为天册金轮大圣皇帝，亲享南郊，合祭天地。",
+    translation: "等到武则天革命称帝，天册万岁元年，加封号为天册金轮大圣皇帝，亲自在南郊举行祭祀，合祭天地。",
+    significance: "记载了武则天时期打破传统、合祭天地的重大礼制变革。"
   },
   {
     id: 3,
-    book: "《大唐开元礼》",
-    quote: "冬至祀昊天上帝于圜丘，以大明、夜明、五星、内官、中官、外官、众星从祀。",
-    translation: "冬至这一天在圜丘祭祀昊天上帝，并以太阳、月亮、五星以及各星官作为陪祀。",
-    significance: "规范了祭祀的对象和等级，反映了唐代人对宇宙星空的认知和敬畏。"
+    book: "《大唐郊祀录》",
+    quote: "开元十一年十月二十一日，参定南郊... 诏令礼官详定... 颁于有司至今以为恒典。",
+    translation: "开元十一年十月二十一日，重新审定南郊祭祀礼仪... 下诏命令礼官详细制定... 颁布给有关部门，至今作为永久的典章。",
+    significance: "反映了唐玄宗时期对祭天礼仪的标准化和制度化建设。"
   },
   {
     id: 4,
-    book: "《新唐书·礼乐志》",
-    quote: "天子亲祀，有司摄事，皆于圜丘。",
-    translation: "无论是皇帝亲自祭祀，还是由有关部门代理祭祀，都在圜丘举行。",
-    significance: "强调了圜丘作为国家最高祭祀场所的唯一性和重要性。"
+    book: "《旧唐书·舆服志》",
+    quote: "开元十一年冬，将有事于南郊，乘辂而往，礼毕，骑而还。",
+    translation: "开元十一年冬天，准备在南郊举行祭祀，乘坐大辂车前往，礼仪结束后，骑马返回。",
+    significance: "记录了盛唐时期皇帝参加祭天大典的出行仪仗和礼仪细节。"
   },
   {
     id: 5,
-    book: "《通典·礼》",
-    quote: "扫地而祭，于其质也；器用陶匏，以象天地之性也。",
-    translation: "扫除地面进行祭祀，是为了崇尚质朴；使用陶器和葫芦瓢，是为了象征天地的本性。",
-    significance: "阐述了祭天仪式中崇尚自然、返璞归真的哲学思想。"
-  },
-  {
-    id: 6,
-    book: "《长安志》",
-    quote: "圜丘在郭城南，去明德门二里，高二丈，周三百步。",
-    translation: "圜丘位于外郭城南面，距离明德门二里，高二丈，周长三百步。",
-    significance: "提供了关于天坛位置和规模的另一份重要地理志资料，可与正史互证。"
+    book: "《大唐郊祀录》",
+    quote: "肃宗乾元一年将耕，阅耒耜有雕刻文饰者，上谓左右曰：‘农人执之在于朴素，岂须文饰乎？’乃撤之。",
+    translation: "唐肃宗乾元一年准备亲耕时，看到农具上有雕刻花纹，对左右说：‘农民用的东西在于朴素，哪里需要装饰呢？’于是下令撤掉装饰。",
+    significance: "体现了唐代帝王在祭祀礼仪中崇尚朴素、重视农桑的思想。"
   }
 ];
 
@@ -129,8 +194,6 @@ export default function History() {
         </motion.div>
 
         {/* 统一布局：三栏结构（时间轴 | 详情 | 典籍） */}
-        {/* 移除了之前的移动端 Carousel 组件，现在所有设备都使用 Grid 布局 */}
-        {/* 在小屏幕上会自动堆叠为单列，大屏幕上为三列 */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
           
           {/* 左侧：时间轴列表 */}
@@ -143,14 +206,14 @@ export default function History() {
                     key={item.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.05 }}
                     className="relative pl-8 cursor-pointer group"
                     onClick={() => setSelectedEvent(item)}
                   >
                     {/* 时间节点圆点：选中时放大并发光 */}
-                    <div className={`absolute left-[-5px] top-1 w-3 h-3 rounded-full transition-all duration-300 ${selectedEvent.id === item.id ? 'bg-primary scale-125 shadow-[0_0_10px_var(--primary)]' : 'bg-white/30 group-hover:bg-primary/70'}`} />
+                    <div className={`absolute left-[-5px] top-2 w-2.5 h-2.5 rounded-full border-2 border-primary transition-all duration-300 ${selectedEvent.id === item.id ? 'bg-primary scale-150 shadow-[0_0_10px_#EAB308]' : 'bg-black group-hover:scale-125'}`} />
                     
-                    {/* 时间节点内容：选中时高亮并右移 */}
+                    {/* 时间轴项内容 */}
                     <div className={`transition-all duration-300 ${selectedEvent.id === item.id ? 'opacity-100 translate-x-2' : 'opacity-60 group-hover:opacity-90'}`}>
                       <span className="text-primary font-mono text-sm">{item.year}</span>
                       <h3 className="text-xl font-serif text-white">{item.dynasty} · {item.emperor}</h3>
@@ -175,12 +238,12 @@ export default function History() {
               >
                 <Card className="h-full bg-black/40 border-white/10 backdrop-blur-md overflow-hidden flex flex-col">
                   {/* 卡片头部：年份和事件标题 */}
-                  <div className="h-48 bg-gradient-to-b from-primary/20 to-transparent p-6 flex items-end relative shrink-0">
-                    <div className="absolute top-4 right-4 text-6xl font-serif text-white/5 font-bold select-none">
+                  <div className="h-40 bg-gradient-to-b from-primary/20 to-transparent p-6 flex items-end relative shrink-0">
+                    <div className="absolute top-4 right-4 text-5xl font-serif text-white/5 font-bold select-none">
                       {selectedEvent.year}
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-white mb-1">{selectedEvent.event}</h2>
+                      <h2 className="text-2xl font-bold text-white mb-1">{selectedEvent.event}</h2>
                       <p className="text-primary/80">{selectedEvent.emperor}</p>
                     </div>
                   </div>
@@ -193,11 +256,12 @@ export default function History() {
                           {selectedEvent.description}
                         </p>
                         <Separator className="bg-white/10 my-4" />
-                        <h4 className="text-sm uppercase text-white/40 mb-2 tracking-widest">详细记载</h4>
-                        <p className="text-white/70 leading-relaxed text-justify placeholder-text">
-                          {/* 红色占位符：提示用户替换素材 */}
-                          [此处需替换为更详细的历史考证资料：{selectedEvent.details}]
-                        </p>
+                        <h4 className="text-sm uppercase text-white/40 mb-2 tracking-widest">古籍详细记载</h4>
+                        <div className="bg-primary/5 border-l-2 border-primary p-4 rounded-r">
+                          <p className="text-white/80 leading-relaxed text-justify font-serif italic">
+                            {selectedEvent.details}
+                          </p>
+                        </div>
                       </div>
                     </ScrollArea>
                   </CardContent>
@@ -209,7 +273,6 @@ export default function History() {
           {/* 右侧：典籍记载列表 */}
           <div className="lg:col-span-4 flex flex-col h-[500px] lg:h-[600px]">
             <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-secondary pl-4">典籍记载</h2>
-            {/* 典籍列表容器：固定高度 + 内部滚动 */}
             <div className="flex-1 min-h-0 rounded-lg border border-white/5 bg-black/20 overflow-hidden">
               <ScrollArea className="h-full w-full">
                 <div className="p-4 space-y-4">
@@ -218,14 +281,13 @@ export default function History() {
                       key={record.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 + index * 0.1 }}
+                      transition={{ delay: 0.3 + index * 0.1 }}
                     >
                       <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
                         <CardContent className="p-5">
                           <h3 className="text-primary font-serif text-lg mb-3">{record.book}</h3>
-                          {/* 引用原文：使用楷体和左侧边框强调 */}
                           <div className="relative pl-4 border-l-2 border-white/20 mb-3">
-                            <p className="font-kai text-xl text-white/90 italic leading-relaxed">
+                            <p className="font-serif text-lg text-white/90 italic leading-relaxed">
                               "{record.quote}"
                             </p>
                           </div>
@@ -234,9 +296,9 @@ export default function History() {
                               <span className="text-secondary font-bold mr-2">译文:</span>
                               {record.translation}
                             </p>
-                            <p className="text-sm text-white/60 placeholder-text">
+                            <p className="text-sm text-white/60">
                               <span className="text-blue-400 font-bold mr-2">释义:</span>
-                              [需核对] {record.significance}
+                              {record.significance}
                             </p>
                           </div>
                         </CardContent>
