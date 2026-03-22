@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ZoomIn, Quote, Lightbulb, Users } from "lucide-react";
 import { Lightbox } from "@/components/ui/lightbox";
 
-// 模拟CAD图纸数据
+// CAD图纸数据
 const cadDrawings = [
   {
     id: 1,
@@ -14,13 +14,62 @@ const cadDrawings = [
     description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
     src: "/zongpingtu.png"
   },
-  ...Array.from({ length: 9 }).map((_, i) => ({
-    id: i + 2,
-    title: `天坛测绘图纸 ${i + 2}`,
-    type: i < 2 ? "平面图" : i < 5 ? "立面图" : "剖面图",
+  {
+    id: 2,
+    title: "天坛图纸 2",
+    type: "展厅平面图",
     description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
-    src: `https://placehold.co/1920x1080/1a1a1a/FFF?text=CAD+Drawing+${i + 2}`
-  }))
+    src: "/展厅平面图.png"
+  },
+  {
+    id: 3,
+    title: "天坛图纸 3",
+    type: "立面图1",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/立面图前.png"
+  },
+  {
+    id: 4,
+    title: "天坛图纸 4",
+    type: "立面图2",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/立面图左.png"
+  },
+  {
+    id: 5,
+    title: "天坛图纸 5",
+    type: "立面图3",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/立面图2.png"
+  },
+  {
+    id: 6,
+    title: "天坛图纸 6",
+    type: "立面图4",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/立面图.png"
+  },
+  {
+    id: 7,
+    title: "天坛图纸 7",
+    type: "景观平面",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/景观平面.png"
+  },
+  {
+    id: 8,
+    title: "天坛图纸 8",
+    type: "景观建筑立面",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/景观建筑立面.png"
+  },
+  {
+    id: 9,
+    title: "天坛图纸 9",
+    type: "吊顶大样图",
+    description: "基于GIS技术截取卫星图及实地测绘绘制的CAD工程图。",
+    src: "/吊顶大样图.png"
+  }
 ];
 
 // 模拟现状模型截图
@@ -63,7 +112,7 @@ export default function Survey() {
           <p className="text-white/60 tracking-widest">SURVEY & MAPPING</p>
         </motion.div>
 
-        {/* 设计理念板块 - 新增 */}
+        {/* 设计理念板块 */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -92,7 +141,7 @@ export default function Survey() {
             </div>
             <h3 className="text-2xl font-serif text-primary mb-4 flex items-center gap-2">
               <Users className="w-6 h-6" />
-              从“君权神授”到“全民共享”
+              从"君权神授"到"全民共享"
             </h3>
             <p className="text-white/80 leading-relaxed mb-4">
               天坛主体是用黄土夯筑而成的圆形高台式坛体建筑，平面呈四重同心圆，四层圆形夯土台叠置而起，底径约53米，顶径约20米，每层以30度夹角设陛阶12个，台面、台壁及陛阶表面皆用拌有麦秸的白灰抹面，总高度约8米。
@@ -106,7 +155,7 @@ export default function Survey() {
         <Tabs defaultValue="cad" className="w-full">
           <div className="flex justify-center mb-8">
             <TabsList className="bg-white/5 border border-white/10">
-              <TabsTrigger value="cad" className="data-[state=active]:bg-primary data-[state=active]:text-black">CAD测绘图纸</TabsTrigger>
+              <TabsTrigger value="cad" className="data-[state=active]:bg-primary data-[state=active]:text-black">CAD图纸</TabsTrigger>
               <TabsTrigger value="model" className="data-[state=active]:bg-primary data-[state=active]:text-black">现状模型</TabsTrigger>
             </TabsList>
           </div>
@@ -124,7 +173,6 @@ export default function Survey() {
                     className="group relative aspect-video bg-black/40 border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:border-primary/50 transition-all duration-300"
                     onClick={() => openLightbox(item.src, item.title)}
                   >
-                    {/* 图片占位符 - 红色文字提示替换 */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
                       <img src={item.src} alt={item.title} className="w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity" />
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -135,7 +183,6 @@ export default function Survey() {
                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
                       <h3 className="text-white font-bold truncate">{item.title}</h3>
                       {item.type && <p className="text-xs text-white/60">{item.type}</p>}
-                      {item.id !== 1 && <p className="text-xs text-red-500 mt-1 font-mono">[待替换为真实CAD图]</p>}
                     </div>
                   </div>
                 </motion.div>
