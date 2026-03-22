@@ -315,8 +315,8 @@ export default function Interaction() {
 
 
 
-            {/* 手势交互和古今对比按钮并排 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 手势交互、古今对比、AI导览员按鈕并排 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* 手势交互按钮 */}
               <Link href="/gesture">
                 <motion.div 
@@ -366,6 +366,38 @@ export default function Interaction() {
                       <p className="text-white/60 text-xs line-clamp-2">全屏展示现状遗址与唐代复原模型对比</p>
                     </div>
                     <div className="text-blue-400 group-hover:translate-x-1 transition-transform flex-shrink-0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
+
+              {/* AI 导览员按鈕 */}
+              <Link href="/ai-guide">
+                <motion.div 
+                  className="bg-gradient-to-r from-emerald-500/20 to-teal-600/20 border border-emerald-400/30 rounded-lg p-4 cursor-pointer group hover:border-emerald-400/60 transition-all duration-300 h-full"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-emerald-400/20 flex items-center justify-center group-hover:bg-emerald-400/30 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M6 20v-2a6 6 0 0 1 12 0v2" />
+                        <path d="M19 11l2 2-2 2" />
+                        <path d="M21 13h-4" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-emerald-400 mb-1 flex items-center gap-2">
+                        AI 导览员
+                        <span className="text-xs bg-emerald-400/20 text-emerald-400 px-2 py-0.5 rounded-full">AI</span>
+                      </h3>
+                      <p className="text-white/60 text-xs line-clamp-2">全屏展示 UE5 像素流送，实时交互导览</p>
+                    </div>
+                    <div className="text-emerald-400 group-hover:translate-x-1 transition-transform flex-shrink-0">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M5 12h14M12 5l7 7-7 7"/>
                       </svg>
