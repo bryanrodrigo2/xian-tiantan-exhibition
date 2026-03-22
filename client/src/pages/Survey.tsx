@@ -108,7 +108,7 @@ export default function Survey() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">现状与测绘</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">现状</h1>
           <p className="text-white/60 tracking-widest">SURVEY & MAPPING</p>
         </motion.div>
 
