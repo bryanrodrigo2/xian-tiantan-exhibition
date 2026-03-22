@@ -15,7 +15,7 @@ const navItems = [
     delay: 0.2
   },
   {
-    title: "现状与测绘",
+    title: "现状",
     en: "Survey",
     href: "/survey",
     position: "top-right",
