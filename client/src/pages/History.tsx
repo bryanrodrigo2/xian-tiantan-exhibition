@@ -197,10 +197,11 @@ export default function History() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
           
           {/* 左侧：时间轴列表 */}
-          <div className="lg:col-span-4 flex flex-col h-[400px] lg:h-[600px]">
-            <h2 className="text-2xl font-serif text-white mb-6 border-l-4 border-primary pl-4">历代祭祀时间轴</h2>
-            <ScrollArea className="flex-1 pr-4">
-              <div className="relative border-l border-white/10 ml-4 space-y-8 py-4">
+          <div className="lg:col-span-4 flex flex-col h-[600px] lg:h-[760px]">
+            <h2 className="text-2xl font-serif text-white mb-4 border-l-4 border-primary pl-4">历代祭祀时间轴</h2>
+            <div className="flex-1 min-h-0 rounded-lg border border-white/10 bg-black/20 overflow-hidden">
+            <ScrollArea className="h-full w-full">
+              <div className="relative border-l border-white/10 ml-6 space-y-6 py-4 pr-4">
                 {timelineData.map((item, index) => (
                   <motion.div
                     key={item.id}
@@ -223,6 +224,7 @@ export default function History() {
                 ))}
               </div>
             </ScrollArea>
+            </div>
           </div>
 
           {/* 中间：详细信息展示卡片 */}
