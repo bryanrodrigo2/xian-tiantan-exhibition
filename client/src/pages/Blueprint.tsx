@@ -44,13 +44,12 @@ export default function Blueprint() {
                 </p>
                 <div 
                   className="group relative h-48 bg-black/30 rounded border border-white/5 overflow-hidden cursor-pointer"
-                  onClick={() => openLightbox("https://placehold.co/800x600/1a1a1a/FFF?text=Ancient+Book+Reference", "古籍复原推导图")}
+                  onClick={() => openLightbox("/wenxianzuozheng.png", "古籍复原推导图")}
                 >
-                  <img src="https://placehold.co/800x600/1a1a1a/FFF?text=Ancient+Book+Reference" alt="古籍复原推导图" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <img src="/wenxianzuozheng.png" alt="古籍复原推导图" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <ZoomIn className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="absolute bottom-2 left-2 text-red-500 font-mono text-xs bg-black/50 px-2 py-1 rounded">[此处插入古籍复原推导图]</p>
                 </div>
               </CardContent>
             </Card>
@@ -63,13 +62,12 @@ export default function Blueprint() {
                 </p>
                 <div 
                   className="group relative h-48 bg-black/30 rounded border border-white/5 overflow-hidden cursor-pointer"
-                  onClick={() => openLightbox("https://placehold.co/800x600/1a1a1a/FFF?text=Archaeological+Data", "考古发掘平面图")}
+                  onClick={() => openLightbox("/kaogupingmian.png", "考古发掘平面图")}
                 >
-                  <img src="https://placehold.co/800x600/1a1a1a/FFF?text=Archaeological+Data" alt="考古发掘平面图" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <img src="/kaogupingmian.png" alt="考古发掘平面图" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <ZoomIn className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="absolute bottom-2 left-2 text-red-500 font-mono text-xs bg-black/50 px-2 py-1 rounded">[此处插入考古发掘平面图]</p>
                 </div>
               </CardContent>
             </Card>
@@ -86,43 +84,35 @@ export default function Blueprint() {
             
             <div 
               className="aspect-square bg-black/40 border border-white/10 rounded-xl overflow-hidden relative group cursor-pointer"
-              onClick={() => openLightbox("https://placehold.co/1000x1000/1a1a1a/FFF?text=Restored+Model+Render", "唐代圜丘复原图")}
+              onClick={() => openLightbox("/fuyuan.png", "唐代圜丘复原图")}
             >
-              <img src="https://placehold.co/1000x1000/1a1a1a/FFF?text=Restored+Model+Render" alt="唐代圜丘复原图" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+              <img src="/fuyuan.png" alt="唐代圜丘复原图" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <ZoomIn className="w-12 h-12 text-primary" />
               </div>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <p className="text-red-500 font-bold text-xl animate-pulse group-hover:opacity-0 transition-opacity">[此处展示唐代天坛复原三维渲染图]</p>
-              </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
                 <h3 className="text-2xl font-bold text-white mb-2">唐代圜丘复原图</h3>
-                <p className="text-white/60">
-                  完整复原了坛体、内壝、外壝、御道及周边附属建筑，重现盛唐祭天场所的宏大规制。
-                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div 
                 className="group relative aspect-video bg-black/40 border border-white/10 rounded-lg overflow-hidden cursor-pointer"
-                onClick={() => openLightbox("https://placehold.co/800x600/1a1a1a/FFF?text=Detail+1", "细节渲染图1")}
+                onClick={() => openLightbox("/kaoguzhaopin.png", "考古发掘现场照片")}
               >
-                <img src="https://placehold.co/800x600/1a1a1a/FFF?text=Detail+1" alt="细节渲染图1" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                <img src="/kaoguzhaopin.png" alt="考古发掘现场照片" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <ZoomIn className="w-8 h-8 text-primary" />
                 </div>
-                <p className="absolute bottom-2 left-2 text-red-500 text-xs bg-black/50 px-2 py-1 rounded">[细节渲染图1]</p>
               </div>
               <div 
                 className="group relative aspect-video bg-black/40 border border-white/10 rounded-lg overflow-hidden cursor-pointer"
-                onClick={() => openLightbox("https://placehold.co/800x600/1a1a1a/FFF?text=Detail+2", "细节渲染图2")}
+                onClick={() => openLightbox("/yizhixiaoguo.png", "遗址保护工程效果图")}
               >
-                <img src="https://placehold.co/800x600/1a1a1a/FFF?text=Detail+2" alt="细节渲染图2" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                <img src="/yizhixiaoguo.png" alt="遗址保护工程效果图" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <ZoomIn className="w-8 h-8 text-primary" />
                 </div>
-                <p className="absolute bottom-2 left-2 text-red-500 text-xs bg-black/50 px-2 py-1 rounded">[细节渲染图2]</p>
               </div>
             </div>
           </motion.div>
