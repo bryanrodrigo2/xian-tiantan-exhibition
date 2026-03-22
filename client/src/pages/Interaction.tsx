@@ -81,6 +81,7 @@ export default function Interaction() {
   const [streamingActive, setStreamingActive] = useState(false); // 是否已启动像素流送
   const [isFullscreen, setIsFullscreen] = useState(false); // 是否全屏
   const iframeContainerRef = useRef<HTMLDivElement>(null); // 全屏容器引用
+  const iframeRef = useRef<HTMLIFrameElement>(null); // iframe 引用
 
   // 启动交互：激活像素流送并显示引导
   const handleStartInteraction = () => {
@@ -88,6 +89,37 @@ export default function Interaction() {
     setShowGuide(true);
     // 5秒后自动隐藏引导，以免干扰用户操作
     setTimeout(() => setShowGuide(false), 5000);
+    
+    // 启动后尝试自动聚焦到 iframe
+    setTimeout(() => {
+      iframeRef.current?.focus();
+    }, 500);
+  };
+
+  // 拦截浏览器默认行为（如空格翻页、方向键滚动），确保 UE 接收指令
+  useEffect(() => {
+    if (!streamingActive) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 拦截 WASD、空格、方向键等常用 UE 控制键的浏览器默认行为
+      const blockedKeys = [" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d", "W", "A", "S", "D"];
+      if (blockedKeys.includes(e.key)) {
+        // 只有当焦点在流送区域或全屏时才拦截
+        if (document.activeElement === iframeRef.current || isFullscreen) {
+          // e.preventDefault(); // 某些情况下可能需要开启，但需谨慎
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [streamingActive, isFullscreen]);
+
+  // 点击流送区域时强制聚焦
+  const handleIframeContainerClick = () => {
+    if (streamingActive) {
+      iframeRef.current?.focus();
+    }
   };
 
   // 停止流送
@@ -185,12 +217,18 @@ export default function Interaction() {
               {/* UE5 Pixel Streaming 嵌入区域 */}
               {streamingActive ? (
                 /* 激活状态：嵌入像素流送 iframe */
-                <div ref={iframeContainerRef} className="absolute inset-0 bg-black">
+                <div 
+                  ref={iframeContainerRef} 
+                  className="absolute inset-0 bg-black cursor-pointer"
+                  onClick={handleIframeContainerClick}
+                >
                   <iframe
+                    ref={iframeRef}
                     src={PIXEL_STREAMING_URL}
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 outline-none"
                     allow="camera; microphone; fullscreen; autoplay"
                     title="UE5 像素流送 - 西安隋唐天坛交互复原"
+                    tabIndex={0}
                   />
                 </div>
               ) : (
