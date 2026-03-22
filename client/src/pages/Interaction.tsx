@@ -234,16 +234,13 @@ export default function Interaction() {
               ) : (
                 /* 未激活状态：显示启动按钮 */
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
-                  <div className="text-center p-8">
-                    <p className="text-white/50 mb-6">点击下方按钮启动交互体验</p>
-                    <Button 
-                      size="lg" 
-                      className="bg-primary text-black hover:bg-primary/80 font-bold w-20 h-20 rounded-full flex items-center justify-center glow-effect"
-                      onClick={handleStartInteraction}
-                    >
-                      <Play className="w-10 h-10 fill-current" />
-                    </Button>
-                  </div>
+                  <Button 
+                    className="bg-primary text-black hover:bg-primary/80 rounded-full glow-effect"
+                    style={{ width: '80px', height: '80px', minWidth: '80px', padding: 0 }}
+                    onClick={handleStartInteraction}
+                  >
+                    <Play className="w-10 h-10 fill-current" />
+                  </Button>
                 </div>
               )}
               
