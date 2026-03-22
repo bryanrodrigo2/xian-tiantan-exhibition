@@ -175,7 +175,7 @@ export function AboutDialog() {
             <Info className="w-5 h-5" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="bg-black/95 border-white/10 text-white max-w-4xl flex flex-col p-0 overflow-hidden max-h-[90vh]">
+        <DialogContent className="bg-black/95 border-white/10 text-white max-w-4xl flex flex-col p-0 overflow-hidden" style={{maxHeight: '90vh', height: '90vh'}}>
           <div className="p-6 pb-2 border-b border-white/10 bg-black/50 backdrop-blur-xl z-10">
             <DialogHeader>
               <DialogTitle className="text-2xl font-serif text-primary mb-1 flex items-center gap-2">
@@ -188,8 +188,9 @@ export function AboutDialog() {
             </DialogHeader>
           </div>
 
-          {/* ScrollArea 确保内容可滚动 */}
-          <ScrollArea className="flex-1 min-h-0 overflow-hidden">
+          {/* ScrollArea 确保内容可滚动 — 与 History.tsx 时间轴完全一致的三层结构 */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+          <ScrollArea className="h-full w-full">
             <div className="p-6 pt-4 space-y-8 pb-8">
               {/* 项目信息 */}
               <div className="space-y-3">
@@ -264,6 +265,7 @@ export function AboutDialog() {
               </div>
             </div>
           </ScrollArea>
+          </div>
 
           <div className="border-t border-white/10 p-4 bg-black/50 backdrop-blur-xl text-center text-xs text-white/40 z-10">
             © 2026 Xian Sui-Tang Altar of Heaven Holographic Exhibition. All rights reserved.
@@ -274,7 +276,7 @@ export function AboutDialog() {
       {/* 技术详情弹窗 */}
       {selectedTech && (
         <Dialog open={!!selectedTech} onOpenChange={() => setSelectedTech(null)}>
-          <DialogContent className="bg-black/95 border-primary/30 text-white max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+          <DialogContent className="bg-black/95 border-primary/30 text-white max-w-2xl flex flex-col p-0 overflow-hidden" style={{maxHeight: '85vh', height: '85vh'}}>
             <div className="p-6 pb-3 border-b border-white/10">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-primary flex items-center gap-3">
@@ -288,7 +290,8 @@ export function AboutDialog() {
             </div>
 
             {/* 详情内容也加滚动条，防止 UE5 等长文本溢出 */}
-            <ScrollArea className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
+            <ScrollArea className="h-full w-full">
               <div className="p-6 pt-4">
                 <div className="bg-white/5 p-6 rounded-lg border border-white/10">
                   <h4 className="text-sm font-semibold text-white/80 mb-3 flex items-center gap-2">
@@ -301,6 +304,7 @@ export function AboutDialog() {
                 </div>
               </div>
             </ScrollArea>
+            </div>
           </DialogContent>
         </Dialog>
       )}
