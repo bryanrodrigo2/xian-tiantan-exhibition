@@ -96,7 +96,7 @@ export default function ComparisonFullscreen() {
           style={{ clipPath: `inset(0 ${100 - sliderValue}% 0 0)` }}
         >
           <img 
-            src="https://placehold.co/1920x1080/5d4037/FFF?text=Restored+Tang+Model" 
+            src="/fuyuan.png" 
             alt="唐代复原" 
             className="w-full h-full object-cover"
           />
