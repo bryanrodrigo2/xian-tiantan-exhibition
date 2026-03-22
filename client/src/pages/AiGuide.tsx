@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 
-// ⚠️ 请将下方 src 地址替换为您实际的 UE5 像素流送服务地址
-// 例如：http://您的服务器IP:9000/s?loadType=auto&group=xxx&runType=box
-const PIXEL_STREAMING_URL = "http://127.0.0.1:8888";
+// UE5 像素流送服务地址
+const PIXEL_STREAMING_URL = "http://127.0.0.1:9000/s?loadType=auto&group=2adkoq140509&runType=box";
 
 export default function AiGuide() {
   const [, navigate] = useLocation();
