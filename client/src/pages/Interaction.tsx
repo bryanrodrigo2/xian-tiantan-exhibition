@@ -316,18 +316,7 @@ export default function Interaction() {
               </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-primary mb-2">交互说明</h3>
-              <p className="text-white/70 mb-4">
-                您将扮演"赞礼官"，通过键盘(WASD)和鼠标控制视角，体验从"銮驾出宫"到"燎柴"的完整祭天流程。
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-white/50">
-                <div className="flex items-center gap-2"><span className="border border-white/20 px-2 py-1 rounded">W</span> 前进</div>
-                <div className="flex items-center gap-2"><span className="border border-white/20 px-2 py-1 rounded">S</span> 后退</div>
-                <div className="flex items-center gap-2"><span className="border border-white/20 px-2 py-1 rounded">A</span> 左移</div>
-                <div className="flex items-center gap-2"><span className="border border-white/20 px-2 py-1 rounded">D</span> 右移</div>
-              </div>
-            </div>
+
 
             {/* 手势交互和古今对比按钮并排 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
