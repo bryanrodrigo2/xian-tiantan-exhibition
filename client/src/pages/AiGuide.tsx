@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Play, RotateCcw, Maximize, MousePointer2, Keyboard, X } from "lucide-react";
 
 // UE5 像素流送服务地址（AI 导览员专用）
-const PIXEL_STREAMING_URL = "http://127.0.0.1:9000/s?loadType=auto&group=5d82m5320644&runType=box";
+const PIXEL_STREAMING_URL = "http://127.0.0.1:9000/s?loadType=auto&group=422k7j284267&runType=box";
 
 export default function AiGuide() {
   const [, navigate] = useLocation();

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Play, RotateCcw, Maximize, MousePointer2, Keyboard, Flame, Footprints, ScrollText, Utensils, Crown, LayoutDashboard, MessageSquareQuote, Hand, X } from "lucide-react";
 
 // UE5 像素流送服务地址
-const PIXEL_STREAMING_URL = "http://127.0.0.1:9000/s?loadType=auto&group=f59yyp331917&runType=box";
+const PIXEL_STREAMING_URL = "http://127.0.0.1:9000/s?loadType=auto&group=422k7j284267&runType=box";
 
 // 祭天大典六步流程数据
 const ritualSteps = [
