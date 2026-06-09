@@ -112,6 +112,35 @@ export default function Survey() {
           <p className="text-white/60 tracking-widest">SURVEY & MAPPING</p>
         </motion.div>
 
+        {/* 建筑复原方案容器 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-12"
+        >
+          <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden group hover:border-primary/30 transition-colors">
+            <div className="p-4 border-bottom border-white/10 bg-white/5 flex items-center justify-between">
+              <h3 className="text-xl font-serif text-primary flex items-center gap-2">
+                建筑复原方案
+              </h3>
+            </div>
+            <div 
+              className="relative cursor-pointer overflow-hidden"
+              onClick={() => openLightbox("/fuyuan_scheme.png", "建筑复原方案")}
+            >
+              <img 
+                src="/fuyuan_scheme.png" 
+                alt="建筑复原方案" 
+                className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                <ZoomIn className="w-12 h-12 text-primary" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* 设计理念板块 */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
