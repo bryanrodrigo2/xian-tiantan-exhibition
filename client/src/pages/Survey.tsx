@@ -247,11 +247,11 @@ export default function Survey() {
                     <span style={{ color: "#EAB308", fontSize: 13, letterSpacing: "0.05em", fontWeight: 600 }}>
                       无人机倾斜摄影建模成果
                     </span>
-                    <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>· 实景三维成果</span>
+                    <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>· DJI 实景三维</span>
                   </div>
                   {/* 大疆 3D 查看器 iframe */}
                   <iframe
-                    src="https://bryanfinal.xyz/#/survey"
+                    src="https://3dviewer.dji.com/s/77ae4965-a3b4-4ac4-930e-8f11fb12b682"
                     style={{
                       width: "100%",
                       height: "70vh",
